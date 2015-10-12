@@ -1,8 +1,6 @@
 package imbacad;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -32,7 +30,7 @@ public class Mesh {
 	private float[] vertices;
 	private int[] indices;
 	
-	private int texture;			// texture id
+	private int[] texture = new int[1];			// texture id
 
 	private int[] VAO = new int[1]; // Vertex Array Object
 	private int[] VBO = new int[1]; // Vertex Buffer Object
@@ -140,7 +138,7 @@ public class Mesh {
 		gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_LINEAR);
 		gl.glBindTexture(GL.GL_TEXTURE_2D, 0);
 
-		this.texture = textureID[0];
+		this.texture = textureID;
 	}
 
 	public void draw(int shader) {
@@ -153,7 +151,7 @@ public class Mesh {
 		// Now set the sampler to the correct texture unit
 		gl.glUniform1f(gl.glGetUniformLocation(shader, "diffuse_texture"), 0);
 		// And finally bind the texture
-		gl.glBindTexture(GL.GL_TEXTURE_2D, texture);
+		gl.glBindTexture(GL.GL_TEXTURE_2D, texture[0]);
 
 		gl.glActiveTexture(GL.GL_TEXTURE0); // Always good practice to set
 											// everything back to defaults once
@@ -163,6 +161,25 @@ public class Mesh {
 		gl.glBindVertexArray(VAO[0]);
 		gl.glDrawElements(GL.GL_TRIANGLES, indices.length, GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
+	}
+	
+	public void dispose() {
+		System.out.println("Mesh.dispose()");
+		
+		GL3 gl = drawable.getGL().getGL3();
+		gl.glDeleteVertexArrays(1, VAO, 0);
+		gl.glDeleteBuffers(1, VBO, 0);
+		gl.glDeleteBuffers(1, EBO, 0);
+		
+		gl.glDeleteTextures(1, texture, 0);
+	}
+
+	public float[] getVertices() {
+		return vertices;
+	}
+
+	public int[] getIndices() {
+		return indices;
 	}
 	
 }

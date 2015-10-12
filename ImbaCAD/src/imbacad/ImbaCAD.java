@@ -6,13 +6,12 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.newt.event.InputEvent;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.event.MouseEvent;
 import com.jogamp.newt.event.MouseListener;
 import com.jogamp.newt.opengl.GLWindow;
-import com.jogamp.opengl.util.*;
+import com.jogamp.opengl.util.Animator;
 import com.jogamp.common.nio.Buffers;
 
 import imbacad.util.Glm;
@@ -35,8 +34,11 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 			0, 1, 2, 0, 2, 3
 	};
 	
-	private Mesh mesh;
+	private static GLWindow glWindow;
+	private static GLWindow glWindow2;
+	private static Animator animator;
 	
+	private Mesh mesh = null;
 	
 	private static int width = 800;
 	private static int height = 600;
@@ -78,11 +80,14 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 	public static void main(String[] s) {
 		Glm.init();
 		
+		ImbaCAD icad = new ImbaCAD();
+		
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
-		// We may at this point tweak the caps and request a translucent
-		// drawable
+		// We may at this point tweak the caps and request a translucent drawable
 		caps.setBackgroundOpaque(false);
-		GLWindow glWindow = GLWindow.create(caps);
+		
+		
+		glWindow = GLWindow.create(caps);
 
 		glWindow.setTitle("ImbaCAD");
 		glWindow.setSize(width, height);
@@ -91,17 +96,30 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		glWindow.setRealized(true);
 		glWindow.setVisible(true);
 		
-		
-		ImbaCAD icad = new ImbaCAD();
-		
 		glWindow.addKeyListener(icad);
 		glWindow.addMouseListener(icad);
 		glWindow.addGLEventListener(icad);
 		
 		
+		glWindow2 = GLWindow.create(caps);
+
+		glWindow2.setTitle("ImbaCAD");
+		glWindow2.setPosition(400, 400);
+		glWindow2.setSize(width, height);
+		glWindow2.setUndecorated(false);
+		glWindow2.setPointerVisible(true);
+		glWindow2.setRealized(true);
+		glWindow2.setVisible(true);
 		
-		Animator animator = new Animator();
+		glWindow2.addKeyListener(icad);
+		glWindow2.addMouseListener(icad);
+		glWindow2.addGLEventListener(icad);
+		
+		
+		
+		animator = new Animator();
 		animator.add(glWindow);
+		animator.add(glWindow2);
 		animator.start();
 	}
 	
@@ -141,6 +159,7 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 			while ((c = fr.read()) != -1) {
 				sb.append((char)c);
 			}
+			fr.close();
 			vsString = sb.toString();
 			
 			// read vertex shader
@@ -151,6 +170,7 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 			while ((c = fr.read()) != -1) {
 				sb.append((char) c);
 			}
+			fr.close();
 			fsString = sb.toString();
 			
 		} catch (IOException e) {
@@ -222,6 +242,8 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		vboHandles = new int[2];
 		gl.glGenBuffers(2, vboHandles, 0);
 		
+		gl.glEnable(GL3.GL_CULL_FACE);
+		
 		mesh = new Mesh(drawable, "test2.jpg", vertices, indices);
 	}
 	
@@ -289,8 +311,10 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		}
 		
 		if (keys[KeyEvent.VK_ESCAPE]) {
-			drawable.getAnimator().remove(drawable);
-			drawable.destroy();
+			animator.remove(glWindow);
+			animator.remove(glWindow2);
+			glWindow.destroy();
+			glWindow2.destroy();
 			return;
 		}
 		
@@ -318,7 +342,6 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		 * Drawing
 		 */
 
-		// Get gl
 		GL3 gl = drawable.getGL().getGL3();
 		
 		// Clear screen
@@ -329,18 +352,15 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		gl.glUseProgram(shaderProgram);
 		
 		
-		
-		
+		// set up matrices
 		float[] projection = Glm.diag(1.0f);
-		projection = Glm.perspective((float)(0.5f * Math.PI), (float)width / height, 0.1f, 100.0f);
-		
 		float[] modelview = Glm.diag(1.0f);
+		Vec3 camStart = new Vec3(0.0f, 0.0f, -1.5f);
 		
+		projection = Glm.perspective((float)(0.5f * Math.PI), (float)width / height, 0.1f, 100.0f);
 		
 		modelview = Glm.rotate(modelview, (float)(polarAngle - Math.PI), Glm.vec3(1.0f, 0.0f, 0.0f));
 		modelview = Glm.rotate(modelview, (float)(Math.PI / 2.0f - azimuthAngle), Glm.vec3(0.0f, 0.0f, 1.0f));
-		
-		Vec3 camStart = new Vec3(0.0f, 0.0f, -1.5f);
 		
 		modelview = Glm.translate(modelview, pos.add(camStart).toArray());
 		
@@ -349,7 +369,8 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		gl.glUniformMatrix4fv(ModelviewLocation, 1, false,	modelview, 0);
 		gl.glUniformMatrix4fv(ProjectionLocation, 1, false,	projection, 0);
 			
-
+		
+		// set up triangle
 		float[] vertices = { 0.0f, 0.5f, 0.0f, 1.0f, // Top
 							-0.5f, -0.5f, 0.0f, 1.0f, // Bottom Left
 							0.5f, -0.5f, 0.0f, 1.0f // Bottom Right
@@ -372,15 +393,15 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		gl.glVertexAttribPointer(0, 4, GL3.GL_FLOAT, false, 0, 0);
 
 		// VBO
-		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, 0); // You can unbind the VBO
-		// after it have been associated using glVertexAttribPointer
+		gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, 0); 
+		// You can unbind the VBO after it have been associated using glVertexAttribPointer
 		gl.glEnableVertexAttribArray(0);
 
 		float[] colors = { 
 				1.0f, 0.0f, 0.0f, 1.0f, // Top color (red)
 				0.0f, 0.0f, 0.0f, 1.0f, // Bottom Left color (black)
-				1.0f, 1.0f, 0.0f, 0.9f // Bottom Right color (yellow) with 10%
-										// transparence
+				1.0f, 1.0f, 0.0f, 0.9f  // Bottom Right color (yellow) with 10% transparency
+									
 		};
 
 		FloatBuffer fbColors = Buffers.newDirectFloatBuffer(colors);
@@ -397,24 +418,28 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 
 		gl.glEnableVertexAttribArray(1);
 
-		
-		
+		// draw triangle
 		gl.glDrawArrays(GL3.GL_TRIANGLES, 0, 3); // Draw the vertices as triangle
 
 		gl.glDisableVertexAttribArray(0); // Allow release of vertex position memory
 		gl.glDisableVertexAttribArray(1); // Allow release of vertex color memory
 		
+		// draw mesh
 		mesh.draw(shaderProgram);
 	}
 
 	@Override
 	public void dispose(GLAutoDrawable drawable) {
-		System.out.println("cleanup, remember to release shaders");
+		System.out.println("cleanup");
+		
 		GL3 gl = drawable.getGL().getGL3();
+		
+		mesh.dispose();
+		
 		gl.glUseProgram(0);
-		gl.glDeleteBuffers(2, vboHandles, 0); // Release VBO, color and
-												// vertices, buffer GPU memory.
+		gl.glDeleteBuffers(2, vboHandles, 0); // Release VBO, color and vertices, buffer GPU memory.
 		vboHandles = null;
+		
 		gl.glDetachShader(shaderProgram, vertShader);
 		gl.glDeleteShader(vertShader);
 		gl.glDetachShader(shaderProgram, fragShader);
