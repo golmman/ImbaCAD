@@ -476,7 +476,7 @@ public class ImbaCAD implements GLEventListener, KeyListener, MouseListener {
 		mouseX = e.getX();
 		mouseY = e.getY();
 		
-		System.out.println("azi: " + azimuthAngle + ", pol: " + polarAngle);
+		//System.out.println("azi: " + azimuthAngle + ", pol: " + polarAngle);
 	}
 
 	@Override
