@@ -1,5 +1,6 @@
  #version 330
 
+#extension GL_ARB_separate_shader_objects: enable
 
 layout(location = 4) in vec4 inColor;
 layout(location = 5) in vec2 inTexCoords;
