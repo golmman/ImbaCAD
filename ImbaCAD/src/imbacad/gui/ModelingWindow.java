@@ -10,7 +10,6 @@ import java.io.IOException;
 import imbacad.ImbaCAD;
 import imbacad.Mesh;
 import imbacad.event.LevitateEvents;
-import imbacad.event.MKEvents;
 import imbacad.util.Glm;
 import imbacad.util.Vec3;
 
@@ -30,7 +29,7 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 
 	private static final long serialVersionUID = -2636383013866025654L;
 	
-	private MKEvents events;
+	private LevitateEvents events;
 	
 	private Animator animator;
 	
@@ -46,14 +45,6 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 	private int ModelLocation;
 	private int ViewLocation;
 	private int ProjectionLocation;
-	
-	private float polarAngle = (float)(0.6f * Math.PI);
-	private float azimuthAngle = 0.0f;
-	private Vec3 camStart = new Vec3(3.0f, -1.0f, -1.5f);
-	
-	private Vec3 pos = new Vec3();
-	
-	private float velocity = 0.001f;
 	
 	
 	// TODO: only for debug
@@ -79,6 +70,11 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		super(parent, "Title", false);
 		
 		events = new LevitateEvents();
+		events.setPosition(new Vec3(3.0f, -1.0f, -1.5f));
+		events.setAzimuthAngle(0.0f);
+		events.setPolarAngle((float)(0.6f * Math.PI));
+		events.setVelocity(0.001f);
+		
 		
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
 		caps.setBackgroundOpaque(false);
@@ -242,35 +238,7 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		/*
 		 * Events
 		 */
-		// calculate normalized direction the camera is looking at
-		Vec3 lookingAt = new Vec3(
-			(float)(Math.sin(polarAngle) * Math.cos(azimuthAngle)),
-			(float)(Math.sin(polarAngle) * Math.sin(azimuthAngle)),	
-			(float)(Math.cos(polarAngle)));	
-		
-		// clear z and normalize, used in strafe movement
-		Vec3 lookingAt2 = new Vec3(lookingAt);
-		lookingAt2.setZ(0.0f);
-		lookingAt2 = lookingAt2.mul(1.0f / lookingAt2.norm());
-		
-		if (events.getKey(KeyEvent.VK_W)) {
-			pos = pos.sub(lookingAt.mul(velocity));
-		}
-		if (events.getKey(KeyEvent.VK_A)) {
-			pos = pos.sub(Vec3.EZ.cross(lookingAt2.mul(velocity)));
-		}
-		if (events.getKey(KeyEvent.VK_S)) {
-			pos = pos.add(lookingAt.mul(velocity));
-		}
-		if (events.getKey(KeyEvent.VK_D)) {
-			pos = pos.add(Vec3.EZ.cross(lookingAt2.mul(velocity)));
-		}
-		if (events.getKey(KeyEvent.VK_SPACE)) {
-			pos = pos.sub(Vec3.EZ.mul(velocity));
-		}
-		if (events.getKey(KeyEvent.VK_SHIFT)) {
-			pos = pos.add(Vec3.EZ.mul(velocity));
-		}
+		events.process();
 		
 		if (events.getKey(KeyEvent.VK_ESCAPE)) {
 			this.dispose();
@@ -278,30 +246,15 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		}
 		
 		
-		if (events.getButton(MouseEvent.BUTTON3)) {
-			azimuthAngle -= 0.003f * events.getMouseDx();
-			polarAngle += 0.003f * events.getMouseDy();
-		}
-
-		
-		if (azimuthAngle >= 2.0f * Math.PI) {
-			float d = (float)(azimuthAngle / (2.0f * Math.PI));
-			azimuthAngle = d - (float)Math.floor(d);
-		} else if (azimuthAngle < 0.0f) {
-			float d = (float)(-azimuthAngle / (2.0f * Math.PI));
-			azimuthAngle = (float)(2.0f * Math.PI - (d - (float)Math.floor(d)));
-		}
-		
-		events.setMouseDx(0);
-		events.setMouseDy(0);
-		
-		
-		
 		/*
 		 * Drawing
 		 */
-
 		GL3 gl = drawable.getGL().getGL3();
+		
+		float[] projection;
+		float[] view;
+		float[] model;
+		
 		
 		// Clear screen
 		gl.glClearColor(0, 0, 0, 1.0f); 
@@ -310,21 +263,15 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		// Use the shaderProgram that got linked during the init part.
 		gl.glUseProgram(shaderProgram);
 		
-		
-		
-		float[] projection;
-		float[] view;
-		float[] model;
-		
 		// set up projection matrix
 		projection = Glm.diag(1.0f);
 		projection = Glm.perspective((float)(0.5f * Math.PI), (float)width / height, 0.1f, 100.0f);
 		
 		// set up view matrix
 		view = Glm.diag(1.0f);
-		view = Glm.rotate(view, (float)(polarAngle - Math.PI), Glm.vec3(1.0f, 0.0f, 0.0f));
-		view = Glm.rotate(view, (float)(Math.PI / 2.0f - azimuthAngle), Glm.vec3(0.0f, 0.0f, 1.0f));
-		view = Glm.translate(view, pos.add(camStart).toArray());
+		view = Glm.rotate(view, (float)(events.getPolarAngle() - Math.PI), Glm.vec3(1.0f, 0.0f, 0.0f));
+		view = Glm.rotate(view, (float)(Math.PI / 2.0f - events.getAzimuthAngle()), Glm.vec3(0.0f, 0.0f, 1.0f));
+		view = Glm.translate(view, events.getPosition().toArray());
 		
 		gl.glUniformMatrix4fv(ViewLocation, 1, false,	view, 0);
 		gl.glUniformMatrix4fv(ProjectionLocation, 1, false,	projection, 0);
