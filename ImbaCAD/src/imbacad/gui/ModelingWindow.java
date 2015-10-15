@@ -133,7 +133,7 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		try {
 			
 			// read vertex shader
-			FileReader fr = new FileReader("shader/vertex.shader");
+			FileReader fr = new FileReader("shader/alt_vertex.shader");
 			StringBuffer sb = new StringBuffer();
 			int c = 0;
 			
@@ -144,7 +144,7 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 			vsString = sb.toString();
 			
 			// read vertex shader
-			fr = new FileReader("shader/fragment.shader");
+			fr = new FileReader("shader/alt_fragment.shader");
 			sb = new StringBuffer();
 			c = 0;
 
