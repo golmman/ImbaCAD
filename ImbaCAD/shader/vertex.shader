@@ -10,11 +10,12 @@ layout(location = 3) in vec2 inTexCoords;
 layout(location = 4) out vec4 outColor;
 layout(location = 5) out vec2 outTexCoords;
 
-uniform mat4 modelview;
+uniform mat4 model;
+uniform mat4 view;
 uniform mat4 projection;
 
 void main(void) {
 	outColor = inColor;
 	outTexCoords = inTexCoords;
-	gl_Position = projection * modelview * inPosition;
+	gl_Position = projection * view * model * inPosition;
 }

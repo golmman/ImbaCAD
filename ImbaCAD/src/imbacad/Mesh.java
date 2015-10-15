@@ -1,5 +1,7 @@
 package imbacad;
 
+import imbacad.util.Vec3;
+
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
@@ -26,7 +28,7 @@ public class Mesh {
 
 	public static final int SIZEOF_VERTEX = 20;
 
-	private GLAutoDrawable drawable;
+	private String textureFilename;
 	private float[] vertices;
 	private int[] indices;
 	
@@ -35,11 +37,18 @@ public class Mesh {
 	private int[] VAO = new int[1]; // Vertex Array Object
 	private int[] VBO = new int[1]; // Vertex Buffer Object
 	private int[] EBO = new int[1]; // Element Buffer Object
+	
+	
+	private Vec3 position = new Vec3();
+	private Vec3 rotation = new Vec3();
 
-	public Mesh(GLAutoDrawable drawable, String filename, float[] vertices, int[] indices) {
-		this.drawable = drawable;
+	public Mesh(String textureFilename, float[] vertices, int[] indices) {
+		this.textureFilename = textureFilename;
 		this.vertices = vertices;
 		this.indices = indices;
+	}
+	
+	public void init(GLAutoDrawable drawable) {
 
 		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
 		IntBuffer indexBuffer = Buffers.newDirectIntBuffer(indices);
@@ -70,10 +79,10 @@ public class Mesh {
 
 		gl.glBindVertexArray(0);
 		
-		loadTexture(filename);
+		loadTexture(drawable, textureFilename);
 	}
 
-	private void loadTexture(String filename) {
+	private void loadTexture(GLAutoDrawable drawable, String filename) {
 		GL3 gl = drawable.getGL().getGL3();
 
 		// Generate texture ID and load texture data
@@ -141,12 +150,11 @@ public class Mesh {
 		this.texture = textureID;
 	}
 
-	public void draw(int shader) {
+	public void draw(GLAutoDrawable drawable, int shader) {
 		GL3 gl = drawable.getGL().getGL3();
-
-		gl.glActiveTexture(GL.GL_TEXTURE0); // Active proper texture unit before
-											// binding
-		// Retrieve texture number (the N in diffuse_textureN)
+		
+		// Active proper texture unit before binding
+		gl.glActiveTexture(GL.GL_TEXTURE0); 
 
 		// Now set the sampler to the correct texture unit
 		gl.glUniform1f(gl.glGetUniformLocation(shader, "diffuse_texture"), 0);
@@ -154,8 +162,7 @@ public class Mesh {
 		gl.glBindTexture(GL.GL_TEXTURE_2D, texture[0]);
 
 		gl.glActiveTexture(GL.GL_TEXTURE0); // Always good practice to set
-											// everything back to defaults once
-											// configured.
+											// everything back to defaults once configured.
 
 		// Draw mesh
 		gl.glBindVertexArray(VAO[0]);
@@ -163,7 +170,7 @@ public class Mesh {
 		gl.glBindVertexArray(0);
 	}
 	
-	public void dispose() {
+	public void dispose(GLAutoDrawable drawable) {
 		System.out.println("Mesh.dispose()");
 		
 		GL3 gl = drawable.getGL().getGL3();
@@ -180,6 +187,22 @@ public class Mesh {
 
 	public int[] getIndices() {
 		return indices;
+	}
+
+	public Vec3 getPosition() {
+		return position;
+	}
+
+	public void setPosition(Vec3 position) {
+		this.position = position;
+	}
+
+	public Vec3 getRotation() {
+		return rotation;
+	}
+
+	public void setRotation(Vec3 rotation) {
+		this.rotation = rotation;
 	}
 	
 }
