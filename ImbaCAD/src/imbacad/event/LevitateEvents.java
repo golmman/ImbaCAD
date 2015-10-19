@@ -5,7 +5,6 @@ import imbacad.util.Vec3;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 
 
 public class LevitateEvents extends MKEvents {
@@ -49,19 +48,19 @@ public class LevitateEvents extends MKEvents {
 			position = position.sub(lookingAt.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_A]) {
-			position = position.sub(Vec3.EZ.cross(lookingAt2.mul(velocity)));
+			position = position.sub(Vec3.AXIS_Z.cross(lookingAt2.mul(velocity)));
 		}
 		if (keys[KeyEvent.VK_S]) {
 			position = position.add(lookingAt.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_D]) {
-			position = position.add(Vec3.EZ.cross(lookingAt2.mul(velocity)));
+			position = position.add(Vec3.AXIS_Z.cross(lookingAt2.mul(velocity)));
 		}
 		if (keys[KeyEvent.VK_SPACE]) {
-			position = position.sub(Vec3.EZ.mul(velocity));
+			position = position.sub(Vec3.AXIS_Z.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_SHIFT]) {
-			position = position.add(Vec3.EZ.mul(velocity));
+			position = position.add(Vec3.AXIS_Z.mul(velocity));
 		}
 		
 		

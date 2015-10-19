@@ -296,19 +296,19 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 			pos = pos.sub(lookingAt.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_A]) {
-			pos = pos.sub(Vec3.EZ.cross(lookingAt2.mul(velocity)));
+			pos = pos.sub(Vec3.AXIS_Z.cross(lookingAt2.mul(velocity)));
 		}
 		if (keys[KeyEvent.VK_S]) {
 			pos = pos.add(lookingAt.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_D]) {
-			pos = pos.add(Vec3.EZ.cross(lookingAt2.mul(velocity)));
+			pos = pos.add(Vec3.AXIS_Z.cross(lookingAt2.mul(velocity)));
 		}
 		if (keys[KeyEvent.VK_SPACE]) {
-			pos = pos.sub(Vec3.EZ.mul(velocity));
+			pos = pos.sub(Vec3.AXIS_Z.mul(velocity));
 		}
 		if (keys[KeyEvent.VK_SHIFT]) {
-			pos = pos.add(Vec3.EZ.mul(velocity));
+			pos = pos.add(Vec3.AXIS_Z.mul(velocity));
 		}
 		
 		if (keys[KeyEvent.VK_ESCAPE]) {

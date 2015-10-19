@@ -1,7 +1,7 @@
 package imbacad.gui;
 
+import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.FileReader;
@@ -15,6 +15,7 @@ import imbacad.util.Vec3;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
@@ -25,7 +26,7 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.util.Animator;
 
-public class ModelingWindow extends JDialog implements GLEventListener, WindowListener {
+public class ModelingWindow extends JPanel implements GLEventListener {
 
 	private static final long serialVersionUID = -2636383013866025654L;
 	
@@ -39,8 +40,8 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 	private static int height = 600;
 
 	private int shaderProgram;
-	private int vertShader;
-	private int fragShader;
+	private int vertexShader;
+	private int fragmentShader;
 	
 	private int ModelLocation;
 	private int ViewLocation;
@@ -55,9 +56,26 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 	public static void main(String[] args) {
 		Glm.init();
 		
+		Mesh mesh1 = new Mesh("test2.jpg", MainWindow.testVertices, MainWindow.testIndices);
+		Mesh mesh2 = new Mesh("test.bmp", MainWindow.testVertices, MainWindow.testIndices);
+		mesh2.setPosition(new Vec3(0.5f, -1.5f, 0.0f));
+		ImbaCAD.meshes.add(mesh1);
+		ImbaCAD.meshes.add(mesh2);
+		
+		
 		Animator ani = new Animator();
 		
-		new ModelingWindow(null, ani);
+		JFrame frame = new JFrame("Test");
+		frame.setBounds(100, 100, 400, 400);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setLayout(new GridLayout(1, 1));
+		
+		ModelingWindow mw = new ModelingWindow(ani);
+		
+		frame.add(mw);
+		
+		frame.setVisible(true);
+		
 		
 		ani.start();
 	}
@@ -66,8 +84,10 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 	
 	
 	
-	public ModelingWindow(JFrame parent, Animator animator) {
-		super(parent, "Title", false);
+	public ModelingWindow(Animator animator) {
+		super(new GridLayout(1, 1));
+		
+		System.out.println("new ModelingWindow");
 		
 		events = new LevitateEvents();
 		events.setPosition(new Vec3(3.0f, -1.0f, -1.5f));
@@ -80,28 +100,16 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		caps.setBackgroundOpaque(false);
 		
 		glCanvas = new GLCanvas(caps);
-		glCanvas.setBounds(10, 10, 400, 400);
 		glCanvas.addGLEventListener(this);
 		glCanvas.addKeyListener(events);
 		glCanvas.addMouseListener(events);
 		glCanvas.addMouseMotionListener(events);
 		
 		
-		this.setLayout(null);
-		this.setTitle("Model Window");
-		this.setSize(450, 500);
-		this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		
-		this.addWindowListener(this);
-		
-
 		this.add(glCanvas);
 		
 		this.animator = animator;
 		this.animator.add(glCanvas);
-		
-		this.setVisible(true);
-		
 	}
 
 
@@ -123,8 +131,8 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 
 		// Create GPU shader handles
 		// OpenGL ES retuns a index id to be stored for future reference.
-		vertShader = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
-		fragShader = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
+		vertexShader = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
+		fragmentShader = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
 		
 		
 		// load shaders from disk
@@ -162,20 +170,20 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		// Compile the vertexShader String into a program.
 		String[] vlines = new String[] { vsString };
 		int[] vlengths = new int[] { vlines[0].length() };
-		gl.glShaderSource(vertShader, vlines.length, vlines, vlengths, 0);
-		gl.glCompileShader(vertShader);
+		gl.glShaderSource(vertexShader, vlines.length, vlines, vlengths, 0);
+		gl.glCompileShader(vertexShader);
 
 		// Check compile status.
 		int[] compiled = new int[1];
-		gl.glGetShaderiv(vertShader, GL3.GL_COMPILE_STATUS, compiled, 0);
+		gl.glGetShaderiv(vertexShader, GL3.GL_COMPILE_STATUS, compiled, 0);
 		if (compiled[0] != 0) {
 			System.out.println("Vertex shader compiled");
 		} else {
 			int[] logLength = new int[1];
-			gl.glGetShaderiv(vertShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
+			gl.glGetShaderiv(vertexShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
 
 			byte[] log = new byte[logLength[0]];
-			gl.glGetShaderInfoLog(vertShader, logLength[0], (int[]) null, 0, log, 0);
+			gl.glGetShaderInfoLog(vertexShader, logLength[0], (int[]) null, 0, log, 0);
 
 			System.err.println("Error compiling the vertex shader: " + new String(log));
 			System.exit(1);
@@ -184,19 +192,19 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		// Compile the fragmentShader String into a program.
 		String[] flines = new String[] { fsString };
 		int[] flengths = new int[] { flines[0].length() };
-		gl.glShaderSource(fragShader, flines.length, flines, flengths, 0);
-		gl.glCompileShader(fragShader);
+		gl.glShaderSource(fragmentShader, flines.length, flines, flengths, 0);
+		gl.glCompileShader(fragmentShader);
 
 		// Check compile status.
-		gl.glGetShaderiv(fragShader, GL3.GL_COMPILE_STATUS, compiled, 0);
+		gl.glGetShaderiv(fragmentShader, GL3.GL_COMPILE_STATUS, compiled, 0);
 		if (compiled[0] != 0) {
 			System.out.println("Fragment shader compiled");
 		} else {
 			int[] logLength = new int[1];
-			gl.glGetShaderiv(fragShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
+			gl.glGetShaderiv(fragmentShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
 
 			byte[] log = new byte[logLength[0]];
-			gl.glGetShaderInfoLog(fragShader, logLength[0], (int[]) null, 0, log, 0);
+			gl.glGetShaderInfoLog(fragmentShader, logLength[0], (int[]) null, 0, log, 0);
 
 			System.err.println("Error compiling the fragment shader: " + new String(log));
 			System.exit(1);
@@ -205,8 +213,8 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		// Each shaderProgram must have
 		// one vertex shader and one fragment shader.
 		shaderProgram = gl.glCreateProgram();
-		gl.glAttachShader(shaderProgram, vertShader);
-		gl.glAttachShader(shaderProgram, fragShader);
+		gl.glAttachShader(shaderProgram, vertexShader);
+		gl.glAttachShader(shaderProgram, fragmentShader);
 
 		// Associate attribute ids with the attribute names inside
 		// the vertex shader.
@@ -241,7 +249,8 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		events.process();
 		
 		if (events.getKey(KeyEvent.VK_ESCAPE)) {
-			this.dispose();
+			//this.dispose();
+			// TODO: dispose?
 			return;
 		}
 		
@@ -308,10 +317,10 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		
 		gl.glUseProgram(0);
 		
-		gl.glDetachShader(shaderProgram, vertShader);
-		gl.glDeleteShader(vertShader);
-		gl.glDetachShader(shaderProgram, fragShader);
-		gl.glDeleteShader(fragShader);
+		gl.glDetachShader(shaderProgram, vertexShader);
+		gl.glDeleteShader(vertexShader);
+		gl.glDetachShader(shaderProgram, fragmentShader);
+		gl.glDeleteShader(fragmentShader);
 		gl.glDeleteProgram(shaderProgram);
 	}
 
@@ -331,74 +340,5 @@ public class ModelingWindow extends JDialog implements GLEventListener, WindowLi
 		gl.glViewport(0, 0, width, height);
 	}
 
-
-
-
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-	@Override
-	public void windowClosed(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-	@Override
-	public void windowClosing(WindowEvent e) {
-		animator.remove(glCanvas);
-		glCanvas.destroy();
-	}
-
-
-
-
-
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-
-
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 
 }

@@ -2,9 +2,9 @@ package imbacad.util;
 
 public class Vec3 {
 	
-	public static final Vec3 EX = new Vec3(1.0f, 0.0f, 0.0f);
-	public static final Vec3 EY = new Vec3(0.0f, 1.0f, 0.0f);
-	public static final Vec3 EZ = new Vec3(0.0f, 0.0f, 1.0f);
+	public static final Vec3 AXIS_X = new Vec3(1.0f, 0.0f, 0.0f);
+	public static final Vec3 AXIS_Y = new Vec3(0.0f, 1.0f, 0.0f);
+	public static final Vec3 AXIS_Z = new Vec3(0.0f, 0.0f, 1.0f);
 	
 	private float[] vec = new float[3];
 	
