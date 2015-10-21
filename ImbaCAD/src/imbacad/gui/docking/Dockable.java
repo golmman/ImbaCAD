@@ -1,45 +1,36 @@
 package imbacad.gui.docking;
 
 import imbacad.gui.docking.dnd.DND;
+import imbacad.gui.docking.dnd.DNDEvent;
+import imbacad.gui.docking.dnd.DragListener;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
-import javax.swing.JComponent;
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayer;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
-public class Dockable extends JPanel implements ComponentListener {
+
+public class Dockable extends JPanel implements ComponentListener, DragListener {
 	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 8753675976711240289L;
 
 	private static final int TITLE_HEIGHT = 25;
 	
 	private String name = null;
 	
-	private Frame owner = null;
-	
 	private DockingRoot dockingRoot = null;
 	
-	private JDialog dialog = null;
+	private Window owner;
 	
 	//private JLayer<JPanel> front = null;
 	private JLayeredPane layeredPane = new JLayeredPane();
@@ -50,30 +41,33 @@ public class Dockable extends JPanel implements ComponentListener {
 	private JPanel bottom = new JPanel();
 	
 	private Component title = null;
+	private JLabel close = new JLabel(" X ");
 	
-	public Dockable(Frame owner, Component title, String name) {
+	public Dockable(Window owner, Component title, String name) {
 		super();
 		
-		
-		
 		this.setLayout(new GridLayout(1, 1));
+		this.setBorder(BorderFactory.createEmptyBorder());
 		this.addComponentListener(this);
 		
 		this.owner = owner;
 		this.title = title;
+		this.close.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		this.name = name;
-		DND.supportDrag(this.title, null);
-		
-		dialog = new JDialog(owner, name);
+		DND.supportDrag(this.title, this);
 		
 		
 		back.setLayout(null);
+		back.setBorder(BorderFactory.createEmptyBorder());
 		
-		top.setLayout(new FlowLayout(FlowLayout.LEFT));
+		top.setLayout(new TitleLayout());
 		top.add(this.title);
-		top.setBackground(Color.YELLOW);
+		top.add(new JLabel(""));
+		top.add(new JLabel(""));
+		top.add(this.close);
+		top.setBackground(Color.GRAY);
 		
-		bottom.setBackground(Color.CYAN);
+		bottom.setBackground(Color.LIGHT_GRAY);
 		
 		back.add(top);
 		back.add(bottom);
@@ -85,17 +79,14 @@ public class Dockable extends JPanel implements ComponentListener {
 		this.add(layeredPane);
 		
 		
-		dialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
-		dialog.setLayout(new GridLayout(1, 1));
+		
+
+		
+		//dialog.setUndecorated(true);
 		//dialog.add(bottom);
 		//dialog2 = new JInternalFrame(title);
 		//dialog2.setVisible(false);
 		//owner.add(dialog2);
-	}
-	
-	
-	public JDialog getDialog() {
-		return dialog;
 	}
 	
 
@@ -113,6 +104,7 @@ public class Dockable extends JPanel implements ComponentListener {
 
 	@Override
 	public void componentResized(ComponentEvent e) {
+		
 		back.setBounds(0, 0, this.getWidth(), this.getHeight());
 		front.setBounds(0, 0, this.getWidth(), this.getHeight());
 		
@@ -156,6 +148,54 @@ public class Dockable extends JPanel implements ComponentListener {
 
 	public Component getTitle() {
 		return title;
+	}
+
+
+	@Override
+	public void dropped(DNDEvent e) {
+		
+		if (e.getResult() == DNDEvent.RESULT_FAILURE) {
+			// there was no target for our drag
+				
+			
+			// store the current DockingCanvas
+			DockingCanvas sourceCanvas = dockingRoot.findRoot().getDockingCanvas();
+			
+			
+			this.setPreferredSize(this.getSize());
+			dockingRoot.remove();
+			
+			// create new Window to display the Dockable
+			JDialog dialog = new JDialog(owner, "");
+			DockingCanvas dialogDockingCanvas = new DockingCanvas(dialog, true);
+			
+			dialogDockingCanvas.add(this);
+			
+			Insets insets = sourceCanvas.getOwner().getInsets();
+			dialog.setLocation(
+					e.getX() - e.getOriginX() - insets.left - title.getX(), 
+					e.getY() - e.getOriginY() - insets.top  - title.getY());
+			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			dialog.setLayout(new GridLayout(1, 1));
+			dialog.add(dialogDockingCanvas);
+			dialog.pack();
+			dialog.setVisible(true);
+			
+			
+			if (sourceCanvas.isDisposable() && sourceCanvas.getComponentCount() == 0) {
+				// disposable, empty window so remove it
+				sourceCanvas.getOwner().dispose();
+			} else {
+				// re-validate and repaint the old DockingCanvas
+				sourceCanvas.revalidate();
+				sourceCanvas.repaint();
+			}
+		}
+	}
+
+
+	public Window getOwner() {
+		return owner;
 	}
 	
 

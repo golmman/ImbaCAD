@@ -40,22 +40,8 @@ public class SimpleDocking implements MouseListener {
 		frame.setBounds(100, 100, 600, 300);
 		frame.setLayout(new GridLayout(1, 1));
 		
-//		JPanel glass = new JPanel() {
-//			@Override
-//			protected void paintComponent(Graphics g) {
-//				super.paintComponent(g);
-//				
-//				g.setColor(Color.RED);
-//				g.drawLine(10, 10, 100, 200);
-//			}
-//		};
-//		frame.setGlassPane(glass);
-//		glass.setOpaque(false);
-//		glass.setVisible(true);
 		
-		
-		DockingCanvas dockingCanvas = new DockingCanvas();
-		dockingCanvas.setLayout(new GridLayout(1, 1));
+		DockingCanvas dockingCanvas = new DockingCanvas(frame, false);
 		
 		
 		Dockable dockable1 = new Dockable(frame, new JLabel("dockable1"), "dockable1");

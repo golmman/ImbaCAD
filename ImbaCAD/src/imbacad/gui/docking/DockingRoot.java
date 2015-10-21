@@ -4,9 +4,15 @@ import java.awt.Component;
 import java.awt.Container;
 
 
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
 
-public class DockingRoot {
+public class DockingRoot implements ComponentListener, PropertyChangeListener {
 	
 	public static final int HORIZONTAL = JSplitPane.HORIZONTAL_SPLIT;
 	public static final int VERTICAL = JSplitPane.VERTICAL_SPLIT;
@@ -22,6 +28,10 @@ public class DockingRoot {
 	private DockingRoot left = null;
 	private DockingRoot right = null;
 	
+	private double dividerLocation = 0.5;
+	private int compW = 0;
+	private int compH = 0;
+	
 	
 	public DockingRoot(Component c) {
 		this.component = c;
@@ -32,16 +42,31 @@ public class DockingRoot {
 	}
 	
 	/**
+	 * Convenience method for {@link #add(Dockable, int, int) add(Dockable, int, int)} using direction from {@link DockableLayer}.
+	 * @param dockable
+	 * @param direction
+	 */
+	public void add(Dockable dockable, int direction) {
+		switch (direction) {
+		case DockableLayer.DIRECTION_EAST : this.add(dockable, DockingRoot.HORIZONTAL, DockingRoot.RIGHT); break;
+		case DockableLayer.DIRECTION_NORTH: this.add(dockable, DockingRoot.VERTICAL  , DockingRoot.LEFT ); break;
+		case DockableLayer.DIRECTION_WEST : this.add(dockable, DockingRoot.HORIZONTAL, DockingRoot.LEFT ); break;
+		case DockableLayer.DIRECTION_SOUTH: this.add(dockable, DockingRoot.VERTICAL  , DockingRoot.RIGHT); break;
+		default: throw new IllegalArgumentException("illegal direction");
+		}
+	}
+	
+	/**
 	 * Add a new Dockable to this leaf. <br>
 	 * The Component is invalidated afterwards and needs repaint(?).
-	 * @param c
+	 * @param dockable
+	 * @param orientation
+	 * @param leftOrRight
 	 */
 	public void add(Dockable dockable, int orientation, int leftOrRight) {
 		if (isLeaf()) {
 			
 			Container parentContainer = component.getParent();
-			
-			System.out.println(parentContainer.getWidth());
 			
 			parentContainer.remove(component);
 			
@@ -54,13 +79,18 @@ public class DockingRoot {
 			right.dockingCanvas = dockingCanvas;
 			
 			component = new JSplitPane(orientation, left.component, right.component);
+			component.addComponentListener(this);
+			((JSplitPane)component).addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 			((JSplitPane)component).setResizeWeight(0.5);
+			((JSplitPane)component).setBorder(BorderFactory.createEmptyBorder());
 			
 			parentContainer.add(component);
 			
 		} else {
 			throw new IllegalStateException("Must only add to leafs!");
 		}
+		
+		
 		
 	}
 	
@@ -74,8 +104,8 @@ public class DockingRoot {
 			
 			if (isRoot()) {
 				// if the only leaf is the root, just remove the component
-				component.getParent().remove(component);
-				System.out.println("leaf");
+				getDockingCanvas().remove(component);
+				System.out.println("remove leaf");
 			} else {
 			
 				DockingRoot sibling = getSibling();
@@ -93,38 +123,46 @@ public class DockingRoot {
 					parent.left = sibling.left;
 					parent.right = sibling.right;
 					parent.component = sibling.component;
+					parent.dividerLocation = sibling.dividerLocation;
 					
 					// add component
 					cont.add(parent.component);
 					
-//					cont.revalidate();
-//					cont.repaint();
-					
 				} else {
+					
 					// remove affected component
+					// This triggers the ProperChangeListener but not the ComponentListener,
+					// so the divider location is changed.
+					double dl = parent.parent.dividerLocation;
 					((JSplitPane)parent.parent.component).remove(parent.component);
 					
 					// connect grand parent to sibling
 					if (parent.parent.left == parent) {
 						// parent is left child
 						parent.parent.left = sibling;
-						System.out.println("left!");
 						((JSplitPane)parent.parent.component).setLeftComponent(sibling.component);
 					} else {
 						//parent is right child
 						parent.parent.right = sibling;
-						System.out.println("right!");
 						((JSplitPane)parent.parent.component).setRightComponent(sibling.component);
 					}
+					
+					// restore divider location
+					((JSplitPane)parent.parent.component).setDividerLocation(dl);
+					
 				}
 				
 			}
+			
+			
+			// the remainder has no children (since its a leaf) and no parent ;-(
+			parent = null;
+			
 			
 		} else {
 			throw new IllegalStateException("Must remove only leafs!");
 		}
 		
-		findRoot().printTree("");
 	}
 	
 	public boolean isRoot() {
@@ -184,6 +222,59 @@ public class DockingRoot {
 
 	public void setDockingCanvas(DockingCanvas dockingCanvas) {
 		this.dockingCanvas = dockingCanvas;
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void componentResized(ComponentEvent e) {
+		if (component instanceof JSplitPane) {
+			JSplitPane split = (JSplitPane)component;
+			
+			//System.out.println("resize: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
+			
+			if (isRoot()) System.out.println("resize " + dividerLocation);
+			
+			
+			split.setDividerLocation(dividerLocation);
+			
+			compW = split.getWidth();
+			compH = split.getHeight();
+		}
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent e) {
+		
+		
+		JSplitPane split = (JSplitPane)component;
+		
+		
+		
+		// The proportional divider location is only changed if it is not a consequence of a resize.
+		if (compW == split.getWidth() && compH == split.getHeight()) {
+			//System.out.println("change: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
+			dividerLocation = (double)split.getDividerLocation() / split.getMaximumDividerLocation();
+			
+			if (isRoot()) System.out.println("change  " + dividerLocation);
+		}
+			
 	}
 
 }

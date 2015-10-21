@@ -29,6 +29,8 @@ import java.io.IOException;
 public class DND {
 	
 	private static Component dragSource = null;
+	private static int originX = 0;
+	private static int originY = 0;
 	
 	private DND() {}
 
@@ -46,10 +48,11 @@ public class DND {
             	
 				@Override
 				public void dragGestureRecognized(DragGestureEvent dge) {
-					
 					DragSource ds = dge.getDragSource();
 					
 					dragSource = dge.getComponent();
+					originX = dge.getDragOrigin().x;
+					originY = dge.getDragOrigin().y;
 					
 	                ds.startDrag(
 	                	dge, 
@@ -73,7 +76,6 @@ public class DND {
 						},
 	                	new DragSourceListener() {
 							
-							
 							@Override
 							public void dropActionChanged(DragSourceDragEvent dsde) {}
 							
@@ -87,7 +89,12 @@ public class DND {
 							public void dragEnter(DragSourceDragEvent dsde) {}
 							
 							@Override
-							public void dragDropEnd(DragSourceDropEvent dsde) {}
+							public void dragDropEnd(DragSourceDropEvent dsde) {
+								
+								
+								listener.dropped(new DNDEvent(dragSource, null, dsde.getX(), dsde.getY(), originX, originY,
+										dsde.getDropSuccess() ? DNDEvent.RESULT_SUCCESS : DNDEvent.RESULT_FAILURE));
+							}
 						});
 					
 				}
@@ -114,13 +121,17 @@ public class DND {
 				
 				@Override
 				public void drop(DropTargetDropEvent dtde) {
+					// drop happened inside of the component, 
+					// so inform the drag source that the dnd was successful
+					dtde.dropComplete(true);
+					
 					Component dropTarget = dtde.getDropTargetContext().getComponent();
 					int x = (int)dtde.getLocation().getX();
 					int y = (int)dtde.getLocation().getY();
 					
 					if (dragSource == dropTarget) return;
 					
-					listener.dropped(new DNDEvent(dragSource, dropTarget, x, y));
+					listener.dropped(new DNDEvent(dragSource, dropTarget, x, y, originX, originY, DNDEvent.RESULT_UNKNOWN));
 					
 					lastX = x;
 					lastY = y;
@@ -135,7 +146,7 @@ public class DND {
 					if (dragSource == dropTarget) return;
 					if (lastX == x && lastY == y) return;
 					
-					listener.hovering(new DNDEvent(dragSource, dropTarget, x, y));
+					listener.hovering(new DNDEvent(dragSource, dropTarget, x, y, originX, originY, DNDEvent.RESULT_UNKNOWN));
 					
 					lastX = x;
 					lastY = y;
@@ -147,7 +158,7 @@ public class DND {
 					
 					if (dragSource == dropTarget) return;
 					
-					listener.exited(new DNDEvent(dragSource, dropTarget, -1, -1));
+					listener.exited(new DNDEvent(dragSource, dropTarget, -1, -1, originX, originY, DNDEvent.RESULT_UNKNOWN));
 					
 					lastX = -1;
 					lastY = -1;
@@ -161,7 +172,7 @@ public class DND {
 					
 					if (dragSource == dropTarget) return;
 					
-					listener.entered(new DNDEvent(dragSource, dropTarget, x, y));
+					listener.entered(new DNDEvent(dragSource, dropTarget, x, y, originX, originY, DNDEvent.RESULT_UNKNOWN));
 					
 					lastX = x;
 					lastY = y;

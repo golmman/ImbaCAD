@@ -5,25 +5,23 @@ import imbacad.gui.docking.dnd.DNDEvent;
 import imbacad.gui.docking.dnd.DropListener;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class DockableLayer extends JPanel implements DropListener {
 
 	private static final long serialVersionUID = -2018629049569901672L;
 	
-	private static final int EAST = 0;
-	private static final int NORTH = 1;
-	private static final int WEST = 2;
-	private static final int SOUTH = 3;
+	public static final int DIRECTION_EAST = 0;
+	public static final int DIRECTION_NORTH = 1;
+	public static final int DIRECTION_WEST = 2;
+	public static final int DIRECTION_SOUTH = 3;
 	
 	private Dockable dockable = null;
 
 	private boolean mouseOver = false;
-	private int orientation = 0;
+	private int direction = 0;
 
 	public DockableLayer(Dockable dockable) {
 		super();
@@ -43,19 +41,19 @@ public class DockableLayer extends JPanel implements DropListener {
 		int w = this.getWidth();
 		int h = this.getHeight();
 		
-		g.setColor(Color.BLUE);
-		g.drawLine(0, 0, w, h);
-		g.drawLine(w, 0, 0, h);
+		//g.setColor(Color.BLUE);
+		//g.drawLine(0, 0, w, h);
+		//g.drawLine(w, 0, 0, h);
 		
 		if (mouseOver) {
 			// fill it with the translucent green
 			g.setColor(new Color(0, 128, 0, 128));
 			
-			switch (orientation) {
-			case EAST : g.fillRect(w/2,   0, w/2,   h); break;
-			case NORTH: g.fillRect(  0,   0,   w, h/2); break;
-			case WEST : g.fillRect(  0,   0, w/2,   h); break;
-			case SOUTH: g.fillRect(  0, h/2,   w, h/2); break;
+			switch (direction) {
+			case DIRECTION_EAST : g.fillRect(w/2,   0, w/2,   h); break;
+			case DIRECTION_NORTH: g.fillRect(  0,   0,   w, h/2); break;
+			case DIRECTION_WEST : g.fillRect(  0,   0, w/2,   h); break;
+			case DIRECTION_SOUTH: g.fillRect(  0, h/2,   w, h/2); break;
 			default: break;
 			}
 			
@@ -67,25 +65,37 @@ public class DockableLayer extends JPanel implements DropListener {
 	public void dropped(DNDEvent e) {
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
-		mouseOver = false;
-		
-		// remove drag source Dockable
 		// TODO: quick but really dirty...
-		Dockable source = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
-		source.getDockingRoot().remove();
+		Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
+		Dockable targetDockable = dockable;
 		
-		// add to drop target
-		switch (orientation) {
-		case EAST : dockable.getDockingRoot().add(source, DockingRoot.HORIZONTAL, DockingRoot.RIGHT); break;
-		case NORTH: dockable.getDockingRoot().add(source, DockingRoot.VERTICAL  , DockingRoot.LEFT ); break;
-		case WEST : dockable.getDockingRoot().add(source, DockingRoot.HORIZONTAL, DockingRoot.LEFT ); break;
-		case SOUTH: dockable.getDockingRoot().add(source, DockingRoot.VERTICAL  , DockingRoot.RIGHT); break;
-		default: break;
+		DockingCanvas sourceCanvas = sourceDockable.getDockingRoot().getDockingCanvas();
+		DockingCanvas targetCanvas = targetDockable.getDockingRoot().getDockingCanvas();
+		
+		
+		// remove drag source
+		sourceDockable.getDockingRoot().remove();
+		if (sourceCanvas.isDisposable() && sourceCanvas.getComponentCount() == 0) {
+			sourceCanvas.getOwner().dispose();
 		}
 		
-		// re-validate and repaint root
-		dockable.getDockingRoot().findRoot().getComponent().getParent().revalidate();
-		dockable.getDockingRoot().findRoot().getComponent().getParent().repaint();
+		// add to drop target
+		targetDockable.getDockingRoot().add(sourceDockable, direction);
+		
+		
+		// re-validate and repaint target canvas
+		targetCanvas.revalidate();
+		targetCanvas.repaint();
+		
+		// re-validate and repaint source canvas if different to target canvas
+		if (targetCanvas != sourceCanvas) {
+			sourceCanvas.revalidate();
+			sourceCanvas.repaint();
+		}
+		
+		mouseOver = false;
+		
+		//dockable.getDockingRoot().findRoot().printTree("");
 	}
 
 
@@ -93,7 +103,7 @@ public class DockableLayer extends JPanel implements DropListener {
 	public void hovering(DNDEvent e) {
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
-		int oldOrientation = orientation;
+		int oldOrientation = direction;
 		boolean repaint = false;
 		
 		
@@ -109,19 +119,19 @@ public class DockableLayer extends JPanel implements DropListener {
 		float g = h - m * x;
 		
 		if (y < f && y > g) {
-			orientation = EAST;
+			direction = DIRECTION_EAST;
 		} else if (y < f && y < g) {
-			orientation = NORTH;
+			direction = DIRECTION_NORTH;
 		} else if (y > f && y < g) {
-			orientation = WEST;
+			direction = DIRECTION_WEST;
 		} else if (y > f && y > g) {
-			orientation = SOUTH;
+			direction = DIRECTION_SOUTH;
 		}
 
 		//System.out.println(orientation);
 		//System.out.println(me.getX() + " " + me.getY() + "    " + w + " " + h);
 		
-		if (oldOrientation != orientation) {
+		if (oldOrientation != direction) {
 			repaint = true;
 		}
 		
@@ -146,5 +156,10 @@ public class DockableLayer extends JPanel implements DropListener {
 		
 		mouseOver = false;
 		this.repaint();
+	}
+
+
+	public Dockable getDockable() {
+		return dockable;
 	}
 }
