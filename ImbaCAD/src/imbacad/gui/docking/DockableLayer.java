@@ -66,7 +66,9 @@ public class DockableLayer extends JPanel implements DropListener {
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
 		// TODO: quick but really dirty...
-		Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
+		//Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
+		// TODO: less dirty...
+		Dockable sourceDockable = (Dockable)((DockableTitleBar)e.getDragSource().getParent()).getDockable();
 		Dockable targetDockable = dockable;
 		
 		DockingCanvas sourceCanvas = sourceDockable.getDockingRoot().getDockingCanvas();

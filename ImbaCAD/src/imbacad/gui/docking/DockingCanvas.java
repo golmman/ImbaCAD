@@ -79,7 +79,9 @@ public class DockingCanvas extends JPanel implements DropListener {
 	@Override
 	public void dropped(DNDEvent e) {
 		// TODO: quick but really dirty...
-		Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
+		//Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
+		// TODO: less dirty...
+		Dockable sourceDockable = (Dockable)((DockableTitleBar)e.getDragSource().getParent()).getDockable();
 		
 		DockingCanvas sourceCanvas = sourceDockable.getDockingRoot().getDockingCanvas();
 		

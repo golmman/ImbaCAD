@@ -35,7 +35,6 @@ public class TitleLayout implements LayoutManager {
 		Component comp = container.getComponent(0);
 		int cw = comp.getPreferredSize().width;
 		int ch = comp.getPreferredSize().height;
-		System.out.println(py + " " + ph + " " +  ch);
 		comp.setBounds(px + BORDER_GAP, py + (ph - ch) / 2 , cw, ch);
 		
 		// close

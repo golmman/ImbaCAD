@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
-public class SimpleDocking implements MouseListener {
+public class DockingTest implements MouseListener {
 	
 	
 	private static JPanel panel1 = new JPanel();
@@ -27,7 +27,7 @@ public class SimpleDocking implements MouseListener {
 	
 	
 	
-	public SimpleDocking() {
+	public DockingTest() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -37,7 +37,7 @@ public class SimpleDocking implements MouseListener {
 		
 		JFrame frame = new JFrame("SimpleDocking");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setBounds(100, 100, 600, 300);
+		frame.setBounds(100, 100, 700, 300);
 		frame.setLayout(new GridLayout(1, 1));
 		
 		

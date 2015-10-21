@@ -6,16 +6,24 @@ import imbacad.gui.docking.dnd.DragListener;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
+import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class DockableTitleBar extends JPanel implements DragListener{
+public class DockableTitleBar extends JPanel implements DragListener, MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = -7476683061433551220L;
+	
+	private static final Color COLOR_BUTTON = new Color(232, 232, 232);
+	private static final Color COLOR_BUTTON_HOVER = new Color(208, 208, 208);
 	
 	private Dockable dockable;
 	
@@ -30,6 +38,32 @@ public class DockableTitleBar extends JPanel implements DragListener{
 		
 		this.title = title;
 		DND.supportDrag(this.title, this);
+		
+		Font font = new Font("Courier", Font.PLAIN, 12);
+		
+		this.minimize.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+		this.minimize.setFont(font);
+		this.minimize.setOpaque(true);
+		this.minimize.setBackground(COLOR_BUTTON);
+		this.minimize.addMouseListener(this);
+		this.minimize.addMouseMotionListener(this);
+		
+		this.maximize.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+		this.maximize.setFont(font);
+		this.maximize.setOpaque(true);
+		this.maximize.setBackground(COLOR_BUTTON);
+		this.maximize.addMouseListener(this);
+		this.maximize.addMouseMotionListener(this);
+		
+		this.close.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
+		this.close.setFont(font);
+		this.close.setOpaque(true);
+		this.close.setBackground(COLOR_BUTTON);
+		this.close.addMouseListener(this);
+		this.close.addMouseMotionListener(this);
+		
+		
+		close.setOpaque(true);
 		
 		
 		
@@ -82,5 +116,59 @@ public class DockableTitleBar extends JPanel implements DragListener{
 			}
 		}
 	}
+
+	public Component getTitle() {
+		return title;
+	}
+
+	public Dockable getDockable() {
+		return dockable;
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getSource() == close) {
+			DockingCanvas sourceCanvas = dockable.getDockingRoot().findRoot().getDockingCanvas();
+			
+			dockable.getDockingRoot().remove();
+			
+			if (sourceCanvas.isDisposable() && sourceCanvas.getComponentCount() == 0) {
+				// disposable, empty window so remove it
+				sourceCanvas.getOwner().dispose();
+			} else {
+				// re-validate and repaint the old DockingCanvas
+				sourceCanvas.revalidate();
+				sourceCanvas.repaint();
+			}
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		JLabel label = (JLabel)e.getSource();
+		
+		label.setBackground(COLOR_BUTTON_HOVER);
+		label.repaint();
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		JLabel label = (JLabel)e.getSource();
+		
+		label.setBackground(COLOR_BUTTON);
+		label.repaint();
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {}
 
 }

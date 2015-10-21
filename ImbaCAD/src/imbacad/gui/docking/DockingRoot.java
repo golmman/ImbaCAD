@@ -1,5 +1,6 @@
 package imbacad.gui.docking;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 
@@ -82,7 +83,11 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			component.addComponentListener(this);
 			((JSplitPane)component).addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 			((JSplitPane)component).setResizeWeight(0.5);
-			((JSplitPane)component).setBorder(BorderFactory.createEmptyBorder());
+			// TODO: createEmptyBorder would be a nicer looking alternative. 
+			// Unfortunately the still remaining (why?) 1-pixel border
+			// is not repainted when the divider location changes.
+			// A simple repaint() in PropertyChangeListener.propertyChange() seems not to resolve this issue.
+			((JSplitPane)component).setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
 			
 			parentContainer.add(component);
 			
@@ -225,22 +230,13 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 	}
 
 	@Override
-	public void componentHidden(ComponentEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void componentHidden(ComponentEvent e) {}
 
 	@Override
-	public void componentMoved(ComponentEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void componentMoved(ComponentEvent e) {}
 
 	@Override
-	public void componentShown(ComponentEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void componentShown(ComponentEvent e) {}
 	
 	@Override
 	public void componentResized(ComponentEvent e) {
@@ -266,13 +262,13 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 		JSplitPane split = (JSplitPane)component;
 		
 		
-		
 		// The proportional divider location is only changed if it is not a consequence of a resize.
 		if (compW == split.getWidth() && compH == split.getHeight()) {
-			//System.out.println("change: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
+			
 			dividerLocation = (double)split.getDividerLocation() / split.getMaximumDividerLocation();
 			
-			if (isRoot()) System.out.println("change  " + dividerLocation);
+			//System.out.println("change: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
+			//if (isRoot()) System.out.println("change  " + dividerLocation);
 		}
 			
 	}
