@@ -9,11 +9,24 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLayer;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 
-
+/**
+ * Container hierarchy:
+ * 
+ * 	DockableCanvas
+ * 		Dockable/JSplitPane (DockingRoot.component)
+ * 			Dockable.layeredPane
+ * 				Dockable.front 				-> drop and drawing support
+ * 				Dockable.back
+ * 					Dockable.titleBar 		-> drag and title bar support
+ * 					Dockable.contentPane 	-> actual Container where custom components are placed
+ * 					
+ * 
+ * @author Dirk Kretschmann
+ *
+ */
 public class Dockable extends JPanel implements ComponentListener {
 	
 	private static final long serialVersionUID = 8753675976711240289L;
@@ -32,7 +45,7 @@ public class Dockable extends JPanel implements ComponentListener {
 	private DockableLayer front = new DockableLayer(this);
 	
 	private DockableTitleBar titleBar = null;
-	private JPanel contenPane = new JPanel();
+	private JPanel contentPane = new JPanel();
 	
 	public Dockable(Window owner, Component title, String name) {
 		super();
@@ -50,17 +63,17 @@ public class Dockable extends JPanel implements ComponentListener {
 		
 		titleBar = new DockableTitleBar(this, title);
 		
-		contenPane.setBackground(Color.LIGHT_GRAY);
+		contentPane.setBackground(Color.LIGHT_GRAY);
 		
 		back.add(titleBar);
-		back.add(contenPane);
+		back.add(contentPane);
 		
 		layeredPane.setLayout(null);
 		layeredPane.add(back, JLayeredPane.DEFAULT_LAYER);
 		layeredPane.add(front, JLayeredPane.DRAG_LAYER);
 		
-		this.add(layeredPane);
-		
+		//this.add(layeredPane);
+		this.addLayeredPane();
 		
 		
 
@@ -72,6 +85,17 @@ public class Dockable extends JPanel implements ComponentListener {
 		//owner.add(dialog2);
 	}
 	
+	
+	
+	@Override
+	public Component add(Component comp) {
+		return contentPane.add(comp);
+	}
+	
+	private void addLayeredPane() {
+		// only add operation a Dockable will perform on this JPanel
+		super.add(this.layeredPane);
+	}
 
 	@Override
 	public void componentHidden(ComponentEvent e) {}
@@ -86,7 +110,7 @@ public class Dockable extends JPanel implements ComponentListener {
 		front.setBounds(0, 0, this.getWidth(), this.getHeight());
 		
 		titleBar.setBounds(0, 0, this.getWidth(), TITLE_HEIGHT);
-		contenPane.setBounds(0, TITLE_HEIGHT, this.getWidth(), this.getHeight() - TITLE_HEIGHT);
+		contentPane.setBounds(0, TITLE_HEIGHT, this.getWidth(), this.getHeight() - TITLE_HEIGHT);
 		
 		back.revalidate();
 	}
@@ -109,14 +133,14 @@ public class Dockable extends JPanel implements ComponentListener {
 	}
 
 
-	public JLayer<JPanel> getFront() {
-		return null;// front;
+	public DockableLayer getFront() {
+		return front;
 	}
 	
 	
 	
 	public JPanel getContentPane() {
-		return contenPane;
+		return contentPane;
 	}
 
 

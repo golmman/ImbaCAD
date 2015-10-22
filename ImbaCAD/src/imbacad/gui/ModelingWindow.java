@@ -2,8 +2,6 @@ package imbacad.gui;
 
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -13,7 +11,6 @@ import imbacad.event.LevitateEvents;
 import imbacad.util.Glm;
 import imbacad.util.Vec3;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -23,7 +20,7 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.awt.GLCanvas;
+import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 
 public class ModelingWindow extends JPanel implements GLEventListener {
@@ -34,10 +31,10 @@ public class ModelingWindow extends JPanel implements GLEventListener {
 	
 	private Animator animator;
 	
-	private GLCanvas glCanvas;
+	private GLJPanel glPanel;
 	
-	private static int width = 800;
-	private static int height = 600;
+	private int width = 800;
+	private int height = 600;
 
 	private int shaderProgram;
 	private int vertexShader;
@@ -99,17 +96,18 @@ public class ModelingWindow extends JPanel implements GLEventListener {
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
 		caps.setBackgroundOpaque(false);
 		
-		glCanvas = new GLCanvas(caps);
-		glCanvas.addGLEventListener(this);
-		glCanvas.addKeyListener(events);
-		glCanvas.addMouseListener(events);
-		glCanvas.addMouseMotionListener(events);
+		glPanel = new GLJPanel(caps);
+		glPanel.addGLEventListener(this);
+		glPanel.addKeyListener(events);
+		glPanel.addMouseListener(events);
+		glPanel.addMouseMotionListener(events);
+		glPanel.addFocusListener(events);
 		
 		
-		this.add(glCanvas);
+		this.add(glPanel);
 		
 		this.animator = animator;
-		this.animator.add(glCanvas);
+		this.animator.add(glPanel);
 	}
 
 
@@ -328,7 +326,7 @@ public class ModelingWindow extends JPanel implements GLEventListener {
 
 	@Override
 	public void reshape(GLAutoDrawable drawable, int x, int y, int z, int h) {
-		System.out.println("Window resized to width=" + z + " height=" + h);
+		
 		width = z;
 		height = h;
 
@@ -338,6 +336,8 @@ public class ModelingWindow extends JPanel implements GLEventListener {
 		// perspectiveGL((GL2)gl, 90.0, (double)width / height, 0.1, 100.0);
 
 		gl.glViewport(0, 0, width, height);
+		
+		System.out.println("Window resized to width=" + z + " height=" + h);
 	}
 
 

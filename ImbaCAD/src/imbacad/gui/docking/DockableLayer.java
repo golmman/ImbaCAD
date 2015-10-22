@@ -9,6 +9,11 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
+/**
+ * Enables drop of dragged components and painting on top of {@link Dockable}.
+ * @author Dirk Kretschmann
+ *
+ */
 public class DockableLayer extends JPanel implements DropListener {
 
 	private static final long serialVersionUID = -2018629049569901672L;

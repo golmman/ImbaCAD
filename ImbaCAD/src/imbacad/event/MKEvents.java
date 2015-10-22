@@ -1,5 +1,7 @@
 package imbacad.event;
 
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -7,8 +9,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.util.Arrays;
 
-public abstract class MKEvents implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
+import com.jogamp.opengl.awt.GLJPanel;
+
+public abstract class MKEvents implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener, FocusListener {
 
 	protected int mouseDx;
 	protected int mouseDy;
@@ -35,6 +40,13 @@ public abstract class MKEvents implements KeyListener, MouseListener, MouseMotio
 	@Override
 	public void keyReleased(KeyEvent e) {
 		keys[e.getKeyCode()] = false;
+	}
+	
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		if (e.getSource() instanceof GLJPanel) {
+			((GLJPanel)e.getSource()).requestFocusInWindow();
+		}
 	}
 	
 	@Override
@@ -89,6 +101,16 @@ public abstract class MKEvents implements KeyListener, MouseListener, MouseMotio
 	}
 	public boolean getKey(int key) {
 		return keys[key];
+	}
+
+
+	@Override
+	public void focusGained(FocusEvent e) {}
+
+
+	@Override
+	public void focusLost(FocusEvent e) {
+		Arrays.fill(keys, false);
 	}
 	
 }

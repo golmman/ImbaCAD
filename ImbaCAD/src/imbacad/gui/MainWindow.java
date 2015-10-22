@@ -1,18 +1,17 @@
 package imbacad.gui;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 
 import imbacad.ImbaCAD;
 import imbacad.Mesh;
+import imbacad.gui.docking.Dockable;
+import imbacad.gui.docking.DockingCanvas;
+import imbacad.gui.docking.DockingRoot;
 import imbacad.util.Vec3;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
-
-import bibliothek.gui.dock.common.CControl;
-import bibliothek.gui.dock.common.CLocation;
-import bibliothek.gui.dock.common.DefaultSingleCDockable;
-import bibliothek.gui.dock.common.SingleCDockable;
+import javax.swing.JLabel;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -51,21 +50,53 @@ public class MainWindow extends JFrame {
 		
 		
 		
-		CControl dockingControl = new CControl(this);
-		this.add(dockingControl.getContentArea());
+//		CControl dockingControl = new CControl(this);
+//		this.add(dockingControl.getContentArea());
+//		
+//		SingleCDockable modeling1 = new DefaultSingleCDockable("Modeling1", "Modeling1", new ModelingWindow(animator));
+//		SingleCDockable modeling2 = new DefaultSingleCDockable("Modeling2", "Modeling2", new ModelingWindow(animator));
+//		
+//		dockingControl.addDockable(modeling1);
+//		dockingControl.addDockable(modeling2);
+//		
+//		modeling1.setLocation(CLocation.base().normalWest(0.4));
+//		modeling1.setVisible(true);
+//
+//		modeling2.setLocation(CLocation.base().normalEast(0.3));
+//		modeling2.setVisible(true);
 		
-		SingleCDockable modeling1 = new DefaultSingleCDockable("Modeling1", "Modeling1", new ModelingWindow(animator));
-		SingleCDockable modeling2 = new DefaultSingleCDockable("Modeling2", "Modeling2", new ModelingWindow(animator));
 		
-		dockingControl.addDockable(modeling1);
-		dockingControl.addDockable(modeling2);
+		DockingCanvas dockingCanvas = new DockingCanvas(this, false);
 		
-		modeling1.setLocation(CLocation.base().normalWest(0.4));
-		modeling1.setVisible(true);
-
-		modeling2.setLocation(CLocation.base().normalEast(0.3));
-		modeling2.setVisible(true);
 		
+		Dockable dockable1 = new Dockable(this, new JLabel("dockable1"), "dockable1");
+		Dockable dockable2 = new Dockable(this, new JLabel("dockable2"), "dockable2");
+		Dockable dockable3 = new Dockable(this, new JLabel("dockable3"), "dockable3");
+		Dockable dockable4 = new Dockable(this, new JLabel("dockable4"), "dockable4");
+		
+		dockable1.getContentPane().setLayout(new GridLayout(1, 1));
+		dockable1.getContentPane().add(new ModelingWindow(animator));
+		
+		dockable2.getContentPane().setLayout(new GridLayout(1, 1));
+		dockable2.getContentPane().add(new ModelingWindow(animator));
+		
+		dockable3.getContentPane().setLayout(new GridLayout(1, 1));
+		dockable3.getContentPane().add(new ModelingWindow(animator));
+		
+		dockable4.getContentPane().setLayout(new GridLayout(1, 1));
+		dockable4.getContentPane().add(new JButton("Miau"));
+		
+		
+		DockingRoot root = new DockingRoot(dockable1);
+		
+		dockingCanvas.add(root);
+		
+		root.add(dockable2, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
+		root.getRight().add(dockable3, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
+		root.getRight().getLeft().add(dockable4, DockingRoot.VERTICAL, DockingRoot.RIGHT);
+		
+		
+		this.add(dockingCanvas);
 		
 		
 		this.setVisible(true);

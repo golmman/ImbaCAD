@@ -12,6 +12,11 @@ import java.awt.Window;
 
 import javax.swing.JPanel;
 
+/**
+ * Parent container for all {@link Dockable Dockables}.
+ * @author Dirk Kretschmann
+ *
+ */
 public class DockingCanvas extends JPanel implements DropListener {
 
 	private static final long serialVersionUID = 3317553968573865171L;

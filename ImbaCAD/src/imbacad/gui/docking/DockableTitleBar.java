@@ -18,12 +18,20 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+/**
+ * Adds title bar functionality for a {@link Dockable}.
+ * @author Dirk Kretschmann
+ *
+ */
 public class DockableTitleBar extends JPanel implements DragListener, MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = -7476683061433551220L;
 	
 	private static final Color COLOR_BUTTON = new Color(232, 232, 232);
 	private static final Color COLOR_BUTTON_HOVER = new Color(208, 208, 208);
+	private static final Color COLOR_BUTTON_DISABLED = new Color(160, 160, 160);
+	
+	private static final Font FONT_BUTTON = new Font("Courier", Font.PLAIN, 12);
 	
 	private Dockable dockable;
 	
@@ -39,32 +47,27 @@ public class DockableTitleBar extends JPanel implements DragListener, MouseListe
 		this.title = title;
 		DND.supportDrag(this.title, this);
 		
-		Font font = new Font("Courier", Font.PLAIN, 12);
 		
 		this.minimize.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-		this.minimize.setFont(font);
+		this.minimize.setFont(FONT_BUTTON);
 		this.minimize.setOpaque(true);
-		this.minimize.setBackground(COLOR_BUTTON);
-		this.minimize.addMouseListener(this);
-		this.minimize.addMouseMotionListener(this);
+		this.minimize.setBackground(COLOR_BUTTON_DISABLED);
+		//this.minimize.addMouseListener(this);
+		//this.minimize.addMouseMotionListener(this);
 		
 		this.maximize.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-		this.maximize.setFont(font);
+		this.maximize.setFont(FONT_BUTTON);
 		this.maximize.setOpaque(true);
-		this.maximize.setBackground(COLOR_BUTTON);
-		this.maximize.addMouseListener(this);
-		this.maximize.addMouseMotionListener(this);
+		this.maximize.setBackground(COLOR_BUTTON_DISABLED);
+		//this.maximize.addMouseListener(this);
+		//this.maximize.addMouseMotionListener(this);
 		
 		this.close.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY));
-		this.close.setFont(font);
+		this.close.setFont(FONT_BUTTON);
 		this.close.setOpaque(true);
 		this.close.setBackground(COLOR_BUTTON);
 		this.close.addMouseListener(this);
 		this.close.addMouseMotionListener(this);
-		
-		
-		close.setOpaque(true);
-		
 		
 		
 		this.setLayout(new TitleLayout());

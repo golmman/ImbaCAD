@@ -1,45 +1,25 @@
 package imbacad.gui.docking;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSplitPane;
 
-public class DockingTest implements MouseListener {
+public class DockingTest {
 	
 	
-	private static JPanel panel1 = new JPanel();
-	private static JPanel panel2 = new JPanel();
-	
-	private static JButton button1 = new JButton("Button1");
-	private static JButton button2 = new JButton("Button2");
-	
-	
-	
-	
-	
-	public DockingTest() {
-		// TODO Auto-generated constructor stub
-	}
+	public DockingTest() {}
 
 	public static void main(String[] args) {
 		Toolkit.getDefaultToolkit().setDynamicLayout(false);
 		
 		
-		JFrame frame = new JFrame("SimpleDocking");
+		JFrame frame = new JFrame("DockingTest");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setBounds(100, 100, 700, 300);
 		frame.setLayout(new GridLayout(1, 1));
-		
 		
 		DockingCanvas dockingCanvas = new DockingCanvas(frame, false);
 		
@@ -57,11 +37,14 @@ public class DockingTest implements MouseListener {
 		
 		dockingCanvas.add(root);
 		
-		frame.add(dockingCanvas);
-		
 		root.add(dockable2, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
 		root.getRight().add(dockable3, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
 		root.getRight().getLeft().add(dockable4, DockingRoot.VERTICAL, DockingRoot.RIGHT);
+		
+		
+		frame.add(dockingCanvas);
+		
+
 		
 		
 //		panel1.setBackground(Color.GRAY);
@@ -81,34 +64,6 @@ public class DockingTest implements MouseListener {
 		root.printTree("");
 		
 
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		System.out.println("enter!");
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		System.out.println("exit!");
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
 	}
 
 }

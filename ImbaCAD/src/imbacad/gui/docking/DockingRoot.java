@@ -1,6 +1,5 @@
 package imbacad.gui.docking;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 
@@ -10,8 +9,8 @@ import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.JSplitPane;
+import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 public class DockingRoot implements ComponentListener, PropertyChangeListener {
 	
@@ -67,8 +66,19 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 	public void add(Dockable dockable, int orientation, int leftOrRight) {
 		if (isLeaf()) {
 			
+			
+			
 			Container parentContainer = component.getParent();
 			
+			// save divider location
+			JSplitPane parentSplit = null;
+			double parentDivider = 0.0;
+			if (parentContainer instanceof JSplitPane) {
+				parentSplit = (JSplitPane)parentContainer;
+				parentDivider = (double)parentSplit.getDividerLocation() / parentSplit.getMaximumDividerLocation();
+			}
+			
+			// remove
 			parentContainer.remove(component);
 			
 			// initialize new docking roots
@@ -83,13 +93,24 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			component.addComponentListener(this);
 			((JSplitPane)component).addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 			((JSplitPane)component).setResizeWeight(0.5);
-			// TODO: createEmptyBorder would be a nicer looking alternative. 
-			// Unfortunately the still remaining (why?) 1-pixel border
-			// is not repainted when the divider location changes.
-			// A simple repaint() in PropertyChangeListener.propertyChange() seems not to resolve this issue.
-			((JSplitPane)component).setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
+			((JSplitPane)component).setBorder(null);
+			((JSplitPane)component).setDividerSize(3);
+			((BasicSplitPaneUI)((JSplitPane)component).getUI()).getDivider().setBorder(null);
+			
+//			SplitPaneUI ui = sp.getUI();
+//		    if( ui instanceof BasicSplitPaneUI ) {
+//		        ((BasicSplitPaneUI)ui).getDivider().setBorder( null );
+//		    }
 			
 			parentContainer.add(component);
+			
+			// restore divider location
+			if (parentSplit != null) {
+				// parentDivider may be invalid due to add operations while the parent frame was still invisible
+				if (parentDivider >= 0.0 && parentDivider <= 1.0) {
+					parentSplit.setDividerLocation(parentDivider);
+				}
+			}
 			
 		} else {
 			throw new IllegalStateException("Must only add to leafs!");
@@ -245,7 +266,14 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			
 			//System.out.println("resize: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
 			
-			if (isRoot()) System.out.println("resize " + dividerLocation);
+			
+			if (split.getRightComponent() instanceof Dockable) {
+				Dockable dock = (Dockable)split.getRightComponent();
+				
+				if (dock.getName().equals("dockable4")) {
+					System.out.println("resize " + dividerLocation);
+				}
+			}
 			
 			
 			split.setDividerLocation(dividerLocation);
@@ -266,6 +294,14 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 		if (compW == split.getWidth() && compH == split.getHeight()) {
 			
 			dividerLocation = (double)split.getDividerLocation() / split.getMaximumDividerLocation();
+			
+			if (split.getRightComponent() instanceof Dockable) {
+				Dockable dock = (Dockable)split.getRightComponent();
+				
+				if (dock.getName().equals("dockable4")) {
+					System.out.println("change  " + dividerLocation);
+				}
+			}
 			
 			//System.out.println("change: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
 			//if (isRoot()) System.out.println("change  " + dividerLocation);
