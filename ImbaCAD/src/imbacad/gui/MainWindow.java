@@ -1,5 +1,7 @@
 package imbacad.gui;
 
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 
 import imbacad.ImbaCAD;
@@ -42,29 +44,17 @@ public class MainWindow extends JFrame {
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		
-		animator.start();
+		//animator.start();
+		
+		GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+		int screenWidth = gd.getDisplayMode().getWidth();
+		int screenHeight = gd.getDisplayMode().getHeight();
 		
 		this.setLayout(new GridLayout(1, 1));
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setBounds(30, 30, 800, 400);
-		
-		
-		
-//		CControl dockingControl = new CControl(this);
-//		this.add(dockingControl.getContentArea());
-//		
-//		SingleCDockable modeling1 = new DefaultSingleCDockable("Modeling1", "Modeling1", new ModelingWindow(animator));
-//		SingleCDockable modeling2 = new DefaultSingleCDockable("Modeling2", "Modeling2", new ModelingWindow(animator));
-//		
-//		dockingControl.addDockable(modeling1);
-//		dockingControl.addDockable(modeling2);
-//		
-//		modeling1.setLocation(CLocation.base().normalWest(0.4));
-//		modeling1.setVisible(true);
-//
-//		modeling2.setLocation(CLocation.base().normalEast(0.3));
-//		modeling2.setVisible(true);
-		
+		this.setBounds(0, 0, screenWidth, screenHeight);
+
+
 		
 		DockingCanvas dockingCanvas = new DockingCanvas(this, false);
 		
@@ -101,9 +91,6 @@ public class MainWindow extends JFrame {
 		
 		this.setVisible(true);
 		
-		
-		//new ModelingWindow(this, animator).setLocation(100, 100);
-		//new ModelingWindow(this, animator).setLocation(500, 200);
 	}
 
 	public static void main(String[] args) {

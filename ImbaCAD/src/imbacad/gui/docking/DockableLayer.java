@@ -68,7 +68,19 @@ public class DockableLayer extends JPanel implements DropListener {
 
 	@Override
 	public void dropped(DNDEvent e) {
-		if (dockable.getTitle() == e.getDragSource()) return;
+		// Create new Dialog if drag source is from the same Dockable
+		if (dockable.getTitle() == e.getDragSource()) {
+			DockableTitleBar titleBar = (DockableTitleBar)dockable.getTitle().getParent();
+			DNDEvent event = new DNDEvent(
+					e.getDragSource(), 
+					e.getDropTarget(), 
+					titleBar.getLocationOnScreen().x + e.getX() - e.getOriginX(), 
+					titleBar.getLocationOnScreen().y + e.getY() + e.getOriginY(), 
+					e.getOriginX(), e.getOriginY(), 
+					DNDEvent.RESULT_FAILURE);
+			titleBar.dropped(event);
+			return;
+		}
 		
 		// TODO: quick but really dirty...
 		//Dockable sourceDockable = (Dockable)e.getDragSource().getParent().getParent().getParent().getParent();
@@ -108,6 +120,7 @@ public class DockableLayer extends JPanel implements DropListener {
 
 	@Override
 	public void hovering(DNDEvent e) {
+		// return if drag source is from the same Dockable
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
 		int oldOrientation = direction;
@@ -150,6 +163,7 @@ public class DockableLayer extends JPanel implements DropListener {
 
 	@Override
 	public void entered(DNDEvent e) {
+		// return if drag source is from the same Dockable
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
 		mouseOver = true;
@@ -159,6 +173,7 @@ public class DockableLayer extends JPanel implements DropListener {
 
 	@Override
 	public void exited(DNDEvent e) {
+		// return if drag source is from the same Dockable
 		if (dockable.getTitle() == e.getDragSource()) return;
 		
 		mouseOver = false;

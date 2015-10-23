@@ -1,53 +1,49 @@
 package imbacad.gui;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
-import java.io.FileReader;
-import java.io.IOException;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import imbacad.ImbaCAD;
 import imbacad.Mesh;
-import imbacad.event.LevitateEvents;
+import imbacad.event.LevitateProcessor;
+import imbacad.event.OrbitProcessor;
+import imbacad.event.PanProcessor;
+import imbacad.event.RenderingEventAdapter;
+import imbacad.rendering.Camera;
+import imbacad.rendering.DefaultRenderer;
 import imbacad.util.Glm;
 import imbacad.util.Vec3;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JToggleButton;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
-import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 
-public class ModelingWindow extends JPanel implements GLEventListener {
+public class ModelingWindow extends JPanel implements ComponentListener, ItemListener {
 
 	private static final long serialVersionUID = -2636383013866025654L;
 	
-	private LevitateEvents events;
+	private DefaultRenderer renderer = null;
+	private RenderingEventAdapter events = null;
 	
-	private Animator animator;
+	private Animator animator = null;
 	
-	private GLJPanel glPanel;
+	private JPanel panelControl = new JPanel();
+	private GLJPanel panelRendering = null;
 	
-	private int width = 800;
-	private int height = 600;
-
-	private int shaderProgram;
-	private int vertexShader;
-	private int fragmentShader;
-	
-	private int ModelLocation;
-	private int ViewLocation;
-	private int ProjectionLocation;
-	
-	
-	// TODO: only for debug
-	private float alpha = 0.0f;
-	
+	private JRadioButton buttonLevitate = new JRadioButton("Levitate");
+	private JRadioButton buttonOrbit = new JRadioButton("Orbit");
+	private JRadioButton buttonPan = new JRadioButton("Pan");
 	
 	
 	public static void main(String[] args) {
@@ -82,263 +78,115 @@ public class ModelingWindow extends JPanel implements GLEventListener {
 	
 	
 	public ModelingWindow(Animator animator) {
-		super(new GridLayout(1, 1));
+		super();
 		
-		System.out.println("new ModelingWindow");
-		
-		events = new LevitateEvents();
-		events.setPosition(new Vec3(3.0f, -1.0f, -1.5f));
-		events.setAzimuthAngle(0.0f);
-		events.setPolarAngle((float)(0.6f * Math.PI));
-		events.setVelocity(0.001f);
-		
+		System.out.println("new ModelingWindow");		
 		
 		GLCapabilities caps = new GLCapabilities(GLProfile.get(GLProfile.GL3));
 		caps.setBackgroundOpaque(false);
 		
-		glPanel = new GLJPanel(caps);
-		glPanel.addGLEventListener(this);
-		glPanel.addKeyListener(events);
-		glPanel.addMouseListener(events);
-		glPanel.addMouseMotionListener(events);
-		glPanel.addFocusListener(events);
+		
+		Camera camera = new Camera();
+		camera.setPosition(new Vec3(3.0f, -1.0f, -1.5f));
+		camera.setAzimuthAngle(0.0f);
+		camera.setPolarAngle((float)(0.6f * Math.PI));
+		camera.setFov((float)(0.5f * Math.PI));
+		camera.setVelocity(0.01f);
+		
+		events = new RenderingEventAdapter();
+		renderer = new DefaultRenderer(new LevitateProcessor(events), camera);
 		
 		
-		this.add(glPanel);
+		ButtonGroup bg = new ButtonGroup();
+		bg.add(buttonLevitate);
+		bg.add(buttonOrbit);
+		bg.add(buttonPan);
+		buttonLevitate.addItemListener(this); 
+		buttonOrbit.addItemListener(this);
+		buttonPan.addItemListener(this);
+		
+		buttonLevitate.setSelected(true);
+		
+		JPanel panelControlWest = new JPanel(); 
+		panelControlWest.setLayout(new GridLayout(1, 3));
+		panelControlWest.add(buttonLevitate);
+		panelControlWest.add(buttonOrbit);
+		panelControlWest.add(buttonPan);
+		panelControl.setLayout(new BorderLayout());
+		panelControl.add(panelControlWest, BorderLayout.WEST);
+
+		
+		panelRendering = new GLJPanel(caps);
+		panelRendering.addGLEventListener(renderer);
+		panelRendering.addKeyListener(events);
+		panelRendering.addMouseListener(events);
+		panelRendering.addMouseMotionListener(events);
+		panelRendering.addFocusListener(events);
+		
+		
+		this.setLayout(null);
+		
+		this.addComponentListener(this);
+		
+		this.add(panelControl);
+		this.add(panelRendering);
 		
 		this.animator = animator;
-		this.animator.add(glPanel);
+		this.animator.add(panelRendering);
 	}
+
+
+
 
 
 	@Override
-	public void init(GLAutoDrawable drawable) {
-		GL3 gl = drawable.getGL().getGL3();
+	public void componentHidden(ComponentEvent e) {}
 
-		System.out.println("Chosen GLCapabilities: " + drawable.getChosenGLCapabilities());
-		System.out.println("INIT GL IS: " + gl.getClass().getName());
-		System.out.println("GL_VENDOR: " + gl.glGetString(GL.GL_VENDOR));
-		System.out.println("GL_RENDERER: " + gl.glGetString(GL.GL_RENDERER));
-		System.out.println("GL_VERSION: " + gl.glGetString(GL.GL_VERSION));
+	@Override
+	public void componentMoved(ComponentEvent e) {}
 
-		if (gl.isGL3core()) {
-			System.out.println("GL3 core detected");
-			//vertexShaderString = "#version 130\n" + vertexShaderString;
-			//fragmentShaderString = "#version 130\n" + fragmentShaderString;
-		}
 
-		// Create GPU shader handles
-		// OpenGL ES retuns a index id to be stored for future reference.
-		vertexShader = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
-		fragmentShader = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
+	@Override
+	public void componentResized(ComponentEvent e) {
+		int w = this.getWidth();
+		int h = this.getHeight();
+		final int CONTROL_HEIGHT = 25; 
 		
-		
-		// load shaders from disk
-		String vsString = null;
-		String fsString = null;
-		try {
-			
-			// read vertex shader
-			FileReader fr = new FileReader("shader/alt_vertex.shader");
-			StringBuffer sb = new StringBuffer();
-			int c = 0;
-			
-			while ((c = fr.read()) != -1) {
-				sb.append((char)c);
-			}
-			fr.close();
-			vsString = sb.toString();
-			
-			// read vertex shader
-			fr = new FileReader("shader/alt_fragment.shader");
-			sb = new StringBuffer();
-			c = 0;
-
-			while ((c = fr.read()) != -1) {
-				sb.append((char) c);
-			}
-			fr.close();
-			fsString = sb.toString();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-		// Compile the vertexShader String into a program.
-		String[] vlines = new String[] { vsString };
-		int[] vlengths = new int[] { vlines[0].length() };
-		gl.glShaderSource(vertexShader, vlines.length, vlines, vlengths, 0);
-		gl.glCompileShader(vertexShader);
-
-		// Check compile status.
-		int[] compiled = new int[1];
-		gl.glGetShaderiv(vertexShader, GL3.GL_COMPILE_STATUS, compiled, 0);
-		if (compiled[0] != 0) {
-			System.out.println("Vertex shader compiled");
-		} else {
-			int[] logLength = new int[1];
-			gl.glGetShaderiv(vertexShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
-
-			byte[] log = new byte[logLength[0]];
-			gl.glGetShaderInfoLog(vertexShader, logLength[0], (int[]) null, 0, log, 0);
-
-			System.err.println("Error compiling the vertex shader: " + new String(log));
-			System.exit(1);
-		}
-
-		// Compile the fragmentShader String into a program.
-		String[] flines = new String[] { fsString };
-		int[] flengths = new int[] { flines[0].length() };
-		gl.glShaderSource(fragmentShader, flines.length, flines, flengths, 0);
-		gl.glCompileShader(fragmentShader);
-
-		// Check compile status.
-		gl.glGetShaderiv(fragmentShader, GL3.GL_COMPILE_STATUS, compiled, 0);
-		if (compiled[0] != 0) {
-			System.out.println("Fragment shader compiled");
-		} else {
-			int[] logLength = new int[1];
-			gl.glGetShaderiv(fragmentShader, GL3.GL_INFO_LOG_LENGTH, logLength, 0);
-
-			byte[] log = new byte[logLength[0]];
-			gl.glGetShaderInfoLog(fragmentShader, logLength[0], (int[]) null, 0, log, 0);
-
-			System.err.println("Error compiling the fragment shader: " + new String(log));
-			System.exit(1);
-		}
-
-		// Each shaderProgram must have
-		// one vertex shader and one fragment shader.
-		shaderProgram = gl.glCreateProgram();
-		gl.glAttachShader(shaderProgram, vertexShader);
-		gl.glAttachShader(shaderProgram, fragmentShader);
-
-		// Associate attribute ids with the attribute names inside
-		// the vertex shader.
-		//gl.glBindAttribLocation(shaderProgram, 0, "attribute_Position");
-		//gl.glBindAttribLocation(shaderProgram, 1, "attribute_Color");
-
-		gl.glLinkProgram(shaderProgram);
-
-		// Get a id number to the uniform_Projection matrix
-		// so that we can update it.
-		ModelLocation = gl.glGetUniformLocation(shaderProgram, "model");
-		ViewLocation = gl.glGetUniformLocation(shaderProgram, "view");
-		ProjectionLocation = gl.glGetUniformLocation(shaderProgram, "projection");
-		
-		gl.glEnable(GL3.GL_CULL_FACE);
-		
-		
-		
-		for (Mesh mesh : ImbaCAD.meshes) {
-			mesh.init(drawable);
-		}
+		panelControl.setBounds(0, 0, w, CONTROL_HEIGHT);
+		panelRendering.setBounds(0, CONTROL_HEIGHT, w, h - CONTROL_HEIGHT);
 	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {}
+
+
 	
-	
-
 	@Override
-	public void display(GLAutoDrawable drawable) {
+	public void itemStateChanged(ItemEvent e) {
 		
-		/*
-		 * Events
-		 */
-		events.process();
-		
-		if (events.getKey(KeyEvent.VK_ESCAPE)) {
-			//this.dispose();
-			// TODO: dispose?
-			return;
-		}
-		
-		
-		/*
-		 * Drawing
-		 */
-		GL3 gl = drawable.getGL().getGL3();
-		
-		float[] projection;
-		float[] view;
-		float[] model;
-		
-		
-		// Clear screen
-		gl.glClearColor(0, 0, 0, 1.0f); 
-		gl.glClear(GL3.GL_STENCIL_BUFFER_BIT | GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
-
-		// Use the shaderProgram that got linked during the init part.
-		gl.glUseProgram(shaderProgram);
-		
-		// set up projection matrix
-		projection = Glm.diag(1.0f);
-		projection = Glm.perspective((float)(0.5f * Math.PI), (float)width / height, 0.1f, 100.0f);
-		
-		// set up view matrix
-		view = Glm.diag(1.0f);
-		view = Glm.rotate(view, (float)(events.getPolarAngle() - Math.PI), Glm.vec3(1.0f, 0.0f, 0.0f));
-		view = Glm.rotate(view, (float)(Math.PI / 2.0f - events.getAzimuthAngle()), Glm.vec3(0.0f, 0.0f, 1.0f));
-		view = Glm.translate(view, events.getPosition().toArray());
-		
-		gl.glUniformMatrix4fv(ViewLocation, 1, false,	view, 0);
-		gl.glUniformMatrix4fv(ProjectionLocation, 1, false,	projection, 0);
-		
-		// set up model matrix
-		for (Mesh mesh : ImbaCAD.meshes) {
+		if (e.getStateChange() == ItemEvent.SELECTED) {
+			JToggleButton button = (JToggleButton)e.getItem();
 			
-			if (mesh == ImbaCAD.meshes.getLast()) {
-				alpha += 0.001f;
-				mesh.getRotation().setZ(alpha);
+			if (button == buttonLevitate) {
+				renderer.setProcessor(new LevitateProcessor(events));
+				System.out.println("Levitate");
+			} else if (button == buttonOrbit) {
+				renderer.setProcessor(new OrbitProcessor(events));
+				System.out.println("Orbit");
+			} else if (button == buttonPan) {
+				renderer.setProcessor(new PanProcessor(events));
+				System.out.println("Pan");
 			}
-			
-			model = Glm.diag(1.0f);
-			model = Glm.translate(model, (mesh.getPosition().mul(-1.0f)).toArray());
-			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
-			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
-			
-			gl.glUniformMatrix4fv(ModelLocation, 1, false,	model, 0);
-			
-			mesh.draw(drawable, shaderProgram);
 		}
 	}
-
-	@Override
-	public void dispose(GLAutoDrawable drawable) {
-		System.out.println("cleanup");
-		
-		GL3 gl = drawable.getGL().getGL3();
-		
-		//mesh.dispose(drawable);
-		for (Mesh mesh : ImbaCAD.meshes) {
-			mesh.dispose(drawable);
-		}
-		
-		gl.glUseProgram(0);
-		
-		gl.glDetachShader(shaderProgram, vertexShader);
-		gl.glDeleteShader(vertexShader);
-		gl.glDetachShader(shaderProgram, fragmentShader);
-		gl.glDeleteShader(fragmentShader);
-		gl.glDeleteProgram(shaderProgram);
-	}
-
-
-
-	@Override
-	public void reshape(GLAutoDrawable drawable, int x, int y, int z, int h) {
-		
-		width = z;
-		height = h;
-
-		// Get gl
-		GL3 gl = drawable.getGL().getGL3();
-
-		// perspectiveGL((GL2)gl, 90.0, (double)width / height, 0.1, 100.0);
-
-		gl.glViewport(0, 0, width, height);
-		
-		System.out.println("Window resized to width=" + z + " height=" + h);
-	}
-
-
 }
+
+
+
+
+
+
+
+
+
+

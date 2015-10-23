@@ -4,12 +4,14 @@ import java.awt.Component;
 import java.awt.Container;
 
 
+import java.awt.Graphics;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JSplitPane;
+import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 public class DockingRoot implements ComponentListener, PropertyChangeListener {
@@ -93,9 +95,27 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			component.addComponentListener(this);
 			((JSplitPane)component).addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, this);
 			((JSplitPane)component).setResizeWeight(0.5);
+
+			
+			((JSplitPane)component).setUI(new BasicSplitPaneUI() {
+				public BasicSplitPaneDivider createDefaultDivider() {
+					return new BasicSplitPaneDivider(this) {
+						
+						private static final long serialVersionUID = -7718554283613951256L;
+						
+						@Override
+						public void paint(Graphics g) {
+							g.setColor(DockableTitleBar.COLOR_BUTTON_HOVER);
+							g.fillRect(0, 0, getSize().width, getSize().height);
+							// skip painting of border, dots, etc
+							//super.paint(g);
+						}
+					};
+				}
+			});
 			((JSplitPane)component).setBorder(null);
 			((JSplitPane)component).setDividerSize(3);
-			((BasicSplitPaneUI)((JSplitPane)component).getUI()).getDivider().setBorder(null);
+			
 			
 //			SplitPaneUI ui = sp.getUI();
 //		    if( ui instanceof BasicSplitPaneUI ) {
@@ -131,7 +151,7 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			if (isRoot()) {
 				// if the only leaf is the root, just remove the component
 				getDockingCanvas().remove(component);
-				System.out.println("remove leaf");
+				//System.out.println("remove leaf");
 			} else {
 			
 				DockingRoot sibling = getSibling();
@@ -267,13 +287,13 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			//System.out.println("resize: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
 			
 			
-			if (split.getRightComponent() instanceof Dockable) {
-				Dockable dock = (Dockable)split.getRightComponent();
-				
-				if (dock.getName().equals("dockable4")) {
-					System.out.println("resize " + dividerLocation);
-				}
-			}
+//			if (split.getRightComponent() instanceof Dockable) {
+//				Dockable dock = (Dockable)split.getRightComponent();
+//				
+//				if (dock.getName().equals("dockable4")) {
+//					System.out.println("resize " + dividerLocation);
+//				}
+//			}
 			
 			
 			split.setDividerLocation(dividerLocation);
@@ -295,13 +315,13 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			
 			dividerLocation = (double)split.getDividerLocation() / split.getMaximumDividerLocation();
 			
-			if (split.getRightComponent() instanceof Dockable) {
-				Dockable dock = (Dockable)split.getRightComponent();
-				
-				if (dock.getName().equals("dockable4")) {
-					System.out.println("change  " + dividerLocation);
-				}
-			}
+//			if (split.getRightComponent() instanceof Dockable) {
+//				Dockable dock = (Dockable)split.getRightComponent();
+//				
+//				if (dock.getName().equals("dockable4")) {
+//					System.out.println("change  " + dividerLocation);
+//				}
+//			}
 			
 			//System.out.println("change: " + (float)split.getDividerLocation() / split.getMaximumDividerLocation());
 			//if (isRoot()) System.out.println("change  " + dividerLocation);

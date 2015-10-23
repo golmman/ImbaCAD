@@ -27,11 +27,11 @@ public class DockableTitleBar extends JPanel implements DragListener, MouseListe
 
 	private static final long serialVersionUID = -7476683061433551220L;
 	
-	private static final Color COLOR_BUTTON = new Color(232, 232, 232);
-	private static final Color COLOR_BUTTON_HOVER = new Color(208, 208, 208);
-	private static final Color COLOR_BUTTON_DISABLED = new Color(160, 160, 160);
+	public static final Color COLOR_BUTTON = new Color(232, 232, 232);
+	public static final Color COLOR_BUTTON_HOVER = new Color(208, 208, 208);
+	public static final Color COLOR_BUTTON_DISABLED = new Color(160, 160, 160);
 	
-	private static final Font FONT_BUTTON = new Font("Courier", Font.PLAIN, 12);
+	public static final Font FONT_BUTTON = new Font("Courier", Font.PLAIN, 12);
 	
 	private Dockable dockable;
 	
