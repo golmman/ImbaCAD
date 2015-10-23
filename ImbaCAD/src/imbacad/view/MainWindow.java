@@ -1,15 +1,15 @@
-package imbacad.gui;
+package imbacad.view;
 
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 
 import imbacad.ImbaCAD;
-import imbacad.Mesh;
-import imbacad.gui.docking.Dockable;
-import imbacad.gui.docking.DockingCanvas;
-import imbacad.gui.docking.DockingRoot;
-import imbacad.util.Vec3;
+import imbacad.model.Mesh;
+import imbacad.model.Vec3;
+import imbacad.view.docking.Dockable;
+import imbacad.view.docking.DockingCanvas;
+import imbacad.view.docking.DockingRoot;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -65,13 +65,13 @@ public class MainWindow extends JFrame {
 		Dockable dockable4 = new Dockable(this, new JLabel("dockable4"), "dockable4");
 		
 		dockable1.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable1.getContentPane().add(new ModelingWindow(animator));
+		dockable1.getContentPane().add(new ModelingPanel(animator));
 		
 		dockable2.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable2.getContentPane().add(new ModelingWindow(animator));
+		dockable2.getContentPane().add(new ModelingPanel(animator));
 		
 		dockable3.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable3.getContentPane().add(new ModelingWindow(animator));
+		dockable3.getContentPane().add(new ModelingPanel(animator));
 		
 		dockable4.getContentPane().setLayout(new GridLayout(1, 1));
 		dockable4.getContentPane().add(new JButton("Miau"));

@@ -1,4 +1,4 @@
-package imbacad.gui.docking;
+package imbacad.view.docking;
 
 import java.awt.Component;
 import java.awt.Container;

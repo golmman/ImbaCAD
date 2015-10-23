@@ -1,4 +1,4 @@
-package imbacad.gui.docking.dnd;
+package imbacad.view.docking.dnd;
 
 /**
  * 

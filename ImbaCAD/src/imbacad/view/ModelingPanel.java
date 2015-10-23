@@ -1,4 +1,4 @@
-package imbacad.gui;
+package imbacad.view;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -8,15 +8,15 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import imbacad.ImbaCAD;
-import imbacad.Mesh;
-import imbacad.event.LevitateProcessor;
-import imbacad.event.OrbitProcessor;
-import imbacad.event.PanProcessor;
-import imbacad.event.RenderingEventAdapter;
-import imbacad.rendering.Camera;
-import imbacad.rendering.DefaultRenderer;
-import imbacad.util.Glm;
-import imbacad.util.Vec3;
+import imbacad.control.RenderingEventAdapter;
+import imbacad.model.DefaultRenderer;
+import imbacad.model.Glm;
+import imbacad.model.Mesh;
+import imbacad.model.Vec3;
+import imbacad.model.camera.Camera;
+import imbacad.model.camera.LevitateUpdater;
+import imbacad.model.camera.OrbitUpdater;
+import imbacad.model.camera.PanUpdater;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
@@ -29,7 +29,13 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 
-public class ModelingWindow extends JPanel implements ComponentListener, ItemListener {
+/**
+ * 
+ * A Container on which all the display action happens.
+ * @author Dirk Kretschmann
+ *
+ */
+public class ModelingPanel extends JPanel implements ComponentListener, ItemListener {
 
 	private static final long serialVersionUID = -2636383013866025654L;
 	
@@ -63,7 +69,7 @@ public class ModelingWindow extends JPanel implements ComponentListener, ItemLis
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setLayout(new GridLayout(1, 1));
 		
-		ModelingWindow mw = new ModelingWindow(ani);
+		ModelingPanel mw = new ModelingPanel(ani);
 		
 		frame.add(mw);
 		
@@ -77,7 +83,7 @@ public class ModelingWindow extends JPanel implements ComponentListener, ItemLis
 	
 	
 	
-	public ModelingWindow(Animator animator) {
+	public ModelingPanel(Animator animator) {
 		super();
 		
 		System.out.println("new ModelingWindow");		
@@ -87,14 +93,16 @@ public class ModelingWindow extends JPanel implements ComponentListener, ItemLis
 		
 		
 		Camera camera = new Camera();
-		camera.setPosition(new Vec3(3.0f, -1.0f, -1.5f));
+		camera.setPosition(new Vec3(-3.0f, 1.0f, 1.5f));
 		camera.setAzimuthAngle(0.0f);
 		camera.setPolarAngle((float)(0.6f * Math.PI));
 		camera.setFov((float)(0.5f * Math.PI));
 		camera.setVelocity(0.01f);
 		
+		camera.lookAt(new Vec3());
+		
 		events = new RenderingEventAdapter();
-		renderer = new DefaultRenderer(new LevitateProcessor(events), camera);
+		renderer = new DefaultRenderer(events, camera, new LevitateUpdater());
 		
 		
 		ButtonGroup bg = new ButtonGroup();
@@ -168,13 +176,13 @@ public class ModelingWindow extends JPanel implements ComponentListener, ItemLis
 			JToggleButton button = (JToggleButton)e.getItem();
 			
 			if (button == buttonLevitate) {
-				renderer.setProcessor(new LevitateProcessor(events));
+				renderer.setProcessor(new LevitateUpdater());
 				System.out.println("Levitate");
 			} else if (button == buttonOrbit) {
-				renderer.setProcessor(new OrbitProcessor(events));
+				renderer.setProcessor(new OrbitUpdater());
 				System.out.println("Orbit");
 			} else if (button == buttonPan) {
-				renderer.setProcessor(new PanProcessor(events));
+				renderer.setProcessor(new PanUpdater());
 				System.out.println("Pan");
 			}
 		}

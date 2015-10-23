@@ -14,8 +14,9 @@ import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.common.nio.Buffers;
 
-import imbacad.util.Glm;
-import imbacad.util.Vec3;
+import imbacad.model.Glm;
+import imbacad.model.Mesh;
+import imbacad.model.Vec3;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -262,12 +263,12 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 		gl.glViewport(0, 0, width, height);
 	}
 
-	private float distance = 0.0f;
-	private float sign = 1.0f;
+	//private float distance = 0.0f;
+	//private float sign = 1.0f;
 	
 	@Override
 	public void display(GLAutoDrawable drawable) {
-		distance += sign * 0.0005;
+		//distance += sign * 0.0005;
 //		if (distance >= 1.0f) {
 //			distance = 1.0f;
 //			sign = -1.0f;

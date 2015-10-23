@@ -1,8 +1,8 @@
-package imbacad.event;
+package imbacad.model.camera;
 
 
-import imbacad.rendering.Camera;
-import imbacad.util.Vec3;
+import imbacad.control.RenderingEventAdapter;
+import imbacad.model.Vec3;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -13,24 +13,14 @@ import java.awt.event.MouseEvent;
  * @author Dirk Kretschmann
  *
  */
-public class LevitateProcessor extends RenderingEventProcessor {
+public class LevitateUpdater implements CameraUpdater {
 	
 
-	public LevitateProcessor(RenderingEventAdapter events) {
-		super(events);
-	}
-
-
-
-	
+	public LevitateUpdater() {}
 	
 	@Override
-	public void process(Camera camera) {
-		// calculate normalized direction the camera is looking at
-		Vec3 lookingAt = new Vec3(
-			(float)(Math.sin(camera.getPolarAngle()) * Math.cos(camera.getAzimuthAngle())),
-			(float)(Math.sin(camera.getPolarAngle()) * Math.sin(camera.getAzimuthAngle())),	
-			(float)(Math.cos(camera.getPolarAngle())));	
+	public void update(Camera camera, RenderingEventAdapter events) {
+		Vec3 lookingAt = camera.getLookingAt();	
 		
 		// clear z and normalize, used in strafe movement
 		Vec3 lookingAt2 = new Vec3(lookingAt);
@@ -42,22 +32,22 @@ public class LevitateProcessor extends RenderingEventProcessor {
 		float newPol = camera.getPolarAngle();
 		
 		if (events.getKey(KeyEvent.VK_W)) {
-			newPos = newPos.sub(lookingAt.mul(camera.getVelocity()));
-		}
-		if (events.getKey(KeyEvent.VK_A)) {
-			newPos = newPos.sub(Vec3.AXIS_Z.cross(lookingAt2.mul(camera.getVelocity())));
-		}
-		if (events.getKey(KeyEvent.VK_S)) {
 			newPos = newPos.add(lookingAt.mul(camera.getVelocity()));
 		}
-		if (events.getKey(KeyEvent.VK_D)) {
+		if (events.getKey(KeyEvent.VK_A)) {
 			newPos = newPos.add(Vec3.AXIS_Z.cross(lookingAt2.mul(camera.getVelocity())));
 		}
+		if (events.getKey(KeyEvent.VK_S)) {
+			newPos = newPos.sub(lookingAt.mul(camera.getVelocity()));
+		}
+		if (events.getKey(KeyEvent.VK_D)) {
+			newPos = newPos.sub(Vec3.AXIS_Z.cross(lookingAt2.mul(camera.getVelocity())));
+		}
 		if (events.getKey(KeyEvent.VK_SPACE)) {
-			newPos = newPos.sub(Vec3.AXIS_Z.mul(camera.getVelocity()));
+			newPos = newPos.add(Vec3.AXIS_Z.mul(camera.getVelocity()));
 		}
 		if (events.getKey(KeyEvent.VK_SHIFT)) {
-			newPos = newPos.add(Vec3.AXIS_Z.mul(camera.getVelocity()));
+			newPos = newPos.sub(Vec3.AXIS_Z.mul(camera.getVelocity()));
 		}
 		
 		

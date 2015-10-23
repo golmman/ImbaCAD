@@ -1,8 +1,8 @@
-package imbacad.gui.docking;
+package imbacad.view.docking;
 
-import imbacad.gui.docking.dnd.DND;
-import imbacad.gui.docking.dnd.DNDEvent;
-import imbacad.gui.docking.dnd.DropListener;
+import imbacad.view.docking.dnd.DND;
+import imbacad.view.docking.dnd.DNDEvent;
+import imbacad.view.docking.dnd.DropListener;
 
 import java.awt.Color;
 import java.awt.Component;

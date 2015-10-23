@@ -1,9 +1,9 @@
-package imbacad.rendering;
+package imbacad.model;
 
 import imbacad.ImbaCAD;
-import imbacad.Mesh;
-import imbacad.event.RenderingEventProcessor;
-import imbacad.util.Glm;
+import imbacad.control.RenderingEventAdapter;
+import imbacad.model.camera.Camera;
+import imbacad.model.camera.CameraUpdater;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,11 +13,16 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 
+/**
+ * Renders
+ * @author Dirk Kretschmann
+ *
+ */
 public class DefaultRenderer implements GLEventListener {
 	
+	RenderingEventAdapter events = null;
 	private Camera camera = null;
-	
-	private RenderingEventProcessor processor = null;
+	private CameraUpdater cameraUpdater = null;
 	
 	private int width = 800;
 	private int height = 600;
@@ -33,8 +38,9 @@ public class DefaultRenderer implements GLEventListener {
 	// TODO: only for debug
 	private float alpha = 0.0f;
 	
-	public DefaultRenderer(RenderingEventProcessor processor, Camera camera) {
-		this.processor = processor;
+	public DefaultRenderer(RenderingEventAdapter events, Camera camera, CameraUpdater updater) {
+		this.events = events;
+		this.cameraUpdater = updater;
 		this.camera = camera;
 	}
 
@@ -171,7 +177,7 @@ public class DefaultRenderer implements GLEventListener {
 		/*
 		 * Events
 		 */
-		processor.process(camera);
+		cameraUpdater.update(camera, events);
 		
 //		if (processor.getKey(KeyEvent.VK_ESCAPE)) {
 //			//this.dispose();
@@ -205,7 +211,7 @@ public class DefaultRenderer implements GLEventListener {
 		view = Glm.diag(1.0f);
 		view = Glm.rotate(view, (float)(camera.getPolarAngle() - Math.PI), Glm.vec3(1.0f, 0.0f, 0.0f));
 		view = Glm.rotate(view, (float)(Math.PI / 2.0f - camera.getAzimuthAngle()), Glm.vec3(0.0f, 0.0f, 1.0f));
-		view = Glm.translate(view, camera.getPosition().toArray());
+		view = Glm.translate(view, camera.getPosition().mul(-1.0f).toArray());
 		
 		gl.glUniformMatrix4fv(ViewLocation, 1, false,	view, 0);
 		gl.glUniformMatrix4fv(ProjectionLocation, 1, false,	projection, 0);
@@ -275,12 +281,12 @@ public class DefaultRenderer implements GLEventListener {
 		this.camera = camera;
 	}
 
-	public RenderingEventProcessor getProcessor() {
-		return processor;
+	public CameraUpdater getProcessor() {
+		return cameraUpdater;
 	}
 
-	public void setProcessor(RenderingEventProcessor processor) {
-		this.processor = processor;
+	public void setProcessor(CameraUpdater processor) {
+		this.cameraUpdater = processor;
 	}
 
 }

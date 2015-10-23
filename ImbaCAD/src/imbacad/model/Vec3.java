@@ -1,4 +1,4 @@
-package imbacad.util;
+package imbacad.model;
 
 public class Vec3 {
 	

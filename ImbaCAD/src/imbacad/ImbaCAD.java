@@ -2,8 +2,9 @@ package imbacad;
 
 import java.util.LinkedList;
 
-import imbacad.gui.MainWindow;
-import imbacad.util.Glm;
+import imbacad.model.Glm;
+import imbacad.model.Mesh;
+import imbacad.view.MainWindow;
 
 
 public class ImbaCAD {

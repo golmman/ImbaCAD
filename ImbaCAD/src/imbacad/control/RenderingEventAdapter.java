@@ -1,4 +1,4 @@
-package imbacad.event;
+package imbacad.control;
 
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -63,6 +63,9 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 		}
 	};
 	
+	/**
+	 * 
+	 */
 	public RenderingEventAdapter() {
 		keyDownThread.start();
 	}

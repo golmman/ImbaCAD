@@ -1,6 +1,4 @@
-package imbacad;
-
-import imbacad.util.Vec3;
+package imbacad.model;
 
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;

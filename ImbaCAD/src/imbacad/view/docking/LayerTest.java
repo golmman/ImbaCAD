@@ -1,8 +1,6 @@
-package imbacad.gui.docking;
+package imbacad.view.docking;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
