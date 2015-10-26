@@ -71,7 +71,7 @@ public class LevitateUpdater implements CameraUpdater {
 		camera.setAzimuthAngle(newAzi);
 		camera.setPolarAngle(newPol);
 		
-		events.resetMouseDelta();
+		events.reset();
 	}
 
 

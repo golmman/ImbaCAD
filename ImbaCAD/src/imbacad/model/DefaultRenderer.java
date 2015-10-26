@@ -7,7 +7,10 @@ import imbacad.model.camera.CameraUpdater;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
@@ -161,6 +164,7 @@ public class DefaultRenderer implements GLEventListener {
 		ProjectionLocation = gl.glGetUniformLocation(shaderProgram, "projection");
 		
 		gl.glEnable(GL3.GL_CULL_FACE);
+		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		
 		
 		
@@ -220,6 +224,7 @@ public class DefaultRenderer implements GLEventListener {
 		for (Mesh mesh : ImbaCAD.meshes) {
 			
 			if (mesh == ImbaCAD.meshes.getLast()) {
+				// rotate last
 				alpha += 0.01f;
 				mesh.getRotation().setZ(alpha);
 			}
@@ -232,6 +237,55 @@ public class DefaultRenderer implements GLEventListener {
 			gl.glUniformMatrix4fv(ModelLocation, 1, false,	model, 0);
 			
 			mesh.draw(drawable, shaderProgram);
+			
+			
+			
+			if (mesh == ImbaCAD.meshes.getFirst()) {
+				// calculate screen coordinates for last mesh
+				
+				
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, mesh.getVBO()[0]);
+				
+				
+				// get object coordinates, equal to mesh.getVertices()[0];
+				FloatBuffer vertices = Buffers.newDirectFloatBuffer(20);
+				gl.glGetBufferSubData(GL.GL_ARRAY_BUFFER, 0, 20 * 4, vertices);
+				float objX = vertices.get(0); 		
+				float objY = vertices.get(1);
+				float objZ = vertices.get(2);
+				float objW = 1.0f;
+				
+				// get clip coordinates, OpenGL uses column-major order
+				float[] mvp = Glm.mul(Glm.mul(projection, view), model);
+				float clipX = objX * mvp[ 0] + objY * mvp[ 4] + objZ * mvp[ 8] + objW * mvp[12];
+				float clipY = objX * mvp[ 1] + objY * mvp[ 5] + objZ * mvp[ 9] + objW * mvp[13];
+				float clipZ = objX * mvp[ 2] + objY * mvp[ 6] + objZ * mvp[10] + objW * mvp[14];
+				float clipW = objX * mvp[ 3] + objY * mvp[ 7] + objZ * mvp[11] + objW * mvp[15];
+				
+				// get normalized device coordinates
+				float ndcX = clipX / clipW;
+				float ndcY = clipY / clipW;
+				float ndcZ = clipZ / clipW;
+				
+				// get screen coordinates
+				IntBuffer viewport = Buffers.newDirectIntBuffer(4);
+				gl.glGetIntegerv(GL.GL_VIEWPORT, viewport);
+				FloatBuffer depthRange = Buffers.newDirectFloatBuffer(2);
+				gl.glGetFloatv(GL.GL_DEPTH_RANGE, depthRange);
+				float scX = 0.5f * viewport.get(2) * (ndcX + 1) + viewport.get(0);
+				float scY = viewport.get(3) - 0.5f * viewport.get(3) * (ndcY + 1) + viewport.get(1);
+				float scZ = 0.5f * ((depthRange.get(1) - depthRange.get(0)) * ndcZ + depthRange.get(1) + depthRange.get(0));
+				
+				// get distance to mouse pointer
+				float dx = scX - events.getMouseX();
+				float dy = scY - events.getMouseY();
+				
+				if (Math.sqrt(dx * dx + dy * dy) < 10.0) {
+					System.out.println("top left corner! " + Math.sqrt(dx * dx + dy * dy));
+				}
+				
+				//System.out.println(scX + " " + scY + " " + scZ);
+			}
 		}
 	}
 

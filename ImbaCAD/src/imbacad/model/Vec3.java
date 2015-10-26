@@ -73,6 +73,28 @@ public class Vec3 {
 				+ this.vec[2] * this.vec[2]));
 	}
 	
+	
+	public Vec3 rotateX(float a) {
+		return new Vec3(
+				this.vec[0],
+				(float)(this.vec[1] * Math.cos(a) - this.vec[2] * Math.sin(a)),
+				(float)(this.vec[1] * Math.sin(a) + this.vec[2] * Math.cos(a)));
+	}
+	
+	public Vec3 rotateY(float a) {
+		return new Vec3(
+				(float)(this.vec[0] * Math.cos(a) + this.vec[2] * Math.sin(a)),
+				this.vec[1],
+				(float)(-this.vec[0] * Math.sin(a) + this.vec[2] * Math.cos(a)));
+	}
+	
+	public Vec3 rotateZ(float a) {
+		return new Vec3(
+				(float)(this.vec[0] * Math.cos(a) - this.vec[1] * Math.sin(a)),
+				(float)(this.vec[0] * Math.sin(a) + this.vec[1] * Math.cos(a)),
+				this.vec[2]);
+	}
+	
 	public float getX() {
 		return this.vec[0];
 	}

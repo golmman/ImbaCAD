@@ -2,7 +2,6 @@ package imbacad.model;
 
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
@@ -32,9 +31,9 @@ public class Mesh {
 	
 	private int[] texture = new int[1];			// texture id
 
-	private int[] VAO = new int[1]; // Vertex Array Object
-	private int[] VBO = new int[1]; // Vertex Buffer Object
-	private int[] EBO = new int[1]; // Element Buffer Object
+	private int[] VAO = new int[1]; // Vertex Array Object - holds the set of "everything that needs rendering"
+	private int[] VBO = new int[1]; // Vertex Buffer Object - holds vertices
+	private int[] EBO = new int[1]; // Element Buffer Object - holds indices
 	
 	
 	private Vec3 position = new Vec3();
@@ -61,7 +60,7 @@ public class Mesh {
 		gl.glBindVertexArray(VAO[0]);
 
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBO[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.length * SIZEOF_VERTEX, vertexBuffer, GL.GL_STATIC_DRAW);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GL.GL_STATIC_DRAW);
 
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, EBO[0]);
 		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuffer, GL.GL_STATIC_DRAW);
@@ -118,10 +117,10 @@ public class Mesh {
 		// Filter img into bufImg and perform
 		// Coordinate Transformations on the way.
 		Graphics2D g = bufImg.createGraphics();
-		AffineTransform gt = new AffineTransform();
-		gt.translate(0, imgHeight);
-		gt.scale(1, -1d);
-		g.transform(gt);
+//		AffineTransform gt = new AffineTransform();		// TODO: Original code has this uncommented
+//		gt.translate(0, imgHeight);						//       but it results in simply flipping
+//		gt.scale(1, -1d);								//       the image upside down. WHY?!
+//		g.transform(gt);
 		g.drawImage(img, null, null);
 		
 		// Retrieve underlying byte array (imgBuf)
@@ -151,21 +150,32 @@ public class Mesh {
 	public void draw(GLAutoDrawable drawable, int shader) {
 		GL3 gl = drawable.getGL().getGL3();
 		
+		
+		
 		// Active proper texture unit before binding
 		gl.glActiveTexture(GL.GL_TEXTURE0); 
 
 		// Now set the sampler to the correct texture unit
-		gl.glUniform1f(gl.glGetUniformLocation(shader, "diffuse_texture"), 0);
+		gl.glUniform1f(gl.glGetUniformLocation(shader, "texDiffuse"), 0);
 		// And finally bind the texture
 		gl.glBindTexture(GL.GL_TEXTURE_2D, texture[0]);
 
 		gl.glActiveTexture(GL.GL_TEXTURE0); // Always good practice to set
 											// everything back to defaults once configured.
-
+		
+		
 		// Draw mesh
 		gl.glBindVertexArray(VAO[0]);
 		gl.glDrawElements(GL.GL_TRIANGLES, indices.length, GL.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL.GL_POINTS, indices.length, GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
+		
+		
+		
+		
+
+		
+		
 	}
 	
 	public void dispose(GLAutoDrawable drawable) {
@@ -201,6 +211,18 @@ public class Mesh {
 
 	public void setRotation(Vec3 rotation) {
 		this.rotation = rotation;
+	}
+
+	public int[] getVAO() {
+		return VAO;
+	}
+
+	public int[] getVBO() {
+		return VBO;
+	}
+
+	public int[] getEBO() {
+		return EBO;
 	}
 	
 }

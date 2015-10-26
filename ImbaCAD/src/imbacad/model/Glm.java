@@ -55,7 +55,25 @@ public class Glm {
 	}
 	
 	public static native float[] mul(float[] A, float[] B);
+	
+	
+	/**
+	 * Multiplies 4x4 matrix M with translation matrix specified by vector v.
+	 * @param M
+	 * @param v
+	 * @return
+	 */
 	public static native float[] translate(float[] M, float[] v);
+	
+	/**
+	 * Multiplies 4x4 matrix M with rotation matrix with angle a around v.
+	 * @param M
+	 * @param a
+	 * @param v
+	 * @return
+	 */
 	public static native float[] rotate(float[] M, float a, float[] v);
+	
+	
 	public static native float[] perspective(float fovy, float aspect, float zNear, float zFar);
 }

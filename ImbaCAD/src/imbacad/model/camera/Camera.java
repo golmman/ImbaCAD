@@ -62,8 +62,6 @@ public class Camera {
 		} else {
 			polarAngle = (float)(Math.PI - (Math.asin(Vec3.AXIS_Z.cross(v).norm() / v.norm())));
 		}
-		
-		System.out.println(polarAngle);
 	}
 	
 	private float getLookAtAzimuth(Vec3 lookAt) {

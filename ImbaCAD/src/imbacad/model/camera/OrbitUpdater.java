@@ -1,6 +1,9 @@
 package imbacad.model.camera;
 
+import java.awt.event.MouseEvent;
+
 import imbacad.control.RenderingEventAdapter;
+import imbacad.model.Vec3;
 
 /**
  * Enables orbiting a point with a camera
@@ -8,12 +11,44 @@ import imbacad.control.RenderingEventAdapter;
  *
  */
 public class OrbitUpdater implements CameraUpdater {
-
+	
+	
 	public OrbitUpdater() {}
 
 	@Override
 	public void update(Camera camera, RenderingEventAdapter events) {
 		
+		camera.lookAt(new Vec3());
+		
+		Vec3 newPos = camera.getPosition();
+		float newAzi = camera.getAzimuthAngle();
+		float newPol = camera.getPolarAngle();
+		
+		
+		if (events.getButton(MouseEvent.BUTTON3)) {
+			float relX = 0.003f * events.getMouseDx();
+			float relY = 0.003f * events.getMouseDy();
+			
+			newPos = newPos.rotateZ(-newAzi);
+			newPos = newPos.rotateY(relY);
+			newPol += relY;
+			
+			newPos = newPos.rotateZ(newAzi - relX);
+			newAzi -= relX;
+		}
+		
+		if (events.getMouseWheel() != 0) {
+			newPos = newPos.add(camera.getLookingAt().mul(
+					-0.05f * events.getMouseWheel() * camera.getPosition().norm()));
+		}
+		
+		
+		
+		camera.setPosition(newPos);
+		camera.setAzimuthAngle(newAzi);
+		camera.setPolarAngle(newPol);
+		
+		events.reset();
 	}
 
 }

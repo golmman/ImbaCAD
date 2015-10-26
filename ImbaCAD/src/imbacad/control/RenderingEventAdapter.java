@@ -119,6 +119,11 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 
 	@Override
 	public void mouseDragged(MouseEvent e) {
+		mouseDx = e.getX() - mouseX;
+		mouseDy = e.getY() - mouseY;
+		mouseX = e.getX();
+		mouseY = e.getY();
+		
 		if (e.getSource() instanceof GLJPanel) {
 			((GLJPanel)e.getSource()).requestFocusInWindow();
 		}
@@ -126,29 +131,36 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 		if (e.getComponent() instanceof GLJPanel) {
 			((GLJPanel)e.getComponent()).display();
 		}
-		
-		mouseDx = e.getX() - mouseX;
-		mouseDy = e.getY() - mouseY;
-		mouseX = e.getX();
-		mouseY = e.getY();
 	}
 
 
 	@Override
 	public void mouseMoved(MouseEvent e) {
-//		if (e.getComponent() instanceof GLJPanel) {
-//			((GLJPanel)e.getComponent()).display();
-//		}
-		
 		mouseDx = e.getX() - mouseX;
 		mouseDy = e.getY() - mouseY;
 		mouseX = e.getX();
 		mouseY = e.getY();
+		
+		if (e.getSource() instanceof GLJPanel) {
+			((GLJPanel)e.getSource()).requestFocusInWindow();
+		}
+		
+		if (e.getComponent() instanceof GLJPanel) {
+			((GLJPanel)e.getComponent()).display();
+		}
 	}
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		mouseWheel = e.getWheelRotation();
+		
+		if (e.getSource() instanceof GLJPanel) {
+			((GLJPanel)e.getSource()).requestFocusInWindow();
+		}
+		
+		if (e.getComponent() instanceof GLJPanel) {
+			((GLJPanel)e.getComponent()).display();
+		}
 	}
 
 	@Override
@@ -175,9 +187,10 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 	public boolean getKey(int key) {
 		return keys[key];
 	}
-	public void resetMouseDelta() {
+	public void reset() {
 		mouseDx = 0;
 		mouseDy = 0;
+		mouseWheel = 0;
 	}
 
 	@Override
@@ -189,6 +202,11 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 		keyDownInPanel = null;
 		keysPressed = 0;
 		Arrays.fill(keys, false);
+	}
+
+
+	public int getMouseWheel() {
+		return mouseWheel;
 	}
 	
 }

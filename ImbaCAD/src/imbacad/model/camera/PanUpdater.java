@@ -37,7 +37,7 @@ public class PanUpdater implements CameraUpdater {
 		
 		camera.setPosition(newPos);
 		
-		events.resetMouseDelta();
+		events.reset();
 	}
 
 }

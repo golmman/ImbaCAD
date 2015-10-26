@@ -13,7 +13,11 @@ uniform mat4 view;
 uniform mat4 projection;
 
 void main(void) {
+
+
 	fragmentColor = inColor;
 	fragmentTexCoords = inTexCoords;
 	gl_Position = projection * view * model * inPosition;
+	
+	gl_PointSize = 10.0;
 }

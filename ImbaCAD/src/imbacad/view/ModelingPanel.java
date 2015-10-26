@@ -113,7 +113,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		buttonOrbit.addItemListener(this);
 		buttonPan.addItemListener(this);
 		
-		buttonLevitate.setSelected(true);
+		buttonOrbit.setSelected(true);
 		
 		JPanel panelControlWest = new JPanel(); 
 		panelControlWest.setLayout(new GridLayout(1, 3));
@@ -129,6 +129,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		panelRendering.addKeyListener(events);
 		panelRendering.addMouseListener(events);
 		panelRendering.addMouseMotionListener(events);
+		panelRendering.addMouseWheelListener(events);
 		panelRendering.addFocusListener(events);
 		
 		

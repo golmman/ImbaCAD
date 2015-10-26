@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/jogamp-all-platforms/jar/gluegen-rt.jar">
 		<attributes>
-			<attribute name="javadoc_location" value="https://jogamp.org/deployment/v2.1.2/javadoc/"/>
+			<attribute name="javadoc_location" value="https://jogamp.org/deployment/v2.3.2/javadoc/gluegen/javadoc/"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Program Files (x86)/jogamp-all-platforms/jar/jogl-all.jar">
