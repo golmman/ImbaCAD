@@ -31,9 +31,12 @@ public class Mesh {
 	
 	private int[] texture = new int[1];			// texture id
 
-	private int[] VAO = new int[1]; // Vertex Array Object - holds the set of "everything that needs rendering"
-	private int[] VBO = new int[1]; // Vertex Buffer Object - holds vertices
-	private int[] EBO = new int[1]; // Element Buffer Object - holds indices
+	private int[] texVAO = new int[1]; // Vertex Array Object - holds the set of "everything that needs rendering"
+	private int[] vertexBuffer = new int[1]; // Vertex Buffer Object - holds vertices
+	private int[] indexBuffer = new int[1]; // Element Buffer Object - holds indices
+	
+	private int[] colVAO = new int[1];
+	private int[] colorBuffer = new int[1];
 	
 	
 	private Vec3 position = new Vec3();
@@ -46,24 +49,71 @@ public class Mesh {
 	}
 	
 	public void init(GLAutoDrawable drawable) {
-
-		FloatBuffer vertexBuffer = Buffers.newDirectFloatBuffer(vertices);
-		IntBuffer indexBuffer = Buffers.newDirectIntBuffer(indices);
-
 		GL3 gl = drawable.getGL().getGL3();
+		
+		
+		/*
+		 * 
+		 */
+		float[] colors = new float[4 * getVertexCount()];
+		for (int k = 0; k < colors.length; k += 4) {
+			colors[k+0] = 1.0f;
+			colors[k+1] = 0.0f;
+			colors[k+2] = 0.0f;
+			colors[k+3] = 1.0f;
+		}
+		
+		FloatBuffer colorBuf = Buffers.newDirectFloatBuffer(colors);
+		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices);
+		IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices);
+		
+		gl.glGenVertexArrays(1, texVAO, 0);
+		gl.glGenBuffers(1, vertexBuffer, 0);
+		gl.glGenBuffers(1, indexBuffer, 0);
+		
+		gl.glGenVertexArrays(1, colVAO, 0);
+		gl.glGenBuffers(1, colorBuffer, 0);
+		
+		
+		
+		
+		
+		
+		
+		/*
+		 * create color vertex array
+		 */
+		gl.glBindVertexArray(colVAO[0]);
+		
+		// vertices
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBuffer[0]);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuf, GL.GL_STATIC_DRAW);
 
-		// Create buffers/arrays
-		gl.glGenVertexArrays(1, VAO, 0);
-		gl.glGenBuffers(1, VBO, 0);
-		gl.glGenBuffers(1, EBO, 0);
+		gl.glEnableVertexAttribArray(0);
+		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, SIZEOF_VERTEX, 0);
 
-		gl.glBindVertexArray(VAO[0]);
+		// colors
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, colorBuffer[0]);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, colors.length * 4, colorBuf, GL.GL_DYNAMIC_DRAW);
+		
+		gl.glEnableVertexAttribArray(1);
+		gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, 0);
 
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, VBO[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuffer, GL.GL_STATIC_DRAW);
+		gl.glBindVertexArray(0);
+		
 
-		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, EBO[0]);
-		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuffer, GL.GL_STATIC_DRAW);
+		
+
+		/*
+		 * create texture vertex array
+		 */
+		gl.glBindVertexArray(texVAO[0]);
+
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBuffer[0]);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.length * 4, vertexBuf, GL.GL_STATIC_DRAW);
+
+		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, indexBuffer[0]);
+		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuf, GL.GL_STATIC_DRAW);
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -75,6 +125,8 @@ public class Mesh {
 		gl.glVertexAttribPointer(3, 2, GL.GL_FLOAT, false, SIZEOF_VERTEX, 12);
 
 		gl.glBindVertexArray(0);
+		
+		
 		
 		loadTexture(drawable, textureFilename);
 	}
@@ -119,8 +171,8 @@ public class Mesh {
 		Graphics2D g = bufImg.createGraphics();
 //		AffineTransform gt = new AffineTransform();		// TODO: Original code has this uncommented
 //		gt.translate(0, imgHeight);						//       but it results in simply flipping
-//		gt.scale(1, -1d);								//       the image upside down. WHY?!
-//		g.transform(gt);
+//		gt.scale(1, -1d);								//       the image upside down.
+//		g.transform(gt);								//       WHY?!
 		g.drawImage(img, null, null);
 		
 		// Retrieve underlying byte array (imgBuf)
@@ -147,10 +199,11 @@ public class Mesh {
 		this.texture = textureID;
 	}
 
+	
+	
+	
 	public void draw(GLAutoDrawable drawable, int shader) {
 		GL3 gl = drawable.getGL().getGL3();
-		
-		
 		
 		// Active proper texture unit before binding
 		gl.glActiveTexture(GL.GL_TEXTURE0); 
@@ -165,28 +218,34 @@ public class Mesh {
 		
 		
 		// Draw mesh
-		gl.glBindVertexArray(VAO[0]);
+		gl.glBindVertexArray(texVAO[0]);
 		gl.glDrawElements(GL.GL_TRIANGLES, indices.length, GL.GL_UNSIGNED_INT, 0);
-		gl.glDrawElements(GL.GL_POINTS, indices.length, GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
+	}
+	
+	
+	public void drawPoints(GLAutoDrawable drawable, int shader) {
+		GL3 gl = drawable.getGL().getGL3();
 		
-		
-		
-		
-
-		
-		
+		// Draw mesh
+		gl.glBindVertexArray(colVAO[0]);
+		gl.glDrawArrays(GL.GL_POINTS, 0, getVertexCount());
+		gl.glBindVertexArray(0);
 	}
 	
 	public void dispose(GLAutoDrawable drawable) {
 		System.out.println("Mesh.dispose()");
 		
 		GL3 gl = drawable.getGL().getGL3();
-		gl.glDeleteVertexArrays(1, VAO, 0);
-		gl.glDeleteBuffers(1, VBO, 0);
-		gl.glDeleteBuffers(1, EBO, 0);
+		gl.glDeleteVertexArrays(1, texVAO, 0);
+		gl.glDeleteBuffers(1, vertexBuffer, 0);
+		gl.glDeleteBuffers(1, indexBuffer, 0);
 		
 		gl.glDeleteTextures(1, texture, 0);
+	}
+	
+	public int getVertexCount() {
+		return vertices.length / (SIZEOF_VERTEX / 4);
 	}
 
 	public float[] getVertices() {
@@ -213,16 +272,20 @@ public class Mesh {
 		this.rotation = rotation;
 	}
 
-	public int[] getVAO() {
-		return VAO;
+	public int getTexVAO() {
+		return texVAO[0];
 	}
 
-	public int[] getVBO() {
-		return VBO;
+	public int getVertexBuffer() {
+		return vertexBuffer[0];
 	}
 
-	public int[] getEBO() {
-		return EBO;
+	public int getIndexBuffer() {
+		return indexBuffer[0];
+	}
+
+	public int getColorBuffer() {
+		return colorBuffer[0];
 	}
 	
 }

@@ -11,6 +11,8 @@ import com.jogamp.opengl.GLAutoDrawable;
 public class Shader {
 	
 	private int program;
+	private int vertexShader;
+	private int fragmentShader;
 	
 	private int model;
 	private int view;
@@ -31,8 +33,8 @@ public class Shader {
 
 		// Create GPU shader handles
 		// OpenGL ES retuns a index id to be stored for future reference.
-		int vertexShader = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
-		int fragmentShader = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
+		vertexShader = gl.glCreateShader(GL3.GL_VERTEX_SHADER);
+		fragmentShader = gl.glCreateShader(GL3.GL_FRAGMENT_SHADER);
 		
 		
 		// load shaders from disk
@@ -123,6 +125,19 @@ public class Shader {
 		model = gl.glGetUniformLocation(program, "model");
 		view = gl.glGetUniformLocation(program, "view");
 		projection = gl.glGetUniformLocation(program, "projection");
+	}
+	
+	
+	public void dispose(GLAutoDrawable drawable) {
+		GL3 gl = drawable.getGL().getGL3();
+		
+		gl.glUseProgram(0);
+		
+		gl.glDetachShader(program, vertexShader);
+		gl.glDeleteShader(vertexShader);
+		gl.glDetachShader(program, fragmentShader);
+		gl.glDeleteShader(fragmentShader);
+		gl.glDeleteProgram(program);
 	}
 
 	public int getProgram() {
