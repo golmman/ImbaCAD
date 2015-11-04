@@ -23,13 +23,42 @@ public class MainWindow extends JFrame {
 	
 	// vertices and indices for test meshes
 	public static float testVertices[] = {
-		 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, 
-		-0.5f, -0.5f, -0.5f,  0.0f,  1.0f, 
-		 0.5f, -0.5f, -0.5f,  1.0f,  1.0f, 
+		 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f, 	0.0f, 0.0f, 1.0f, 
+		-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	0.0f, 0.0f, 1.0f, 
+		-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	0.0f, 0.0f, 1.0f, 
+		 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.0f, 0.0f, 1.0f
 	};
 	public static int[] testIndices = {
 		0, 1, 2, 0, 2, 3
+	};
+	
+	// 
+	private static float houseVertices[] = {
+		 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f,	0.57735026f, 0.57735026f, -0.57735026f,	// bottom
+		-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	-0.57735026f, 0.57735026f, -0.57735026f,
+		-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	-0.57735026f, -0.57735026f, -0.57735026f,
+		 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.57735026f, -0.57735026f, -0.57735026f,
+		 
+		 0.5f,  0.5f,  0.5f,  	1.0f,  0.0f,	0.6906652f, 0.6113837f, 0.38625336f,	// top
+		-0.5f,  0.5f,  0.5f,  	0.0f,  0.0f, 	-0.6906652f, 0.6113837f, 0.38625336f,
+		-0.5f, -0.5f,  0.5f,  	0.0f,  1.0f, 	-0.6906652f, -0.6113837f, 0.38625336f,
+		 0.5f, -0.5f,  0.5f,  	1.0f,  1.0f, 	0.6906652f, -0.6113837f, 0.38625336f,
+		 
+		 0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	0.46133813f, 0.0f, 0.8872245f,	// roof
+		-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f
+	};
+	public static int[] houseIndices = {
+		0, 3, 2, 0, 2, 1, 	// bottom
+		0, 4, 7, 0, 7, 3, 	// front (+x)
+		1, 2, 6, 1, 6, 5, 	// back (-x)
+		0, 1, 5, 0, 5, 4, 	// right (+y)
+		2, 3, 7, 2, 7, 6,	// left (-y)
+		
+		4, 8, 7, 			// front gable
+		5, 6, 9, 			// back gable
+		
+		4, 5, 9, 4, 9, 8, 	// right roof side
+		6, 7, 8, 6, 8, 9	// left roof side
 	};
 	
 	private Animator animator = new Animator();
@@ -38,11 +67,15 @@ public class MainWindow extends JFrame {
 		super(title);
 		
 		// add test meshes
-		Mesh mesh1 = new Mesh("test2.jpg", testVertices, testIndices);
-		Mesh mesh2 = new Mesh("test.bmp", testVertices, testIndices);
-		mesh2.setPosition(new Vec3(0.5f, -1.5f, 0.0f));
+		Mesh mesh1 = new Mesh("test2.jpg", testVertices, testIndices, "mesh0");
+		Mesh mesh2 = new Mesh("test.bmp", testVertices, testIndices, "mesh1");
+		Mesh mesh3 = new Mesh("white.bmp", houseVertices, houseIndices, "mesh2");
+		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
+		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
+		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
+		ImbaCAD.meshes.add(mesh3);
 		
 		//animator.start();
 		

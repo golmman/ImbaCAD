@@ -55,8 +55,8 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	public static void main(String[] args) {
 		Glm.init();
 		
-		Mesh mesh1 = new Mesh("test2.jpg", MainWindow.testVertices, MainWindow.testIndices);
-		Mesh mesh2 = new Mesh("test.bmp", MainWindow.testVertices, MainWindow.testIndices);
+		Mesh mesh1 = new Mesh("test2.jpg", MainWindow.testVertices, MainWindow.testIndices, "mesh0");
+		Mesh mesh2 = new Mesh("test.bmp", MainWindow.testVertices, MainWindow.testIndices, "mesh1");
 		mesh2.setPosition(new Vec3(0.5f, -1.5f, 0.0f));
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);

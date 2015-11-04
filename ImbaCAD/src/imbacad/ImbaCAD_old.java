@@ -245,7 +245,7 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 		
 		gl.glEnable(GL3.GL_CULL_FACE);
 		
-		mesh = new Mesh("test2.jpg", vertices, indices);
+		mesh = new Mesh("test2.jpg", vertices, indices, "mesh");
 		mesh.init(drawable);
 	}
 	

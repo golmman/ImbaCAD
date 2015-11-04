@@ -23,8 +23,10 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class Mesh {
 
-	public static final int SIZEOF_VERTEX = 20;
+	public static final int SIZEOF_VERTEX = 8 * 4;
 
+	private String name;
+	
 	private String textureFilename;
 	private float[] vertices;
 	private int[] indices;
@@ -42,10 +44,11 @@ public class Mesh {
 	private Vec3 position = new Vec3();
 	private Vec3 rotation = new Vec3();
 
-	public Mesh(String textureFilename, float[] vertices, int[] indices) {
+	public Mesh(String textureFilename, float[] vertices, int[] indices, String name) {
 		this.textureFilename = textureFilename;
 		this.vertices = vertices;
 		this.indices = indices;
+		this.name = name;
 	}
 	
 	public void init(GLAutoDrawable drawable) {
@@ -119,6 +122,10 @@ public class Mesh {
 		// Vertex Positions
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, SIZEOF_VERTEX, 0);
+		
+		// Vertex Normals
+		gl.glEnableVertexAttribArray(2);
+		gl.glVertexAttribPointer(2, 3, GL.GL_FLOAT, false, SIZEOF_VERTEX, 20);
 
 		// Vertex Texture Coords
 		gl.glEnableVertexAttribArray(3);
@@ -286,6 +293,14 @@ public class Mesh {
 
 	public int getColorBuffer() {
 		return colorBuffer[0];
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 	
 }

@@ -73,6 +73,10 @@ public class Vec3 {
 				+ this.vec[2] * this.vec[2]));
 	}
 	
+	public Vec3 normalised() {
+		return this.mul(1.0f / this.norm());
+	}
+	
 	
 	public Vec3 rotateX(float a) {
 		return new Vec3(
@@ -127,4 +131,24 @@ public class Vec3 {
 	public String toString() {
 		return "(" + this.vec[0] + ", " + this.vec[1] + ", " + this.vec[2] + ")";
 	}
+	
+	public String toStringCopyable() {
+		return "new " + this.getClass().getSimpleName() + "("
+				+ this.vec[0] + "f, "
+				+ this.vec[1] + "f, "
+				+ this.vec[2] + "f"
+				+");";
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+

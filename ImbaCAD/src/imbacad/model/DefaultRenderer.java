@@ -113,14 +113,14 @@ public class DefaultRenderer implements GLEventListener {
 		
 		for (Mesh mesh : ImbaCAD.meshes) {
 			
-			if (mesh == ImbaCAD.meshes.getLast()) {
+			if (mesh.getName().equals("mesh1")) {
 				// rotate last
 				alpha += 0.01f;
 				mesh.getRotation().setZ(alpha);
 			}
 			
 			model = Glm.diag(1.0f);
-			model = Glm.translate(model, (mesh.getPosition().mul(-1.0f)).toArray());
+			model = Glm.translate(model, mesh.getPosition().toArray());
 			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
 			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
 			
@@ -153,7 +153,7 @@ public class DefaultRenderer implements GLEventListener {
 		for (Mesh mesh : ImbaCAD.meshes) {
 			
 			model = Glm.diag(1.0f);
-			model = Glm.translate(model, (mesh.getPosition().mul(-1.0f)).toArray());
+			model = Glm.translate(model, mesh.getPosition().toArray());
 			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
 			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
 			
