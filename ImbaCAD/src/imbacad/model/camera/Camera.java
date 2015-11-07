@@ -1,9 +1,13 @@
 package imbacad.model.camera;
 
 
+import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import imbacad.model.Vec3;
+import imbacad.model.shader.HasUniforms;
+import imbacad.model.shader.Shader;
+import imbacad.model.shader.UniformVec3;
 
 /**
  * 
@@ -18,8 +22,10 @@ import imbacad.model.Vec3;
  * @author Dirk Kretschmann
  *
  */
-public class Camera {
-
+public class Camera implements HasUniforms {
+	
+	private UniformVec3 uniformPos = null;
+	
 	private Vec3 position = new Vec3();
 	private float azimuthAngle = 0.0f;
 	private float polarAngle = 0.0f;
@@ -29,13 +35,13 @@ public class Camera {
 	public Camera() {}
 	
 	public Camera(Vec3 position, float azimuthAngle, float polarAngle, float fov, float velocity) {
-		super();
 		this.position = position;
 		this.azimuthAngle = azimuthAngle;
 		this.polarAngle = polarAngle;
 		this.fov = fov;
 		this.velocity = velocity;
 	}
+	
 	
 	/**
 	 * Calculates the unit normal vector of the camera plane.
@@ -123,6 +129,15 @@ public class Camera {
 
 	public void setVelocity(float velocity) {
 		this.velocity = velocity;
+	}
+
+	@Override
+	public void updateUniforms(GL3 gl, Shader shader) {
+		if (uniformPos == null) {
+			uniformPos = new UniformVec3(gl, shader, "camPos");
+		}
+		
+		uniformPos.update(gl, position);
 	}
 
 }

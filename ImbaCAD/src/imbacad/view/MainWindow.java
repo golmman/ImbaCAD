@@ -5,6 +5,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
 
 import imbacad.ImbaCAD;
+import imbacad.model.Light;
 import imbacad.model.Mesh;
 import imbacad.model.Vec3;
 import imbacad.view.docking.Dockable;
@@ -76,6 +77,7 @@ public class MainWindow extends JFrame {
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
+		
 		
 		//animator.start();
 		

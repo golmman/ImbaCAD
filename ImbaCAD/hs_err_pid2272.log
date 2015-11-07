@@ -1,0 +1,240 @@
+#
+# A fatal error has been detected by the Java Runtime Environment:
+#
+#  EXCEPTION_ACCESS_VIOLATION (0xc0000005) at pc=0x000007fee253305f, pid=2272, tid=3956
+#
+# JRE version: Java(TM) SE Runtime Environment (8.0_45-b14) (build 1.8.0_45-b14)
+# Java VM: Java HotSpot(TM) 64-Bit Server VM (25.45-b02 mixed mode windows-amd64 compressed oops)
+# Problematic frame:
+# C  [libtesseract302.dll+0x1305f]
+#
+# Failed to write core dump. Minidumps are not enabled by default on client versions of Windows
+#
+# If you would like to submit a bug report, please visit:
+#   http://bugreport.java.com/bugreport/crash.jsp
+# The crash happened outside the Java Virtual Machine in native code.
+# See problematic frame for where to report the bug.
+#
+
+---------------  T H R E A D  ---------------
+
+Current thread (0x0000000001d5e000):  JavaThread "main" [_thread_in_native, id=3956, stack(0x0000000002510000,0x0000000002610000)]
+
+siginfo: ExceptionCode=0xc0000005, reading address 0x0000000000000020
+
+Registers:
+RAX=0x000007feef261290, RBX=0x0000000000000000, RCX=0x0000000000000000, RDX=0x000000000260f348
+RSP=0x000000000260f280, RBP=0x000000000260f338, RSI=0x000000000003f1d4, RDI=0x0000000000000183
+R8 =0x0000000000000004, R9 =0x000000000214eff0, R10=0x00000000028f3848, R11=0x000000006cb87ca0
+R12=0x0000000000000000, R13=0x0000000054992f38, R14=0x000000000260f350, R15=0x0000000001d5e000
+RIP=0x000007fee253305f, EFLAGS=0x0000000000010202
+
+Top of Stack: (sp=0x000000000260f280)
+0x000000000260f280:   0000000054992f38 0000000001d5e000
+0x000000000260f290:   0000000000000183 00000000028f3706
+0x000000000260f2a0:   fffffffffffffffe 0000000001d5e000
+0x000000000260f2b0:   000000000260f350 0000000000000183
+0x000000000260f2c0:   000000000003f1d4 00000000028f3874
+0x000000000260f2d0:   0000000001d5e000 0000000054992f38
+0x000000000260f2e0:   000000000260f338 0000000001d5e000
+0x000000000260f2f0:   00000000028f35a2 000000000260f2f8
+0x000000000260f300:   0000000054992f38 000000000260f350
+0x000000000260f310:   0000000054992fa0 0000000000000000
+0x000000000260f320:   0000000054992f38 0000000000000000
+0x000000000260f330:   000000000260f358 000000000260f398
+0x000000000260f340:   00000000028e7a01 00000000eb48a4c8
+0x000000000260f350:   00000000028ef698 000000000260f358
+0x000000000260f360:   0000000054920611 000000000260f3c0
+0x000000000260f370:   0000000054920d78 0000000000000000 
+
+Instructions: (pc=0x000007fee253305f)
+0x000007fee253303f:   cc 40 56 57 41 56 48 83 ec 30 48 c7 44 24 20 fe
+0x000007fee253304f:   ff ff ff 48 89 5c 24 58 48 89 6c 24 60 48 8b d9
+0x000007fee253305f:   48 8b 49 20 45 33 f6 48 85 c9 74 0d 48 8b 01 41
+0x000007fee253306f:   8d 56 01 ff 10 4c 89 73 20 48 8b 7b 38 48 85 ff 
+
+
+Register to memory mapping:
+
+RAX=0x000007feef261290 is an unknown value
+RBX=0x0000000000000000 is an unknown value
+RCX=0x0000000000000000 is an unknown value
+RDX=0x000000000260f348 is pointing into the stack for thread: 0x0000000001d5e000
+RSP=0x000000000260f280 is pointing into the stack for thread: 0x0000000001d5e000
+RBP=0x000000000260f338 is pointing into the stack for thread: 0x0000000001d5e000
+RSI=0x000000000003f1d4 is an unknown value
+RDI=0x0000000000000183 is an unknown value
+R8 =0x0000000000000004 is an unknown value
+R9 =0x000000000214eff0 is an unknown value
+R10=0x00000000028f3848 is at code_begin+840 in an Interpreter codelet
+method entry point (kind = native)  [0x00000000028f3500, 0x00000000028f3e60]  2400 bytes
+R11=0x000000006cb87ca0 is an unknown value
+R12=0x0000000000000000 is an unknown value
+R13={method} {0x0000000054992f40} 'end' '()V' in 'imbacad/model/ocr/Tesseract'
+R14=0x000000000260f350 is pointing into the stack for thread: 0x0000000001d5e000
+R15=0x0000000001d5e000 is a thread
+
+
+Stack: [0x0000000002510000,0x0000000002610000],  sp=0x000000000260f280,  free space=1020k
+Native frames: (J=compiled Java code, j=interpreted, Vv=VM code, C=native code)
+C  [libtesseract302.dll+0x1305f]
+C  0x00000000028f3874
+
+Java frames: (J=compiled Java code, j=interpreted, Vv=VM code)
+j  imbacad.model.ocr.Tesseract.end()V+0
+j  imbacad.model.ocr.Test.main([Ljava/lang/String;)V+49
+v  ~StubRoutines::call_stub
+
+---------------  P R O C E S S  ---------------
+
+Java Threads: ( => current thread )
+  0x00000000567c2000 JavaThread "Java2D Disposer" daemon [_thread_blocked, id=4268, stack(0x0000000056a30000,0x0000000056b30000)]
+  0x0000000054f1c000 JavaThread "Service Thread" daemon [_thread_blocked, id=4056, stack(0x0000000056270000,0x0000000056370000)]
+  0x0000000054ec2800 JavaThread "C1 CompilerThread1" daemon [_thread_blocked, id=4836, stack(0x0000000056160000,0x0000000056260000)]
+  0x0000000054eb9000 JavaThread "C2 CompilerThread0" daemon [_thread_blocked, id=2352, stack(0x0000000055f20000,0x0000000056020000)]
+  0x0000000054eb7000 JavaThread "Attach Listener" daemon [_thread_blocked, id=4760, stack(0x0000000055bf0000,0x0000000055cf0000)]
+  0x0000000054eb5800 JavaThread "Signal Dispatcher" daemon [_thread_blocked, id=784, stack(0x0000000055dd0000,0x0000000055ed0000)]
+  0x0000000054e56000 JavaThread "Finalizer" daemon [_thread_blocked, id=4964, stack(0x00000000557f0000,0x00000000558f0000)]
+  0x0000000054e55000 JavaThread "Reference Handler" daemon [_thread_blocked, id=4252, stack(0x0000000055ae0000,0x0000000055be0000)]
+=>0x0000000001d5e000 JavaThread "main" [_thread_in_native, id=3956, stack(0x0000000002510000,0x0000000002610000)]
+
+Other Threads:
+  0x0000000054e4d000 VMThread [stack: 0x0000000055940000,0x0000000055a40000] [id=2404]
+  0x0000000054f1d000 WatcherThread [stack: 0x00000000563a0000,0x00000000564a0000] [id=5088]
+
+VM state:not at safepoint (normal execution)
+
+VM Mutex/Monitor currently owned by a thread: None
+
+Heap:
+ PSYoungGen      total 18944K, used 5962K [0x00000000eb000000, 0x00000000ec500000, 0x0000000100000000)
+  eden space 16384K, 36% used [0x00000000eb000000,0x00000000eb5d2ac0,0x00000000ec000000)
+  from space 2560K, 0% used [0x00000000ec280000,0x00000000ec280000,0x00000000ec500000)
+  to   space 2560K, 0% used [0x00000000ec000000,0x00000000ec000000,0x00000000ec280000)
+ ParOldGen       total 44032K, used 0K [0x00000000c1000000, 0x00000000c3b00000, 0x00000000eb000000)
+  object space 44032K, 0% used [0x00000000c1000000,0x00000000c1000000,0x00000000c3b00000)
+ Metaspace       used 5070K, capacity 5216K, committed 5376K, reserved 1056768K
+  class space    used 577K, capacity 657K, committed 768K, reserved 1048576K
+
+Card table byte_map: [0x0000000011ca0000,0x0000000011ea0000] byte_map_base: 0x0000000011698000
+
+Marking Bits: (ParMarkBitMap*) 0x000000006d164040
+ Begin Bits: [0x00000000123a0000, 0x0000000013360000)
+ End Bits:   [0x0000000013360000, 0x0000000014320000)
+
+Polling page: 0x0000000000220000
+
+CodeCache: size=245760Kb used=1713Kb max_used=1730Kb free=244046Kb
+ bounds [0x00000000028e0000, 0x0000000002b50000, 0x00000000118e0000]
+ total_blobs=584 nmethods=285 adapters=214
+ compilation: enabled
+
+Compilation events (10 events):
+Event: 0.653 Thread 0x0000000054ec2800  283 %     3       java.awt.image.BufferedImage::getRGB @ 173 (231 bytes)
+Event: 0.653 Thread 0x0000000054eb9000 nmethod 280 0x0000000002a7f690 code [0x0000000002a7f7e0, 0x0000000002a7fab8]
+Event: 0.653 Thread 0x0000000054eb9000  279       4       java.awt.image.ComponentColorModel::getRGBComponent (111 bytes)
+Event: 0.655 Thread 0x0000000054eb9000 nmethod 279 0x0000000002a72750 code [0x0000000002a728a0, 0x0000000002a72968]
+Event: 0.655 Thread 0x0000000054eb9000  282       4       java.awt.image.ComponentColorModel::getRGB (161 bytes)
+Event: 0.656 Thread 0x0000000054ec2800 nmethod 283% 0x0000000002a870d0 code [0x0000000002a87320, 0x0000000002a886d8]
+Event: 0.656 Thread 0x0000000054ec2800  284       3       java.awt.image.BufferedImage::getRGB (231 bytes)
+Event: 0.657 Thread 0x0000000054ec2800 nmethod 284 0x0000000002a89150 code [0x0000000002a893a0, 0x0000000002a8a598]
+Event: 0.667 Thread 0x0000000054eb9000 nmethod 282 0x0000000002a8b010 code [0x0000000002a8b200, 0x0000000002a8b868]
+Event: 0.667 Thread 0x0000000054eb9000  285 %     4       java.awt.image.BufferedImage::getRGB @ 173 (231 bytes)
+
+GC Heap History (0 events):
+No events
+
+Deoptimization events (0 events):
+No events
+
+Internal exceptions (9 events):
+Event: 0.090 Thread 0x0000000001d5e000 Exception <a 'java/lang/NoSuchMethodError': Method sun.misc.Unsafe.defineClass(Ljava/lang/String;[BII)Ljava/lang/Class; name or signature does not match> (0x00000000eb00d820) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\srcxñ+.·?
+Event: 0.091 Thread 0x0000000001d5e000 Exception <a 'java/lang/NoSuchMethodError': Method sun.misc.Unsafe.prefetchRead(Ljava/lang/Object;J)V name or signature does not match> (0x00000000eb00dab0) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jz>9öçÑ?
+Event: 0.280 Thread 0x0000000001d5e000 Exception <a 'java/security/PrivilegedActionException'> (0x00000000eb081ae0) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jvm.cpp, line 1382]
+Event: 0.280 Thread 0x0000000001d5e000 Exception <a 'java/security/PrivilegedActionException'> (0x00000000eb081e28) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jvm.cpp, line 1382]
+Event: 0.282 Thread 0x0000000001d5e000 Exception <a 'java/security/PrivilegedActionException'> (0x00000000eb085ab0) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jvm.cpp, line 1382]
+Event: 0.282 Thread 0x0000000001d5e000 Exception <a 'java/security/PrivilegedActionException'> (0x00000000eb085df8) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jvm.cpp, line 1382]
+Event: 0.292 Thread 0x0000000001d5e000 Exception <a 'java/io/FileNotFoundException'> (0x00000000eb088f70) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\jni.cpp, line 709]
+Event: 0.450 Thread 0x0000000001d5e000 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x00000000eb1f94d0) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\methodHandles.cpp, line 1125]
+Event: 0.468 Thread 0x0000000001d5e000 Exception <a 'java/lang/NoSuchFieldError': method resolution failed> (0x00000000eb207bf0) thrown at [C:\re\workspace\8-2-build-windows-amd64-cygwin\jdk8u45\3457\hotspot\src\share\vm\prims\methodHandles.cpp, line 1125]
+
+Events (10 events):
+Event: 0.550 loading class java/awt/image/IndexColorModel
+Event: 0.550 loading class java/awt/image/IndexColorModel done
+Event: 0.550 loading class sun/awt/image/ShortComponentRaster
+Event: 0.550 loading class sun/awt/image/ShortComponentRaster done
+Event: 0.551 loading class com/sun/imageio/plugins/common/ReaderUtil
+Event: 0.551 loading class com/sun/imageio/plugins/common/ReaderUtil done
+Event: 0.615 loading class java/io/RandomAccessFile$1
+Event: 0.615 loading class java/io/RandomAccessFile$1 done
+Event: 0.691 loading class imbacad/model/ocr/Tesseract
+Event: 0.691 loading class imbacad/model/ocr/Tesseract done
+
+
+Dynamic libraries:
+0x000000013f850000 - 0x000000013f887000 	C:\Program Files\Java\jre1.8.0_45\bin\javaw.exe
+0x00000000779e0000 - 0x0000000077b88000 	C:\Windows\SYSTEM32\ntdll.dll
+0x00000000778c0000 - 0x00000000779df000 	C:\Windows\system32\kernel32.dll
+0x000007fefd870000 - 0x000007fefd8dc000 	C:\Windows\system32\KERNELBASE.dll
+0x000007fefe1d0000 - 0x000007fefe2ab000 	C:\Windows\system32\ADVAPI32.dll
+0x000007feff880000 - 0x000007feff91f000 	C:\Windows\system32\msvcrt.dll
+0x000007fefe5b0000 - 0x000007fefe5cf000 	C:\Windows\SYSTEM32\sechost.dll
+0x000007fefe5f0000 - 0x000007fefe71d000 	C:\Windows\system32\RPCRT4.dll
+0x00000000777c0000 - 0x00000000778ba000 	C:\Windows\system32\USER32.dll
+0x000007feff6f0000 - 0x000007feff757000 	C:\Windows\system32\GDI32.dll
+0x000007feff640000 - 0x000007feff64e000 	C:\Windows\system32\LPK.dll
+0x000007feff760000 - 0x000007feff829000 	C:\Windows\system32\USP10.dll
+0x000007fefc2b0000 - 0x000007fefc4a4000 	C:\Windows\WinSxS\amd64_microsoft.windows.common-controls_6595b64144ccf1df_6.0.7601.18837_none_fa3b1e3d17594757\COMCTL32.dll
+0x000007feffb60000 - 0x000007feffbd1000 	C:\Windows\system32\SHLWAPI.dll
+0x000007fefdf90000 - 0x000007fefdfbe000 	C:\Windows\system32\IMM32.DLL
+0x000007feffbe0000 - 0x000007feffce9000 	C:\Windows\system32\MSCTF.dll
+0x000000005c860000 - 0x000000005c932000 	C:\Program Files\Java\jre1.8.0_45\bin\msvcr100.dll
+0x000000006c960000 - 0x000000006d1e3000 	C:\Program Files\Java\jre1.8.0_45\bin\server\jvm.dll
+0x000007fefa660000 - 0x000007fefa669000 	C:\Windows\system32\WSOCK32.dll
+0x000007feff830000 - 0x000007feff87d000 	C:\Windows\system32\WS2_32.dll
+0x000007fefdf80000 - 0x000007fefdf88000 	C:\Windows\system32\NSI.dll
+0x000007fefb6f0000 - 0x000007fefb72b000 	C:\Windows\system32\WINMM.dll
+0x000007fefcf70000 - 0x000007fefcf7c000 	C:\Windows\system32\VERSION.dll
+0x0000000077bb0000 - 0x0000000077bb7000 	C:\Windows\system32\PSAPI.DLL
+0x0000000074fb0000 - 0x0000000074fbf000 	C:\Program Files\Java\jre1.8.0_45\bin\verify.dll
+0x0000000074f80000 - 0x0000000074fa9000 	C:\Program Files\Java\jre1.8.0_45\bin\java.dll
+0x0000000074f60000 - 0x0000000074f76000 	C:\Program Files\Java\jre1.8.0_45\bin\zip.dll
+0x000007fefe720000 - 0x000007feff4a9000 	C:\Windows\system32\SHELL32.dll
+0x000007fefdfc0000 - 0x000007fefe1c3000 	C:\Windows\system32\ole32.dll
+0x000007fefd790000 - 0x000007fefd79f000 	C:\Windows\system32\profapi.dll
+0x000007feef260000 - 0x000007feef267000 	C:\Users\Johannes\git\ImbaCAD\ImbaCAD\tessx64.dll
+0x000007fee2520000 - 0x000007fee280f000 	C:\Users\Johannes\git\ImbaCAD\ImbaCAD\libtesseract302.dll
+0x000007fee28f0000 - 0x000007fee2afb000 	C:\Users\Johannes\git\ImbaCAD\ImbaCAD\liblept168.dll
+0x000007fee2810000 - 0x000007fee28e4000 	C:\Windows\system32\MSVCR110.dll
+0x000007fee23c0000 - 0x000007fee2467000 	C:\Windows\system32\MSVCP110.dll
+0x000000005c6c0000 - 0x000000005c858000 	C:\Program Files\Java\jre1.8.0_45\bin\awt.dll
+0x000007fefdea0000 - 0x000007fefdf77000 	C:\Windows\system32\OLEAUT32.dll
+0x000007feeecd0000 - 0x000007feeedf5000 	C:\Windows\system32\dbghelp.dll
+
+VM Arguments:
+jvm_args: -Dfile.encoding=Cp1252 
+java_command: imbacad.model.ocr.Test
+java_class_path (initial): C:\Users\Johannes\git\ImbaCAD\ImbaCAD\bin;C:\Program Files (x86)\jogamp-all-platforms\jar\gluegen-rt.jar;C:\Program Files (x86)\jogamp-all-platforms\jar\jogl-all.jar
+Launcher Type: SUN_STANDARD
+
+Environment Variables:
+PATH=C:/Program Files/Java/jre1.8.0_45/bin/server;C:/Program Files/Java/jre1.8.0_45/bin;C:/Program Files/Java/jre1.8.0_45/lib/amd64;C:\ProgramData\Oracle\Java\javapath;C:\Program Files\Common Files\Microsoft Shared\Windows Live;C:\Program Files (x86)\Common Files\Microsoft Shared\Windows Live;C:\Program Files (x86)\AMD APP SDK 2.9-1\AMD APP SDK\2.9-1\bin\x86_64;C:\Program Files (x86)\AMD APP SDK 2.9-1\AMD APP SDK\2.9-1\bin\x86;C:\Program Files (x86)\AMD APP SDK\2.9-1\bin\x86_64;C:\Program Files (x86)\AMD APP SDK\2.9-1\bin\x86;C:\Program Files\Python\;C:\Windows\SYSTEM32;C:\Windows;C:\Windows\SYSTEM32\WBEM;C:\Windows\SYSTEM32\WINDOWSPOWERSHELL\V1.0\;C:\PROGRAM FILES (X86)\ATI TECHNOLOGIES\ATI.ACE\CORE-STATIC;C:\Program Files (x86)\MiKTeX\miktex\bin\;C:\Program Files (x86)\Windows Kits\8.0\Windows Performance Toolkit\;C:\Program Files\Microsoft SQL Server\110\Tools\Binn\;C:\Program Files\OpenVPN\bin;C:\Program Files (x86)\Windows Live\Shared;C:\Program Files\Java\jdk1.8.0_45\bin; ;C:\Program Files (x86)\eclipse;
+USERNAME=Johannes
+OS=Windows_NT
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 23 Stepping 10, GenuineIntel
+
+
+
+---------------  S Y S T E M  ---------------
+
+OS: Windows 7 , 64 bit Build 7601 (6.1.7601.18847)
+
+CPU:total 2 (2 cores per cpu, 1 threads per core) family 6 model 23 stepping 10, cmov, cx8, fxsr, mmx, sse, sse2, sse3, ssse3, tsc
+
+Memory: 4k page, physical 4124456k(1583592k free), swap 8247060k(5495336k free)
+
+vm_info: Java HotSpot(TM) 64-Bit Server VM (25.45-b02) for windows-amd64 JRE (1.8.0_45-b14), built on Apr 10 2015 10:34:15 by "java_re" with MS VC++ 10.0 (VS2010)
+
+time: Mon Nov 02 18:41:58 2015
+elapsed time: 0 seconds (0d 0h 0m 0s)
+

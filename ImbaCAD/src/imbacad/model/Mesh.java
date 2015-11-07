@@ -1,5 +1,7 @@
 package imbacad.model;
 
+import imbacad.model.shader.Shader;
+
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
@@ -24,7 +26,9 @@ import com.jogamp.opengl.GLAutoDrawable;
 public class Mesh {
 
 	public static final int SIZEOF_VERTEX = 8 * 4;
-
+	
+	private Material material = new Material();
+	
 	private String name;
 	
 	private String textureFilename;
@@ -51,9 +55,7 @@ public class Mesh {
 		this.name = name;
 	}
 	
-	public void init(GLAutoDrawable drawable) {
-		GL3 gl = drawable.getGL().getGL3();
-		
+	public void init(GL3 gl) {
 		
 		/*
 		 * 
@@ -135,11 +137,10 @@ public class Mesh {
 		
 		
 		
-		loadTexture(drawable, textureFilename);
+		loadTexture(gl, textureFilename);
 	}
 
-	private void loadTexture(GLAutoDrawable drawable, String filename) {
-		GL3 gl = drawable.getGL().getGL3();
+	private void loadTexture(GL3 gl, String filename) {
 
 		// Generate texture ID and load texture data
 		int[] textureID = new int[1];
@@ -209,14 +210,18 @@ public class Mesh {
 	
 	
 	
-	public void draw(GLAutoDrawable drawable, int shader) {
-		GL3 gl = drawable.getGL().getGL3();
+	public void draw(GL3 gl, Shader shader) {
 		
 		// Active proper texture unit before binding
 		gl.glActiveTexture(GL.GL_TEXTURE0); 
 
 		// Now set the sampler to the correct texture unit
-		gl.glUniform1f(gl.glGetUniformLocation(shader, "texDiffuse"), 0);
+		//gl.glUniform1f(gl.glGetUniformLocation(shader, "material.texture"), 0.0f);
+		//gl.glUniform1f(gl.glGetUniformLocation(shader, "material.shininess"), 200.0f);
+		//gl.glUniform3f(gl.glGetUniformLocation(shader, "material.specularColor"), 1.0f, 1.0f, 1.0f);
+		material.updateUniforms(gl, shader);
+		
+		
 		// And finally bind the texture
 		gl.glBindTexture(GL.GL_TEXTURE_2D, texture[0]);
 
@@ -231,7 +236,7 @@ public class Mesh {
 	}
 	
 	
-	public void drawPoints(GLAutoDrawable drawable, int shader) {
+	public void drawPoints(GLAutoDrawable drawable, Shader shader) {
 		GL3 gl = drawable.getGL().getGL3();
 		
 		// Draw mesh

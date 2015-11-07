@@ -1,4 +1,4 @@
-package imbacad.model;
+package imbacad.model.shader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,16 +10,22 @@ import com.jogamp.opengl.GLAutoDrawable;
 
 public class Shader {
 	
-	private int program;
+	private File vertFile;
+	private File fragFile;
+	
+	private int program = 0;
 	private int vertexShader;
 	private int fragmentShader;
 	
-	private int model;
-	private int view;
-	private int projection;
+	/*
+	 * locations for uniform variables
+	 */
 
 	public Shader(GLAutoDrawable drawable, File vertFile, File fragFile) {
 		GL3 gl = drawable.getGL().getGL3();
+		
+		this.vertFile = vertFile;
+		this.fragFile = fragFile;
 
 		System.out.println("Chosen GLCapabilities: " + drawable.getChosenGLCapabilities());
 		System.out.println("INIT GL IS: " + gl.getClass().getName());
@@ -119,17 +125,10 @@ public class Shader {
 		gl.glAttachShader(program, fragmentShader);
 
 		gl.glLinkProgram(program);
-		
-		// Get a id number to the uniform_Projection matrix
-		// so that we can update it.
-		model = gl.glGetUniformLocation(program, "model");
-		view = gl.glGetUniformLocation(program, "view");
-		projection = gl.glGetUniformLocation(program, "projection");
 	}
 	
 	
-	public void dispose(GLAutoDrawable drawable) {
-		GL3 gl = drawable.getGL().getGL3();
+	public void dispose(GL3 gl) {
 		
 		gl.glUseProgram(0);
 		
@@ -139,21 +138,31 @@ public class Shader {
 		gl.glDeleteShader(fragmentShader);
 		gl.glDeleteProgram(program);
 	}
+	
+	public int getUniformLocation(GL3 gl, String uniformName) {
+		if (program == 0) throw new IllegalStateException("No valid program created yet.");
+		
+		int result = gl.glGetUniformLocation(program, uniformName);
+		
+		if (result == -1) {
+			System.err.println("Uniform \"" + uniformName + "\" not found in " + vertFile.getName() + " or " + fragFile.getName());
+		}
+		
+		return result;
+	}
 
 	public int getProgram() {
 		return program;
 	}
 
-	public int getModel() {
-		return model;
+
+	public File getVertFile() {
+		return vertFile;
 	}
 
-	public int getView() {
-		return view;
-	}
 
-	public int getProjection() {
-		return projection;
+	public File getFragFile() {
+		return fragFile;
 	}
 
 }

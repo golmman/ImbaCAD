@@ -4,10 +4,10 @@ import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.CameraUpdater;
+import imbacad.model.shader.Shader;
+import imbacad.model.shader.UniformMatrix4;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -34,6 +34,14 @@ public class DefaultRenderer implements GLEventListener {
 	private Shader texShader = null;
 	private Shader colShader = null;
 	
+	private UniformMatrix4 uniformTexProj = null;
+	private UniformMatrix4 uniformTexView = null;
+	private UniformMatrix4 uniformTexModel = null;
+	
+	private UniformMatrix4 uniformColProj = null;
+	private UniformMatrix4 uniformColView = null;
+	private UniformMatrix4 uniformColModel = null;
+	
 	private Mesh selectedMesh = null;
 	private int selectedVertex = -1;
 	
@@ -50,17 +58,32 @@ public class DefaultRenderer implements GLEventListener {
 	public void init(GLAutoDrawable drawable) {
 		GL3 gl = drawable.getGL().getGL3();
 		
-		this.texShader = new Shader(drawable, new File("shader/texVertex.shader"), new File("shader/texFragment.shader"));
-		this.colShader = new Shader(drawable, new File("shader/colVertex.shader"), new File("shader/colFragment.shader"));
+		this.texShader = new Shader(drawable, new File("shader/texture.vsh"), new File("shader/texture.fsh"));
+		this.colShader = new Shader(drawable, new File("shader/color.vsh"), new File("shader/color.fsh"));
 		
-		gl.glEnable(GL3.GL_CULL_FACE);
-		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+		this.uniformTexProj = new UniformMatrix4(gl, texShader, "projection");
+		this.uniformTexView = new UniformMatrix4(gl, texShader, "view");
+		this.uniformTexModel = new UniformMatrix4(gl, texShader, "model");
 		
+		this.uniformColProj = new UniformMatrix4(gl, colShader, "projection");
+		this.uniformColView = new UniformMatrix4(gl, colShader, "view");
+		this.uniformColModel = new UniformMatrix4(gl, colShader, "model");
+		
+
 		
 		
 		for (Mesh mesh : ImbaCAD.meshes) {
-			mesh.init(drawable);
+			mesh.init(gl);
 		}
+		
+		// add test lights
+		Light light1 = new Light(texShader, false, new Vec3(0.0f, 0.0f, 5.0f), new Vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.1f);
+		ImbaCAD.lights.add(light1);
+				
+				
+				
+		gl.glEnable(GL3.GL_CULL_FACE);
+		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 	}
 	
 	
@@ -108,8 +131,12 @@ public class DefaultRenderer implements GLEventListener {
 		 * draw meshes
 		 */
 		gl.glUseProgram(texShader.getProgram());
-		gl.glUniformMatrix4fv(texShader.getView(), 1, false,	view, 0);
-		gl.glUniformMatrix4fv(texShader.getProjection(), 1, false,	projection, 0);
+		
+		// send data to gpu
+		ImbaCAD.lights.getFirst().updateUniforms(gl, texShader);
+		camera.updateUniforms(gl, texShader);
+		uniformTexView.update(gl, view);
+		uniformTexProj.update(gl, projection);
 		
 		for (Mesh mesh : ImbaCAD.meshes) {
 			
@@ -124,18 +151,22 @@ public class DefaultRenderer implements GLEventListener {
 			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
 			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
 			
-			gl.glUniformMatrix4fv(texShader.getModel(), 1, false,	model, 0);
+			// send data to gpu
+			uniformTexModel.update(gl, model);
 			
-			mesh.draw(drawable, texShader.getProgram());
-			
+			mesh.draw(gl, texShader);
 		}
+		
+		
 		
 		/*
 		 * draw selection TODO: Create class which handles that
 		 */
 		gl.glUseProgram(colShader.getProgram());
-		gl.glUniformMatrix4fv(colShader.getView(), 1, false,	view, 0);
-		gl.glUniformMatrix4fv(colShader.getProjection(), 1, false,	projection, 0);
+		
+		// send data to gpu
+		uniformColView.update(gl, view);
+		uniformColProj.update(gl, projection);
 		
 		// remove last selection
 		if (selectedMesh != null) {
@@ -157,8 +188,8 @@ public class DefaultRenderer implements GLEventListener {
 			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
 			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
 			
-			gl.glUniformMatrix4fv(colShader.getModel(), 1, false,	model, 0);
-			
+			// send data to gpu
+			uniformColModel.update(gl, model);
 			
 			
 			int floatCount = mesh.getVertexCount() * Mesh.SIZEOF_VERTEX / 4;
@@ -197,6 +228,7 @@ public class DefaultRenderer implements GLEventListener {
 				// get screen coordinates
 				float scX = 0.5f * viewport.get(2) * (ndcX + 1) + viewport.get(0);
 				float scY = viewport.get(3) - 0.5f * viewport.get(3) * (ndcY + 1) + viewport.get(1);
+				@SuppressWarnings("unused")
 				float scZ = 0.5f * ((depthRange.get(1) - depthRange.get(0)) * ndcZ + depthRange.get(1) + depthRange.get(0));
 				
 				// get distance to mouse pointer
@@ -218,7 +250,7 @@ public class DefaultRenderer implements GLEventListener {
 			}	
 			
 			
-			mesh.drawPoints(drawable, colShader.getProgram());
+			mesh.drawPoints(drawable, colShader);
 		}
 	}
 
@@ -226,13 +258,13 @@ public class DefaultRenderer implements GLEventListener {
 	public void dispose(GLAutoDrawable drawable) {
 		System.out.println("cleanup");
 		
-		//GL3 gl = drawable.getGL().getGL3();
+		GL3 gl = drawable.getGL().getGL3();
 		
 		for (Mesh mesh : ImbaCAD.meshes) {
 			mesh.dispose(drawable);
 		}
 		
-		texShader.dispose(drawable);
+		texShader.dispose(gl);
 	}
 
 
