@@ -5,12 +5,12 @@ import java.util.Collection;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import imbacad.control.RenderingEventAdapter;
-import imbacad.model.Mesh;
+import imbacad.model.mesh.Mesh;
 
 public abstract class Selector {
 	
-	private Mesh selectedMesh;
-	private Selectable selection;
+//	private Mesh selectedMesh;
+//	private Selectable selection;
 	
 	
 	public Selector() {}

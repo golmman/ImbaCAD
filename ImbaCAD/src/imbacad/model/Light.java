@@ -1,5 +1,6 @@
 package imbacad.model;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.Matcher;
@@ -7,6 +8,7 @@ import java.util.regex.Pattern;
 
 import com.jogamp.opengl.GL3;
 
+import imbacad.ImbaCAD;
 import imbacad.model.shader.HasUniforms;
 import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformFloat;
@@ -16,9 +18,8 @@ import imbacad.model.shader.UniformVec3;
 public class Light implements HasUniforms {
 
 	private static int maxLights = 0;
-	private static int numLights = 0;
 	
-	private UniformInt uniformNum = null;
+	private UniformInt uniformNum = null;	// TODO: only send this once?!
 	
 	private UniformInt uniformDir = null;
 	private UniformVec3 uniformPos = null;
@@ -32,7 +33,8 @@ public class Light implements HasUniforms {
 	private float attenuation = 0.0f;
 	private float ambient = 0.0f;
 	
-	public Light(Shader shader, boolean isDirectional, Vec3 position, Vec3 color, float attenuation, float ambient) {
+	
+	public Light(File fragmentShaderFile, boolean isDirectional, Vec3 position, Vec3 color, float attenuation, float ambient) {
 		this.isDirectional = isDirectional;
 		this.position = position;
 		this.color = color;
@@ -42,7 +44,7 @@ public class Light implements HasUniforms {
 		// update MAX_LIGHTS
 		if (maxLights == 0) {
 			try {
-				FileReader fr = new FileReader(shader.getFragFile());
+				FileReader fr = new FileReader(fragmentShaderFile);
 				
 				int c = 0;
 				StringBuilder sb = new StringBuilder();
@@ -59,34 +61,34 @@ public class Light implements HasUniforms {
 				if (matcher.find()) {
 					maxLights = Integer.parseInt(matcher.group(2));
 				} else {
-					throw new IllegalStateException("No 'const int MAX_LIGHTS' defined in " + shader.getFragFile().getName() + ".");
+					throw new IllegalStateException("No 'const int MAX_LIGHTS' defined in " + fragmentShaderFile.getName() + ".");
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
-		if (numLights >= maxLights){
+		if (ImbaCAD.lights.size() >= maxLights){
 			throw new IllegalStateException("Exceeding MAX_LIGHTS limit of" + maxLights + ".");
 		}
-		
-		
-		++numLights;
 	}
 	
 	@Override
 	public void updateUniforms(GL3 gl, Shader shader) {
+		
 		if (uniformAmb == null) {
 			uniformNum = new UniformInt(gl, shader, "numLights");
 			
-			uniformDir = new UniformInt(gl, shader, "light.isDirectional");
-			uniformPos = new UniformVec3(gl, shader, "light.position");
-			uniformCol = new UniformVec3(gl, shader, "light.color");
-			uniformAtt = new UniformFloat(gl, shader, "light.attenuation");
-			uniformAmb = new UniformFloat(gl, shader, "light.ambient");
+			int i = ImbaCAD.lights.indexOf(this);
+			
+			uniformDir = new UniformInt(gl, shader, "light[" + i + "].isDirectional");
+			uniformPos = new UniformVec3(gl, shader, "light[" + i + "].position");
+			uniformCol = new UniformVec3(gl, shader, "light[" + i + "].color");
+			uniformAtt = new UniformFloat(gl, shader, "light[" + i + "].attenuation");
+			uniformAmb = new UniformFloat(gl, shader, "light[" + i + "].ambient");
 		}
 		
-		uniformNum.update(gl, numLights);
+		uniformNum.update(gl, ImbaCAD.lights.size());
 		
 		uniformDir.update(gl, isDirectional ? 1 : 0);
 		uniformPos.update(gl, position);
@@ -95,9 +97,6 @@ public class Light implements HasUniforms {
 		uniformAmb.update(gl, ambient);
 	}
 	
-	public void dispose() {
-		--numLights;
-	}
 
 	public Vec3 getPosition() {
 		return position;
@@ -129,10 +128,6 @@ public class Light implements HasUniforms {
 
 	public void setAmbientCoefficient(float ambientCoefficient) {
 		this.ambient = ambientCoefficient;
-	}
-
-	public static int getNumLights() {
-		return numLights;
 	}
 
 	public static int getMaxLights() {

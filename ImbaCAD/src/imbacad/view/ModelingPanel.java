@@ -7,11 +7,8 @@ import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
 import imbacad.model.DefaultRenderer;
-import imbacad.model.Glm;
-import imbacad.model.Mesh;
 import imbacad.model.Vec3;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.LevitateUpdater;
@@ -19,7 +16,6 @@ import imbacad.model.camera.OrbitUpdater;
 import imbacad.model.camera.PanUpdater;
 
 import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
@@ -51,33 +47,6 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	private JRadioButton buttonOrbit = new JRadioButton("Orbit");
 	private JRadioButton buttonPan = new JRadioButton("Pan");
 	
-	
-	public static void main(String[] args) {
-		Glm.init();
-		
-		Mesh mesh1 = new Mesh("test2.jpg", MainWindow.testVertices, MainWindow.testIndices, "mesh0");
-		Mesh mesh2 = new Mesh("test.bmp", MainWindow.testVertices, MainWindow.testIndices, "mesh1");
-		mesh2.setPosition(new Vec3(0.5f, -1.5f, 0.0f));
-		ImbaCAD.meshes.add(mesh1);
-		ImbaCAD.meshes.add(mesh2);
-		
-		
-		Animator ani = new Animator();
-		
-		JFrame frame = new JFrame("Test");
-		frame.setBounds(100, 100, 400, 400);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setLayout(new GridLayout(1, 1));
-		
-		ModelingPanel mw = new ModelingPanel(ani);
-		
-		frame.add(mw);
-		
-		frame.setVisible(true);
-		
-		
-		ani.start();
-	}
 	
 	
 	

@@ -4,6 +4,8 @@ import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.CameraUpdater;
+import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.Vertex;
 import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
 
@@ -45,15 +47,12 @@ public class DefaultRenderer implements GLEventListener {
 	private Mesh selectedMesh = null;
 	private int selectedVertex = -1;
 	
-	// TODO: only for debug
-	private float alpha = 0.0f;
-	
 	public DefaultRenderer(RenderingEventAdapter events, Camera camera, CameraUpdater updater) {
 		this.events = events;
 		this.cameraUpdater = updater;
 		this.camera = camera;
 	}
-
+	
 	@Override
 	public void init(GLAutoDrawable drawable) {
 		GL3 gl = drawable.getGL().getGL3();
@@ -75,15 +74,11 @@ public class DefaultRenderer implements GLEventListener {
 		for (Mesh mesh : ImbaCAD.meshes) {
 			mesh.init(gl);
 		}
-		
-		// add test lights
-		Light light1 = new Light(texShader, false, new Vec3(0.0f, 0.0f, 5.0f), new Vec3(1.0f, 1.0f, 1.0f), 0.0f, 0.1f);
-		ImbaCAD.lights.add(light1);
-				
-				
-				
+			
 		gl.glEnable(GL3.GL_CULL_FACE);
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+		
+		gl.glProvokingVertex(GL3.GL_FIRST_VERTEX_CONVENTION); 
 	}
 	
 	
@@ -133,7 +128,11 @@ public class DefaultRenderer implements GLEventListener {
 		gl.glUseProgram(texShader.getProgram());
 		
 		// send data to gpu
-		ImbaCAD.lights.getFirst().updateUniforms(gl, texShader);
+		for (Light light: ImbaCAD.lights) {
+			light.updateUniforms(gl, texShader);
+		}
+		
+		
 		camera.updateUniforms(gl, texShader);
 		uniformTexView.update(gl, view);
 		uniformTexProj.update(gl, projection);
@@ -141,9 +140,11 @@ public class DefaultRenderer implements GLEventListener {
 		for (Mesh mesh : ImbaCAD.meshes) {
 			
 			if (mesh.getName().equals("mesh1")) {
-				// rotate last
-				alpha += 0.01f;
-				mesh.getRotation().setZ(alpha);
+				mesh.getRotation().setZ(mesh.getRotation().getZ() + 0.01f);
+			}
+			
+			if (mesh.getName().equals("mesh2")) {
+				mesh.getRotation().setZ(mesh.getRotation().getZ() - 0.01f);
 			}
 			
 			model = Glm.diag(1.0f);
@@ -192,7 +193,7 @@ public class DefaultRenderer implements GLEventListener {
 			uniformColModel.update(gl, model);
 			
 			
-			int floatCount = mesh.getVertexCount() * Mesh.SIZEOF_VERTEX / 4;
+			int floatCount = mesh.getVertexCount() * Vertex.FLOATS_PER;
 			
 			// get data from the gpu
 			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, mesh.getVertexBuffer());
@@ -207,7 +208,7 @@ public class DefaultRenderer implements GLEventListener {
 			float[] mvp = Glm.mul(Glm.mul(projection, view), model);
 			
 			// calculate each vertex screen coordinate
-			for (int k = 0; k < floatCount; k += Mesh.SIZEOF_VERTEX / 4) {
+			for (int k = 0; k < floatCount; k += Vertex.FLOATS_PER) {
 				// get object coordinates, equal to mesh.getVertices()[0];
 				float objX = vertices.get(k+0); 		
 				float objY = vertices.get(k+1);
@@ -237,7 +238,7 @@ public class DefaultRenderer implements GLEventListener {
 				
 				if (Math.sqrt(dx * dx + dy * dy) < 5.0) {
 					selectedMesh = mesh;
-					selectedVertex = k / (Mesh.SIZEOF_VERTEX / 4);
+					selectedVertex = k / (Vertex.FLOATS_PER);
 					
 					float[] col = {0.0f, 1.0f, 0.0f, 1.0f};
 					FloatBuffer colBuf = Buffers.newDirectFloatBuffer(col);

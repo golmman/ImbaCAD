@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 import imbacad.model.Glm;
 import imbacad.model.Light;
-import imbacad.model.Mesh;
+import imbacad.model.mesh.Mesh;
 import imbacad.view.MainWindow;
 
 

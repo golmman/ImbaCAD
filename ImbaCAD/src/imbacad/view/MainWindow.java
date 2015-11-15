@@ -3,11 +3,13 @@ package imbacad.view;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.io.File;
 
 import imbacad.ImbaCAD;
 import imbacad.model.Light;
-import imbacad.model.Mesh;
 import imbacad.model.Vec3;
+import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.VertexArray;
 import imbacad.view.docking.Dockable;
 import imbacad.view.docking.DockingCanvas;
 import imbacad.view.docking.DockingRoot;
@@ -68,9 +70,10 @@ public class MainWindow extends JFrame {
 		super(title);
 		
 		// add test meshes
-		Mesh mesh1 = new Mesh("test2.jpg", testVertices, testIndices, "mesh0");
-		Mesh mesh2 = new Mesh("test.bmp", testVertices, testIndices, "mesh1");
-		Mesh mesh3 = new Mesh("white.bmp", houseVertices, houseIndices, "mesh2");
+		Mesh mesh1 = new Mesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "mesh0");
+		Mesh mesh2 = new Mesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "mesh1");
+		//Mesh mesh3 = Mesh.createFlatNormalMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "mesh2");
+		Mesh mesh3 = Mesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "mesh2");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
 		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
@@ -78,6 +81,25 @@ public class MainWindow extends JFrame {
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
 		
+		// add directional lights
+		Vec3 dirLightPos0 = new Vec3(1.0f, 1.0f, 1.0f).normalised();
+		Vec3 dirLightPos1 = new Vec3(-1.0f, 1.0f, 1.0f).normalised();
+		Vec3 dirLightPos2 = new Vec3(0.0f, -1.0f, 1.0f).normalised();
+		float dirAmbient = 0.05f;
+		
+		// light intensity for a surface facing the sky should be 1.0f
+		Vec3 dirLightColor = new Vec3((1.0f - dirAmbient) / (dirLightPos0.getZ() + dirLightPos1.getZ() + dirLightPos2.getZ()));
+		
+		Light directional0 = new Light(new File("shader/texture.fsh"), true, dirLightPos0, dirLightColor, 0.0f, dirAmbient);
+		Light directional1 = new Light(new File("shader/texture.fsh"), true, dirLightPos1, dirLightColor, 0.0f, dirAmbient);
+		Light directional2 = new Light(new File("shader/texture.fsh"), true, dirLightPos2, dirLightColor, 0.0f, dirAmbient);
+		
+		ImbaCAD.lights.add(directional0);
+		ImbaCAD.lights.add(directional1);
+		ImbaCAD.lights.add(directional2);
+		
+		//Light light2 = new Light(new File("shader/texture.fsh"), false, new Vec3(6.0f, 0.0f, 5.0f), new Vec3(1.0f, 0.0f, 0.0f), 0.0f, 0.1f);
+		//ImbaCAD.lights.add(light2);
 		
 		//animator.start();
 		
@@ -128,9 +150,5 @@ public class MainWindow extends JFrame {
 		
 	}
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
 
 }

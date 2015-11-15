@@ -1,8 +1,6 @@
-package imbacad;
+package imbacad.model.mesh;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
 
 import imbacad.model.Vec3;
 
@@ -25,7 +23,7 @@ public class VertexNormals {
 	 * Calculates the normalised vertex normal of the origin given neighbour surfaces spanned by input vectors.
 	 * The order of the input array determines the orientation of the vector.
 	 * For example if the input is z,y,x-axis in this order the output is 1/sqrt(3) * (-1, -1, -1).
-	 * If the input is x,y,y-axis in this order the output is 1/sqrt(3) * (1, 1, 1).
+	 * If the input is x,y,z-axis in this order the output is 1/sqrt(3) * (1, 1, 1).
 	 * Input has to be at least three vectors.
 	 * @param vectors
 	 * @return
@@ -38,7 +36,7 @@ public class VertexNormals {
 		vectors.add(vectors.get(0));
 		
 		for (int k = 0; k < vectors.size() - 1; ++k) {
-			result = result.add(vectors.get(k).cross(vectors.get(k+1)).normalised());
+			result = result.add(vectors.get(k).cross(vectors.get(k+1)));
 			System.out.println("miaus");
 		}
 		

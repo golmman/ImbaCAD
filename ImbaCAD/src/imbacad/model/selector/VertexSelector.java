@@ -1,7 +1,7 @@
 package imbacad.model.selector;
 
 import imbacad.control.RenderingEventAdapter;
-import imbacad.model.Mesh;
+import imbacad.model.mesh.Mesh;
 
 import java.util.Collection;
 

@@ -15,9 +15,10 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.common.nio.Buffers;
 
 import imbacad.model.Glm;
-import imbacad.model.Mesh;
 import imbacad.model.Vec3;
+import imbacad.model.mesh.Mesh;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -245,7 +246,7 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 		
 		gl.glEnable(GL3.GL_CULL_FACE);
 		
-		mesh = new Mesh("test2.jpg", vertices, indices, "mesh");
+		//mesh = new Mesh(new File("test2.jpg"), vertices, indices, "mesh");
 		mesh.init(gl);
 	}
 	

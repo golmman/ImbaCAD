@@ -14,6 +14,12 @@ public class Vec3 {
 		this.vec[2] = 0.0f;
 	}
 	
+	public Vec3(float xyz) {
+		this.vec[0] = xyz;
+		this.vec[1] = xyz;
+		this.vec[2] = xyz;
+	}
+	
 	public Vec3(float x, float y, float z) {
 		this.vec[0] = x;
 		this.vec[1] = y;
