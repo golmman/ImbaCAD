@@ -9,6 +9,7 @@ import imbacad.ImbaCAD;
 import imbacad.model.Light;
 import imbacad.model.Vec3;
 import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.Mesh2D;
 import imbacad.model.mesh.VertexArray;
 import imbacad.view.docking.Dockable;
 import imbacad.view.docking.DockingCanvas;
@@ -64,6 +65,18 @@ public class MainWindow extends JFrame {
 		6, 7, 8, 6, 8, 9	// left roof side
 	};
 	
+	public static Vec3[] test2dVertices = {
+		new Vec3(0.0f, 0.0f, 1.0f),
+		new Vec3(0.0f, 1.0f, 1.2f),
+		new Vec3(1.0f, 2.0f, 1.4f),
+		new Vec3(2.0f, 1.0f, 1.6f),
+		new Vec3(1.0f, 0.0f, 1.8f),
+		new Vec3(1.0f, 1.0f, 2.0f)
+	};
+	public static int[] test2dIndices = {
+		0, 1, 1, 2, 2, 3, 3, 4, 4, 5
+	};
+	
 	private Animator animator = new Animator();
 	
 	public MainWindow(String title) {
@@ -71,15 +84,22 @@ public class MainWindow extends JFrame {
 		
 		// add test meshes
 		Mesh mesh1 = new Mesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "mesh0");
+		
 		Mesh mesh2 = new Mesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "mesh1");
-		//Mesh mesh3 = Mesh.createFlatNormalMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "mesh2");
-		Mesh mesh3 = Mesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "mesh2");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
+		
+		Mesh mesh3 = Mesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "mesh2");
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
 		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
+		
+		Mesh2D mesh2D = new Mesh2D(test2dVertices, test2dIndices);
+		Mesh mesh4 = mesh2D.to3D();
+		
+		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
+		ImbaCAD.meshes.add(mesh4);
 		
 		// add directional lights
 		Vec3 dirLightPos0 = new Vec3(1.0f, 1.0f, 1.0f).normalised();
