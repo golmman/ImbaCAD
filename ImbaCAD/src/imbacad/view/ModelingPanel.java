@@ -6,7 +6,9 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.LinkedList;
 
+import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
 import imbacad.model.DefaultRenderer;
 import imbacad.model.Vec3;
@@ -14,8 +16,12 @@ import imbacad.model.camera.Camera;
 import imbacad.model.camera.LevitateUpdater;
 import imbacad.model.camera.OrbitUpdater;
 import imbacad.model.camera.PanUpdater;
+import imbacad.model.mesh.Mesh;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JToggleButton;
@@ -25,6 +31,9 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.Animator;
 
+
+
+
 /**
  * 
  * A Container on which all the display action happens.
@@ -32,7 +41,16 @@ import com.jogamp.opengl.util.Animator;
  *
  */
 public class ModelingPanel extends JPanel implements ComponentListener, ItemListener {
-
+	
+	class MenuMesh extends JCheckBoxMenuItem {
+		private static final long serialVersionUID = 3058433128285873718L;
+		public Mesh mesh = null;
+		public MenuMesh(Mesh mesh) {
+			super(mesh.getName());
+			this.mesh = mesh;
+		}
+	}
+	
 	private static final long serialVersionUID = -2636383013866025654L;
 	
 	private DefaultRenderer renderer = null;
@@ -47,8 +65,10 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	private JRadioButton buttonOrbit = new JRadioButton("Orbit");
 	private JRadioButton buttonPan = new JRadioButton("Pan");
 	
+	private JMenuBar menuBar = new JMenuBar();
 	
-	
+	private JMenu menuShow = new JMenu("Show Mesh");
+	private LinkedList<MenuMesh> menuMeshes = new LinkedList<MenuMesh>();
 	
 	
 	
@@ -71,7 +91,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		camera.lookAt(new Vec3());
 		
 		events = new RenderingEventAdapter();
-		renderer = new DefaultRenderer(events, camera, new LevitateUpdater());
+		renderer = new DefaultRenderer(events, camera);
 		
 		
 		ButtonGroup bg = new ButtonGroup();
@@ -84,8 +104,19 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		
 		buttonOrbit.setSelected(true);
 		
+		menuBar.add(menuShow);
+		for (Mesh m: ImbaCAD.meshes) {
+			MenuMesh menuItem = new MenuMesh(m);
+			menuItem.addItemListener(this);
+			menuItem.setSelected(true);	
+			menuMeshes.add(menuItem);
+			menuShow.add(menuItem);
+		}
+		
+		
 		JPanel panelControlWest = new JPanel(); 
 		panelControlWest.setLayout(new GridLayout(1, 3));
+		panelControlWest.add(menuBar);
 		panelControlWest.add(buttonLevitate);
 		panelControlWest.add(buttonOrbit);
 		panelControlWest.add(buttonPan);
@@ -142,21 +173,41 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		
-		if (e.getStateChange() == ItemEvent.SELECTED) {
+		if (e.getSource() instanceof MenuMesh) {
+			MenuMesh menu = (MenuMesh)e.getSource();
+			
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				renderer.getMeshMap().add(menu.mesh);
+			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
+				renderer.getMeshMap().remove(menu.mesh);
+			}
+			
+			
+			// re-draw
+			if (panelRendering != null) {
+				panelRendering.display();
+			}
+			
+			
+		} else if (e.getSource() instanceof JToggleButton) {
 			JToggleButton button = (JToggleButton)e.getItem();
 			
-			if (button == buttonLevitate) {
-				renderer.setProcessor(new LevitateUpdater());
-				System.out.println("Levitate");
-			} else if (button == buttonOrbit) {
-				renderer.setProcessor(new OrbitUpdater());
-				System.out.println("Orbit");
-			} else if (button == buttonPan) {
-				renderer.setProcessor(new PanUpdater());
-				System.out.println("Pan");
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				if (button == buttonLevitate) {
+					renderer.setCameraUpdater(new LevitateUpdater());
+					System.out.println("Levitate");
+				} else if (button == buttonOrbit) {
+					renderer.setCameraUpdater(new OrbitUpdater());
+					System.out.println("Orbit");
+				} else if (button == buttonPan) {
+					renderer.setCameraUpdater(new PanUpdater());
+					System.out.println("Pan");
+				}
 			}
 		}
 	}
+
+
 }
 
 

@@ -4,6 +4,7 @@ import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.CameraUpdater;
+import imbacad.model.camera.LevitateUpdater;
 import imbacad.model.mesh.Mesh;
 import imbacad.model.mesh.Vertex;
 import imbacad.model.shader.Shader;
@@ -12,6 +13,7 @@ import imbacad.model.shader.UniformMatrix4;
 import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.HashSet;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
@@ -47,9 +49,11 @@ public class DefaultRenderer implements GLEventListener {
 	private Mesh selectedMesh = null;
 	private int selectedVertex = -1;
 	
-	public DefaultRenderer(RenderingEventAdapter events, Camera camera, CameraUpdater updater) {
+	private HashSet<Mesh> meshMap = new HashSet<Mesh>();
+	
+	public DefaultRenderer(RenderingEventAdapter events, Camera camera) {
 		this.events = events;
-		this.cameraUpdater = updater;
+		this.cameraUpdater = new LevitateUpdater();
 		this.camera = camera;
 	}
 	
@@ -74,7 +78,9 @@ public class DefaultRenderer implements GLEventListener {
 		for (Mesh mesh : ImbaCAD.meshes) {
 			mesh.init(gl);
 		}
-			
+		
+		gl.glEnable(GL3.GL_DEPTH_TEST);
+		gl.glDepthFunc(GL3.GL_LESS);
 		gl.glEnable(GL3.GL_CULL_FACE);
 		gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
 		
@@ -132,18 +138,20 @@ public class DefaultRenderer implements GLEventListener {
 			light.updateUniforms(gl, texShader);
 		}
 		
-		
 		camera.updateUniforms(gl, texShader);
 		uniformTexView.update(gl, view);
 		uniformTexProj.update(gl, projection);
 		
-		for (Mesh mesh : ImbaCAD.meshes) {
+		//for (Mesh mesh : ImbaCAD.meshes) {
+		for (Mesh mesh : meshMap) {
 			
-			if (mesh.getName().equals("mesh1")) {
+			System.out.println(mesh.getName());
+			
+			if (mesh.getName().equals("test")) {
 				mesh.getRotation().setZ(mesh.getRotation().getZ() + 0.01f);
 			}
 			
-			if (mesh.getName().equals("mesh2")) {
+			if (mesh.getName().equals("testHouse")) {
 				mesh.getRotation().setZ(mesh.getRotation().getZ() - 0.01f);
 			}
 			
@@ -160,99 +168,100 @@ public class DefaultRenderer implements GLEventListener {
 		
 		
 		
-		/*
-		 * draw selection TODO: Create class which handles that
-		 */
-		gl.glUseProgram(colShader.getProgram());
-		
-		// send data to gpu
-		uniformColView.update(gl, view);
-		uniformColProj.update(gl, projection);
-		
-		// remove last selection
-		if (selectedMesh != null) {
-			float[] col = {1.0f, 0.0f, 0.0f, 1.0f};
-			FloatBuffer colBuf = Buffers.newDirectFloatBuffer(col);
-			
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, selectedMesh.getColorBuffer());
-			gl.glBufferSubData(GL.GL_ARRAY_BUFFER, selectedVertex * 16, 16, colBuf);
-			
-			selectedMesh = null;
-			selectedVertex = -1;
-		}
-		
-		// draw new selection
-		for (Mesh mesh : ImbaCAD.meshes) {
-			
-			model = Glm.diag(1.0f);
-			model = Glm.translate(model, mesh.getPosition().toArray());
-			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
-			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
-			
-			// send data to gpu
-			uniformColModel.update(gl, model);
-			
-			
-			int floatCount = mesh.getVertexCount() * Vertex.FLOATS_PER;
-			
-			// get data from the gpu
-			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, mesh.getVertexBuffer());
-			FloatBuffer vertices = Buffers.newDirectFloatBuffer(floatCount);
-			gl.glGetBufferSubData(GL.GL_ARRAY_BUFFER, 0, 4 * floatCount, vertices);
-			IntBuffer viewport = Buffers.newDirectIntBuffer(4);
-			gl.glGetIntegerv(GL.GL_VIEWPORT, viewport);
-			FloatBuffer depthRange = Buffers.newDirectFloatBuffer(2);
-			gl.glGetFloatv(GL.GL_DEPTH_RANGE, depthRange);
-			
-			// get model-view-projection matrix
-			float[] mvp = Glm.mul(Glm.mul(projection, view), model);
-			
-			// calculate each vertex screen coordinate
-			for (int k = 0; k < floatCount; k += Vertex.FLOATS_PER) {
-				// get object coordinates, equal to mesh.getVertices()[0];
-				float objX = vertices.get(k+0); 		
-				float objY = vertices.get(k+1);
-				float objZ = vertices.get(k+2);
-				float objW = 1.0f;
-				
-				// get clip coordinates, OpenGL uses column-major order
-				float clipX = objX * mvp[ 0] + objY * mvp[ 4] + objZ * mvp[ 8] + objW * mvp[12];
-				float clipY = objX * mvp[ 1] + objY * mvp[ 5] + objZ * mvp[ 9] + objW * mvp[13];
-				float clipZ = objX * mvp[ 2] + objY * mvp[ 6] + objZ * mvp[10] + objW * mvp[14];
-				float clipW = objX * mvp[ 3] + objY * mvp[ 7] + objZ * mvp[11] + objW * mvp[15];
-				
-				// get normalized device coordinates
-				float ndcX = clipX / clipW;
-				float ndcY = clipY / clipW;
-				float ndcZ = clipZ / clipW;
-				
-				// get screen coordinates
-				float scX = 0.5f * viewport.get(2) * (ndcX + 1) + viewport.get(0);
-				float scY = viewport.get(3) - 0.5f * viewport.get(3) * (ndcY + 1) + viewport.get(1);
-				@SuppressWarnings("unused")
-				float scZ = 0.5f * ((depthRange.get(1) - depthRange.get(0)) * ndcZ + depthRange.get(1) + depthRange.get(0));
-				
-				// get distance to mouse pointer
-				float dx = scX - events.getMouseX();
-				float dy = scY - events.getMouseY();
-				
-				if (Math.sqrt(dx * dx + dy * dy) < 5.0) {
-					selectedMesh = mesh;
-					selectedVertex = k / (Vertex.FLOATS_PER);
-					
-					float[] col = {0.0f, 1.0f, 0.0f, 1.0f};
-					FloatBuffer colBuf = Buffers.newDirectFloatBuffer(col);
-					
-					gl.glBindBuffer(GL.GL_ARRAY_BUFFER, selectedMesh.getColorBuffer());
-					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, selectedVertex * 16, 16, colBuf);
-					
-					//System.out.println(k / (Mesh.SIZEOF_VERTEX / 4) + " " + Math.sqrt(dx * dx + dy * dy));
-				}
-			}	
-			
-			
-			mesh.drawPoints(drawable, colShader);
-		}
+//		/*
+//		 * draw selection TODO: Create class which handles that
+//		 */
+//		gl.glUseProgram(colShader.getProgram());
+//		
+//		// send data to gpu
+//		uniformColView.update(gl, view);
+//		uniformColProj.update(gl, projection);
+//		
+//		// remove last selection
+//		if (selectedMesh != null) {
+//			float[] col = {1.0f, 0.0f, 0.0f, 1.0f};
+//			FloatBuffer colBuf = Buffers.newDirectFloatBuffer(col);
+//			
+//			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, selectedMesh.getColorBuffer());
+//			gl.glBufferSubData(GL.GL_ARRAY_BUFFER, selectedVertex * 16, 16, colBuf);
+//			
+//			selectedMesh = null;
+//			selectedVertex = -1;
+//		}
+//		
+//		// draw new selection
+//		//for (Mesh mesh : ImbaCAD.meshes) {
+//		for (Mesh mesh : meshMap) {
+//			
+//			model = Glm.diag(1.0f);
+//			model = Glm.translate(model, mesh.getPosition().toArray());
+//			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
+//			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
+//			
+//			// send data to gpu
+//			uniformColModel.update(gl, model);
+//			
+//			
+//			int floatCount = mesh.getVertexCount() * Vertex.FLOATS_PER;
+//			
+//			// get data from the gpu
+//			gl.glBindBuffer(GL.GL_ARRAY_BUFFER, mesh.getVertexBuffer());
+//			FloatBuffer vertices = Buffers.newDirectFloatBuffer(floatCount);
+//			gl.glGetBufferSubData(GL.GL_ARRAY_BUFFER, 0, 4 * floatCount, vertices);
+//			IntBuffer viewport = Buffers.newDirectIntBuffer(4);
+//			gl.glGetIntegerv(GL.GL_VIEWPORT, viewport);
+//			FloatBuffer depthRange = Buffers.newDirectFloatBuffer(2);
+//			gl.glGetFloatv(GL.GL_DEPTH_RANGE, depthRange);
+//			
+//			// get model-view-projection matrix
+//			float[] mvp = Glm.mul(Glm.mul(projection, view), model);
+//			
+//			// calculate each vertex screen coordinate
+//			for (int k = 0; k < floatCount; k += Vertex.FLOATS_PER) {
+//				// get object coordinates, equal to mesh.getVertices()[0];
+//				float objX = vertices.get(k+0); 		
+//				float objY = vertices.get(k+1);
+//				float objZ = vertices.get(k+2);
+//				float objW = 1.0f;
+//				
+//				// get clip coordinates, OpenGL uses column-major order
+//				float clipX = objX * mvp[ 0] + objY * mvp[ 4] + objZ * mvp[ 8] + objW * mvp[12];
+//				float clipY = objX * mvp[ 1] + objY * mvp[ 5] + objZ * mvp[ 9] + objW * mvp[13];
+//				float clipZ = objX * mvp[ 2] + objY * mvp[ 6] + objZ * mvp[10] + objW * mvp[14];
+//				float clipW = objX * mvp[ 3] + objY * mvp[ 7] + objZ * mvp[11] + objW * mvp[15];
+//				
+//				// get normalized device coordinates
+//				float ndcX = clipX / clipW;
+//				float ndcY = clipY / clipW;
+//				float ndcZ = clipZ / clipW;
+//				
+//				// get screen coordinates
+//				float scX = 0.5f * viewport.get(2) * (ndcX + 1) + viewport.get(0);
+//				float scY = viewport.get(3) - 0.5f * viewport.get(3) * (ndcY + 1) + viewport.get(1);
+//				@SuppressWarnings("unused")
+//				float scZ = 0.5f * ((depthRange.get(1) - depthRange.get(0)) * ndcZ + depthRange.get(1) + depthRange.get(0));
+//				
+//				// get distance to mouse pointer
+//				float dx = scX - events.getMouseX();
+//				float dy = scY - events.getMouseY();
+//				
+//				if (Math.sqrt(dx * dx + dy * dy) < 5.0) {
+//					selectedMesh = mesh;
+//					selectedVertex = k / (Vertex.FLOATS_PER);
+//					
+//					float[] col = {0.0f, 1.0f, 0.0f, 1.0f};
+//					FloatBuffer colBuf = Buffers.newDirectFloatBuffer(col);
+//					
+//					gl.glBindBuffer(GL.GL_ARRAY_BUFFER, selectedMesh.getColorBuffer());
+//					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, selectedVertex * 16, 16, colBuf);
+//					
+//					//System.out.println(k / (Mesh.SIZEOF_VERTEX / 4) + " " + Math.sqrt(dx * dx + dy * dy));
+//				}
+//			}	
+//			
+//			
+//			mesh.drawPoints(drawable, colShader);
+//		}
 	}
 
 	@Override
@@ -294,12 +303,16 @@ public class DefaultRenderer implements GLEventListener {
 		this.camera = camera;
 	}
 
-	public CameraUpdater getProcessor() {
+	public CameraUpdater getCameraUpdater() {
 		return cameraUpdater;
 	}
 
-	public void setProcessor(CameraUpdater processor) {
-		this.cameraUpdater = processor;
+	public void setCameraUpdater(CameraUpdater updater) {
+		this.cameraUpdater = updater;
+	}
+
+	public HashSet<Mesh> getMeshMap() {
+		return meshMap;
 	}
 
 }

@@ -17,7 +17,7 @@ public class Material implements HasUniforms {
 	
 	private float texture = 0.0f;
 	private float shininess = 200.0f;
-	private Vec3 specularColor = new Vec3(1.0f, 1.0f, 1.0f);
+	private Vec3 specularColor = new Vec3(0.5f, 0.5f, 0.5f);
 	private boolean flatNormals = false;
 	
 	

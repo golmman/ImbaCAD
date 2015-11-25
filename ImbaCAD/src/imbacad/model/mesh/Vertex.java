@@ -18,14 +18,18 @@ public class Vertex {
 		this.normal = new Vec3(vertex.normal);
 	}
 	
-	
 	public Vertex(Vec3 position, Vec2 texture, Vec3 normal) {
 		this.position = position;
 		this.texture = texture;
 		this.normal = normal;
 	}
 
-
+	public Vertex(Vec3 position) {
+		this.position = position;
+		this.texture = new Vec2();
+		this.normal = new Vec3();
+	}
+	
 	public Vertex(float posx, float posy, float posz) {
 		this.position = new Vec3(posx, posy, posz);
 		this.texture = new Vec2();
