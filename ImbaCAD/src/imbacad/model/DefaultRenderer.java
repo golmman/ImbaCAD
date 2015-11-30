@@ -5,7 +5,9 @@ import imbacad.control.RenderingEventAdapter;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.CameraUpdater;
 import imbacad.model.camera.LevitateUpdater;
+import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.TextureMesh;
 import imbacad.model.mesh.Vertex;
 import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
@@ -35,6 +37,8 @@ public class DefaultRenderer implements GLEventListener {
 	private int width = 800;
 	private int height = 600;
 	
+	private FrameBuffer frameBuffer = new FrameBuffer();
+	
 	private Shader texShader = null;
 	private Shader colShader = null;
 	
@@ -46,10 +50,11 @@ public class DefaultRenderer implements GLEventListener {
 	private UniformMatrix4 uniformColView = null;
 	private UniformMatrix4 uniformColModel = null;
 	
-	private Mesh selectedMesh = null;
+	private TextureMesh selectedMesh = null;
 	private int selectedVertex = -1;
 	
-	private HashSet<Mesh> meshMap = new HashSet<Mesh>();
+	private HashSet<TextureMesh> textureMeshes = new HashSet<TextureMesh>();
+	private HashSet<ColorMesh> colorMeshes = new HashSet<ColorMesh>();
 	
 	public DefaultRenderer(RenderingEventAdapter events, Camera camera) {
 		this.events = events;
@@ -72,12 +77,12 @@ public class DefaultRenderer implements GLEventListener {
 		this.uniformColView = new UniformMatrix4(gl, colShader, "view");
 		this.uniformColModel = new UniformMatrix4(gl, colShader, "model");
 		
-
-		
-		
 		for (Mesh mesh : ImbaCAD.meshes) {
 			mesh.init(gl);
 		}
+		
+		
+		frameBuffer.init(gl, drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
 		
 		gl.glEnable(GL3.GL_DEPTH_TEST);
 		gl.glDepthFunc(GL3.GL_LESS);
@@ -118,6 +123,8 @@ public class DefaultRenderer implements GLEventListener {
 		gl.glClearColor(0, 0, 0, 1.0f); 
 		gl.glClear(GL3.GL_STENCIL_BUFFER_BIT | GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 		
+		
+		
 		// set up projection matrix
 		projection = Glm.diag(1.0f);
 		projection = Glm.perspective(camera.getFov(), (float)width / height, 0.1f, 100.0f);
@@ -143,9 +150,7 @@ public class DefaultRenderer implements GLEventListener {
 		uniformTexProj.update(gl, projection);
 		
 		//for (Mesh mesh : ImbaCAD.meshes) {
-		for (Mesh mesh : meshMap) {
-			
-			System.out.println(mesh.getName());
+		for (TextureMesh mesh : textureMeshes) {
 			
 			if (mesh.getName().equals("test")) {
 				mesh.getRotation().setZ(mesh.getRotation().getZ() + 0.01f);
@@ -166,16 +171,39 @@ public class DefaultRenderer implements GLEventListener {
 			mesh.draw(gl, texShader);
 		}
 		
+		FloatBuffer data = Buffers.newDirectFloatBuffer(4);
+		gl.glReadPixels(
+				events.getMouseX(), 
+				height - events.getMouseY(), 
+				1, 1, GL.GL_RGBA, GL3.GL_FLOAT, data);
+		System.out.println(255.0f*data.get(0) + " " + 255.0f*data.get(1) + " " + 255.0f*data.get(2) + " " + 255.0f*data.get(3) + " ");
 		
 		
-//		/*
-//		 * draw selection TODO: Create class which handles that
-//		 */
-//		gl.glUseProgram(colShader.getProgram());
-//		
-//		// send data to gpu
-//		uniformColView.update(gl, view);
-//		uniformColProj.update(gl, projection);
+		/*
+		 * draw selection TODO: Create class which handles that
+		 * 
+		 * glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &c);
+		 * 
+		 */
+		gl.glUseProgram(colShader.getProgram());
+		
+		// send data to gpu
+		uniformColView.update(gl, view);
+		uniformColProj.update(gl, projection);
+		
+		for (ColorMesh mesh : colorMeshes) {
+			
+			model = Glm.diag(1.0f);
+			model = Glm.translate(model, mesh.getPosition().toArray());
+			model = Glm.rotate(model, mesh.getRotation().getX(), Glm.vec3(1.0f, 0.0f, 0.0f));
+			model = Glm.rotate(model, mesh.getRotation().getZ(), Glm.vec3(0.0f, 0.0f, 1.0f));
+			
+			// send data to gpu
+			uniformColModel.update(gl, model);
+			
+			mesh.draw(gl, colShader);
+		}
+		
 //		
 //		// remove last selection
 //		if (selectedMesh != null) {
@@ -271,9 +299,10 @@ public class DefaultRenderer implements GLEventListener {
 		GL3 gl = drawable.getGL().getGL3();
 		
 		for (Mesh mesh : ImbaCAD.meshes) {
-			mesh.dispose(drawable);
+			mesh.dispose(gl);
 		}
 		
+		frameBuffer.dispose(gl);
 		texShader.dispose(gl);
 	}
 
@@ -291,6 +320,8 @@ public class DefaultRenderer implements GLEventListener {
 		// perspectiveGL((GL2)gl, 90.0, (double)width / height, 0.1, 100.0);
 
 		gl.glViewport(0, 0, width, height);
+		
+		frameBuffer.reshape(gl, width, height);
 		
 		System.out.println("Window resized to width=" + z + " height=" + h);
 	}
@@ -311,8 +342,28 @@ public class DefaultRenderer implements GLEventListener {
 		this.cameraUpdater = updater;
 	}
 
-	public HashSet<Mesh> getMeshMap() {
-		return meshMap;
+//	public HashSet<TextureMesh> getTextureMeshes() {
+//		return textureMeshes;
+//	}
+//
+//	public HashSet<ColorMesh> getColorMeshes() {
+//		return colorMeshes;
+//	}
+	
+	public void addMesh(Mesh mesh) {
+		if (mesh instanceof TextureMesh) {
+			textureMeshes.add((TextureMesh)mesh);
+		} else if (mesh instanceof ColorMesh) {
+			colorMeshes.add((ColorMesh)mesh);
+		}
+	}
+	
+	public void removeMesh(Mesh mesh) {
+		if (mesh instanceof TextureMesh) {
+			textureMeshes.remove((TextureMesh)mesh);
+		} else if (mesh instanceof ColorMesh) {
+			colorMeshes.remove((ColorMesh)mesh);
+		}
 	}
 
 }

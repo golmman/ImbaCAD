@@ -8,7 +8,9 @@ import java.io.File;
 import imbacad.ImbaCAD;
 import imbacad.model.Light;
 import imbacad.model.Vec3;
-import imbacad.model.mesh.Mesh;
+import imbacad.model.Vec4;
+import imbacad.model.mesh.TextureMesh;
+import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh2D;
 import imbacad.model.mesh.Plaster;
 import imbacad.model.mesh.VertexArray;
@@ -74,28 +76,40 @@ public class MainWindow extends JFrame {
 	};
 
 	
+	public static Vec3[] colorMeshTest = {
+		new Vec3(0.0f, 0.0f, 0.0f),
+		new Vec3(0.2f, 0.8f, 0.0f),
+		new Vec3(1.0f, 1.0f, 0.0f),
+		new Vec3(0.5f, 0.5f, 0.0f),
+		new Vec3(2.0f, 0.0f, 0.0f),
+		new Vec3(0.0f, 0.0f, 0.0f),
+	};
+	
 	private Animator animator = new Animator();
 	
 	public MainWindow(String title) {
 		super(title);
 		
 		// add test meshes
-		Mesh mesh1 = new Mesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "flippers");
+		TextureMesh mesh1 = new TextureMesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "flippers");
 		
-		Mesh mesh2 = new Mesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "test");
+		TextureMesh mesh2 = new TextureMesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "test");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
 		
-		Mesh mesh3 = Mesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "testHouse");
+		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "testHouse");
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
 		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
 		
 		Mesh2D mesh2D = new Mesh2D(testPlasters, "doorway");
-		Mesh mesh4 = mesh2D.to3D();
+		TextureMesh mesh4 = mesh2D.to3D();
+		
+		ColorMesh mesh5 = new ColorMesh(colorMeshTest, new Vec4(1.0f,  0.0f, 0.0f, 0.0f), "LINES!");
 		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
 		ImbaCAD.meshes.add(mesh4);
+		ImbaCAD.meshes.add(mesh5);
 		
 		// add directional lights
 		Vec3 dirLightPos0 = new Vec3(1.0f, 1.0f, 1.0f).normalised();

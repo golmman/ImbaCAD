@@ -1,7 +1,7 @@
 package imbacad.model.selector;
 
 import imbacad.control.RenderingEventAdapter;
-import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.TextureMesh;
 
 import java.util.Collection;
 
@@ -14,7 +14,7 @@ public class VertexSelector extends Selector {
 	}
 
 	@Override
-	public void update(GLAutoDrawable drawable, Collection<Mesh> meshes, float[] mvp, RenderingEventAdapter events) {
+	public void update(GLAutoDrawable drawable, Collection<TextureMesh> meshes, float[] mvp, RenderingEventAdapter events) {
 		// TODO Auto-generated method stub
 		
 	}

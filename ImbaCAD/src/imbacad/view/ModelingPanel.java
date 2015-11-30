@@ -177,9 +177,9 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 			MenuMesh menu = (MenuMesh)e.getSource();
 			
 			if (e.getStateChange() == ItemEvent.SELECTED) {
-				renderer.getMeshMap().add(menu.mesh);
+				renderer.addMesh(menu.mesh);
 			} else if (e.getStateChange() == ItemEvent.DESELECTED) {
-				renderer.getMeshMap().remove(menu.mesh);
+				renderer.removeMesh(menu.mesh);
 			}
 			
 			

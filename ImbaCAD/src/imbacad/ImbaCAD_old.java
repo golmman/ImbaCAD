@@ -16,7 +16,7 @@ import com.jogamp.common.nio.Buffers;
 
 import imbacad.model.Glm;
 import imbacad.model.Vec3;
-import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.TextureMesh;
 
 import java.io.File;
 import java.io.FileReader;
@@ -40,7 +40,7 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 	private static GLWindow glWindow2;
 	private static Animator animator;
 	
-	private Mesh mesh = null;
+	private TextureMesh mesh = null;
 	
 	private static int width = 800;
 	private static int height = 600;
@@ -437,7 +437,7 @@ public class ImbaCAD_old implements GLEventListener, KeyListener, MouseListener 
 		
 		GL3 gl = drawable.getGL().getGL3();
 		
-		mesh.dispose(drawable);
+		mesh.dispose(gl);
 		
 		gl.glUseProgram(0);
 		gl.glDeleteBuffers(2, vboHandles, 0); // Release VBO, color and vertices, buffer GPU memory.

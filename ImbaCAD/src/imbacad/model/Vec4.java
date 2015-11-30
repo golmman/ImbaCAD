@@ -11,6 +11,13 @@ public class Vec4 {
 		vec[3] = 0.0f;
 	}
 	
+	public Vec4(Vec4 v) {
+		vec[0] = v.vec[0];
+		vec[1] = v.vec[1];
+		vec[2] = v.vec[2];
+		vec[3] = v.vec[3];
+	}
+	
 	public Vec4(float x, float y, float z, float w) {
 		vec[0] = x;
 		vec[1] = y;

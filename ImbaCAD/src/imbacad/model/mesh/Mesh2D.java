@@ -22,7 +22,7 @@ public class Mesh2D {
 	}
 	
 	
-	public Mesh to3D() {
+	public TextureMesh to3D() {
 		VertexArray vertices3D = new VertexArray();
 		ArrayList<Integer> indices3D = new ArrayList<Integer>();
 		
@@ -51,7 +51,7 @@ public class Mesh2D {
 			intIndices3D[k] = indices3D.get(k);
 		}
 		
-		return Mesh.createFlatShadedMesh(new File("white.bmp"), vertices3D, intIndices3D, this.name + "3D");
+		return TextureMesh.createFlatShadedMesh(new File("white.bmp"), vertices3D, intIndices3D, this.name + "3D");
 	}
 	
 	

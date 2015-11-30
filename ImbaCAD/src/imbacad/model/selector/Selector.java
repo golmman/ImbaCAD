@@ -5,7 +5,7 @@ import java.util.Collection;
 import com.jogamp.opengl.GLAutoDrawable;
 
 import imbacad.control.RenderingEventAdapter;
-import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.TextureMesh;
 
 public abstract class Selector {
 	
@@ -16,5 +16,5 @@ public abstract class Selector {
 	public Selector() {}
 	
 	
-	public abstract void update(GLAutoDrawable drawable, Collection<Mesh> meshes, float[] mvp, RenderingEventAdapter events);
+	public abstract void update(GLAutoDrawable drawable, Collection<TextureMesh> meshes, float[] mvp, RenderingEventAdapter events);
 }
