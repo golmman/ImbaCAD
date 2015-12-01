@@ -24,6 +24,11 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+/**
+ * Represents a mesh which uses an advanced shader with lighting, textures etc. .
+ * @author Dirk Kretschmann
+ *
+ */
 public class TextureMesh extends Mesh {
 	
 	private Material material = new Material();
@@ -42,14 +47,8 @@ public class TextureMesh extends Mesh {
 	private int[] colorBuffer = new int[1];
 	
 	
-	/**
-	 * Creates a new Mesh from given data.<br>
-	 * @param textureFile
-	 * @param vertices
-	 * @param indices
-	 * @param name
-	 */
-	public TextureMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
+
+	private TextureMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
 		super(name);
 		
 		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
@@ -57,6 +56,18 @@ public class TextureMesh extends Mesh {
 		this.textureFile = textureFile;
 		this.vertices = vertices;
 		this.indices = indices;
+	}
+	
+	
+	/**
+	 * Creates a new Mesh from given data.<br>
+	 * @param textureFile
+	 * @param vertices
+	 * @param indices
+	 * @param name
+	 */
+	public static TextureMesh createMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
+		return new TextureMesh(textureFile, vertices, indices, name);
 	}
 	
 	/**

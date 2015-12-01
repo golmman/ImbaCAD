@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.util.Animator;
 
 public class MainWindow extends JFrame {
@@ -91,9 +92,9 @@ public class MainWindow extends JFrame {
 		super(title);
 		
 		// add test meshes
-		TextureMesh mesh1 = new TextureMesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "flippers");
+		TextureMesh mesh1 = TextureMesh.createMesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "flippers");
 		
-		TextureMesh mesh2 = new TextureMesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "test");
+		TextureMesh mesh2 = TextureMesh.createMesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "test");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
 		
 		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "testHouse");
@@ -103,7 +104,7 @@ public class MainWindow extends JFrame {
 		Mesh2D mesh2D = new Mesh2D(testPlasters, "doorway");
 		TextureMesh mesh4 = mesh2D.to3D();
 		
-		ColorMesh mesh5 = new ColorMesh(colorMeshTest, new Vec4(1.0f,  0.0f, 0.0f, 0.0f), "LINES!");
+		ColorMesh mesh5 = ColorMesh.createColorGradientMesh(colorMeshTest, new Vec4(1.0f,  0.0f, 0.0f, 0.0f), GL.GL_LINES, "LINES!");
 		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);

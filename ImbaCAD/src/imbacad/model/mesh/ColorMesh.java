@@ -10,18 +10,24 @@ import imbacad.model.Vec3;
 import imbacad.model.Vec4;
 import imbacad.model.shader.Shader;
 
+/**
+ * Represents a mesh using a simplyfied shader which only outputs colors
+ * @author Dirk Kretschmann
+ *
+ */
 public class ColorMesh extends Mesh {
 	
 	Vec3[] vertices = null;
 	Vec4[] colors = null;
+	private int drawMode = GL.GL_LINES;
 	
 	private int[] colVAO = new int[1];
 	private int[] vertexBuffer = new int[1];
 	private int[] colorBuffer = new int[1];
 	
-	private int drawMode = GL.GL_LINES;
+
 	
-	public ColorMesh(Vec3[] vertices, Vec4[] colors, String name) {
+	private ColorMesh(Vec3[] vertices, Vec4[] colors, int drawMode, String name) {
 		super(name);
 		
 		if (vertices.length != colors.length) {
@@ -30,20 +36,60 @@ public class ColorMesh extends Mesh {
 		
 		this.vertices = vertices;
 		this.colors = colors;
-		
+		this.drawMode = drawMode;
 	}
 	
-	public ColorMesh(Vec3[] vertices, Vec4 color, String name) {
-		super(name);
+	
+	/**
+	 * Creates a mesh where vertex colours are interpolated for each fragment.
+	 * @param vertices
+	 * @param colors
+	 * @param drawMode
+	 * @param name
+	 * @return
+	 */
+	public static ColorMesh createColorGradientMesh(Vec3[] vertices, Vec4[] colors, int drawMode, String name) {
+		return new ColorMesh(vertices, colors, drawMode, name);
+	}
+	
+	/**
+	 * Creates a mesh where vertex colours are interpolated for each fragment.
+	 * @param vertices
+	 * @param color
+	 * @param drawMode
+	 * @param name
+	 * @return
+	 */
+	public static ColorMesh createColorGradientMesh(Vec3[] vertices, Vec4 color, int drawMode, String name) {
 		
-		
-		this.vertices = vertices;
-		this.colors = new Vec4[vertices.length];
-		
+		Vec4[] colors = new Vec4[vertices.length];
 		for (int k = 0; k < vertices.length; ++k) {
-			this.colors[k] = new Vec4(color);
+			colors[k] = new Vec4(color);
 		}
 		
+		return createColorGradientMesh(vertices, colors, drawMode, name);
+	}
+	
+	/**
+	 * Creates a mesh where the provoking vertex (first vertex of each primitive) 
+	 * determines the colour of the entire primitive.
+	 * @param vertices
+	 * @param colors
+	 * @param drawMode
+	 * @param name
+	 * @return
+	 */
+	public static ColorMesh createColorFlatMesh(Vec3[] vertices, Vec4[] colors, int drawMode, String name) {
+		
+		if (drawMode == GL.GL_LINES) {
+			for (int k = 1; k < colors.length; k += 2) {
+				colors[k] = new Vec4(colors[k-1]);
+			}
+		} else if (drawMode == GL.GL_TRIANGLES) {
+			
+		}
+		
+		return null;
 	}
 	
 
@@ -98,12 +144,12 @@ public class ColorMesh extends Mesh {
 		
 	}
 
-
 	@Override
 	public void dispose(GL3 gl) {
 		// TODO Auto-generated method stub
 		
 	}
+	
 
 
 	public int getDrawMode() {
@@ -111,9 +157,6 @@ public class ColorMesh extends Mesh {
 	}
 
 
-	public void setDrawMode(int drawMode) {
-		this.drawMode = drawMode;
-	}
 
 
 }
