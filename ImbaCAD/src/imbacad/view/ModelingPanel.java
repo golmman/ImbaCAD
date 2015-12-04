@@ -44,8 +44,8 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	
 	class MenuMesh extends JCheckBoxMenuItem {
 		private static final long serialVersionUID = 3058433128285873718L;
-		public Mesh mesh = null;
-		public MenuMesh(Mesh mesh) {
+		public Mesh<?> mesh = null;
+		public MenuMesh(Mesh<?> mesh) {
 			super(mesh.getName());
 			this.mesh = mesh;
 		}
@@ -105,7 +105,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		buttonOrbit.setSelected(true);
 		
 		menuBar.add(menuShow);
-		for (Mesh m: ImbaCAD.meshes) {
+		for (Mesh<?> m: ImbaCAD.meshes) {
 			MenuMesh menuItem = new MenuMesh(m);
 			menuItem.addItemListener(this);
 			menuItem.setSelected(true);	

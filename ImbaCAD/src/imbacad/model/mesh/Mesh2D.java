@@ -3,6 +3,9 @@ package imbacad.model.mesh;
 import java.io.File;
 import java.util.ArrayList;
 
+import imbacad.model.mesh.vertex.TextureVertex;
+import imbacad.model.mesh.vertex.VertexArray;
+
 public class Mesh2D {
 	
 	private Plaster[] plasters;
@@ -23,7 +26,7 @@ public class Mesh2D {
 	
 	
 	public TextureMesh to3D() {
-		VertexArray vertices3D = new VertexArray();
+		VertexArray<TextureVertex> vertices3D = new VertexArray<TextureVertex>();
 		ArrayList<Integer> indices3D = new ArrayList<Integer>();
 		
 		
@@ -39,10 +42,10 @@ public class Mesh2D {
 			indices3D.add(i0+2);
 			indices3D.add(i0+3);
 			
-			vertices3D.add(new Vertex(plasters[k].getTopR()));
-			vertices3D.add(new Vertex(plasters[k].getTopL()));
-			vertices3D.add(new Vertex(plasters[k].getBotL()));
-			vertices3D.add(new Vertex(plasters[k].getBotR()));
+			vertices3D.add(new TextureVertex(plasters[k].getTopR()));
+			vertices3D.add(new TextureVertex(plasters[k].getTopL()));
+			vertices3D.add(new TextureVertex(plasters[k].getBotL()));
+			vertices3D.add(new TextureVertex(plasters[k].getBotR()));
 		}
 		
 		

@@ -8,12 +8,13 @@ import java.io.File;
 import imbacad.ImbaCAD;
 import imbacad.model.Light;
 import imbacad.model.Vec3;
-import imbacad.model.Vec4;
 import imbacad.model.mesh.TextureMesh;
+import imbacad.model.mesh.vertex.ColorVertex;
+import imbacad.model.mesh.vertex.TextureVertex;
+import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh2D;
 import imbacad.model.mesh.Plaster;
-import imbacad.model.mesh.VertexArray;
 import imbacad.view.docking.Dockable;
 import imbacad.view.docking.DockingCanvas;
 import imbacad.view.docking.DockingRoot;
@@ -30,30 +31,30 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 280678482530286275L;
 	
 	// vertices and indices for test meshes
-	public static float testVertices[] = {
-		 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f, 	0.0f, 0.0f, 1.0f, 
-		-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	0.0f, 0.0f, 1.0f, 
-		-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	0.0f, 0.0f, 1.0f, 
-		 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.0f, 0.0f, 1.0f
+	public static TextureVertex[] testVertices = {
+		new TextureVertex(0.5f,  0.5f, -0.5f,  	1.0f,  0.0f, 	0.0f, 0.0f, 1.0f), 
+		new TextureVertex(-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	0.0f, 0.0f, 1.0f), 
+		new TextureVertex(-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	0.0f, 0.0f, 1.0f), 
+		new TextureVertex( 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.0f, 0.0f, 1.0f)
 	};
 	public static int[] testIndices = {
 		0, 1, 2, 0, 2, 3
 	};
 	
 	// 
-	private static float houseVertices[] = {
-		 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f,	0.57735026f, 0.57735026f, -0.57735026f,	// bottom
-		-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	-0.57735026f, 0.57735026f, -0.57735026f,
-		-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	-0.57735026f, -0.57735026f, -0.57735026f,
-		 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.57735026f, -0.57735026f, -0.57735026f,
+	private static TextureVertex[] houseVertices = {
+		new TextureVertex( 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f,	0.57735026f, 0.57735026f, -0.57735026f),	// bottom
+		new TextureVertex(-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	-0.57735026f, 0.57735026f, -0.57735026f),
+		new TextureVertex(-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	-0.57735026f, -0.57735026f, -0.57735026f),
+		new TextureVertex( 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.57735026f, -0.57735026f, -0.57735026f),
 		 
-		 0.5f,  0.5f,  0.5f,  	1.0f,  0.0f,	0.6906652f, 0.6113837f, 0.38625336f,	// top
-		-0.5f,  0.5f,  0.5f,  	0.0f,  0.0f, 	-0.6906652f, 0.6113837f, 0.38625336f,
-		-0.5f, -0.5f,  0.5f,  	0.0f,  1.0f, 	-0.6906652f, -0.6113837f, 0.38625336f,
-		 0.5f, -0.5f,  0.5f,  	1.0f,  1.0f, 	0.6906652f, -0.6113837f, 0.38625336f,
+		new TextureVertex( 0.5f,  0.5f,  0.5f,  	1.0f,  0.0f,	0.6906652f, 0.6113837f, 0.38625336f),	// top
+		new TextureVertex(-0.5f,  0.5f,  0.5f,  	0.0f,  0.0f, 	-0.6906652f, 0.6113837f, 0.38625336f),
+		new TextureVertex(-0.5f, -0.5f,  0.5f,  	0.0f,  1.0f, 	-0.6906652f, -0.6113837f, 0.38625336f),
+		new TextureVertex( 0.5f, -0.5f,  0.5f,  	1.0f,  1.0f, 	0.6906652f, -0.6113837f, 0.38625336f),
 		 
-		 0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	0.46133813f, 0.0f, 0.8872245f,	// roof
-		-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f
+		new TextureVertex( 0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	0.46133813f, 0.0f, 0.8872245f),	// roof
+		new TextureVertex(-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f)
 	};
 	public static int[] houseIndices = {
 		0, 3, 2, 0, 2, 1, 	// bottom
@@ -77,14 +78,15 @@ public class MainWindow extends JFrame {
 	};
 
 	
-	public static Vec3[] colorMeshTest = {
-		new Vec3(0.0f, 0.0f, 0.0f),
-		new Vec3(0.2f, 0.8f, 0.0f),
-		new Vec3(1.0f, 1.0f, 0.0f),
-		new Vec3(0.5f, 0.5f, 0.0f),
-		new Vec3(2.0f, 0.0f, 0.0f),
-		new Vec3(0.0f, 0.0f, 0.0f),
+	public static ColorVertex[] colorMeshVertices = {
+		new ColorVertex(0.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
+		new ColorVertex(0.2f, 0.8f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
+		new ColorVertex(1.0f, 1.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
+		new ColorVertex(0.5f, 0.5f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
+		new ColorVertex(2.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
+		new ColorVertex(0.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f)
 	};
+	public static int[] colorMeshIndices = {0};
 	
 	private Animator animator = new Animator();
 	
@@ -92,19 +94,31 @@ public class MainWindow extends JFrame {
 		super(title);
 		
 		// add test meshes
-		TextureMesh mesh1 = TextureMesh.createMesh(new File("test2.jpg"), new VertexArray(testVertices), testIndices, "flippers");
+		TextureMesh mesh1 = TextureMesh.createMesh(
+				new File("test2.jpg"), 
+				new VertexArray<TextureVertex>(testVertices), 
+				testIndices, "flippers");
 		
-		TextureMesh mesh2 = TextureMesh.createMesh(new File("test.bmp"), new VertexArray(testVertices), testIndices, "test");
+		TextureMesh mesh2 = TextureMesh.createMesh(
+				new File("test.bmp"), 
+				new VertexArray<TextureVertex>(testVertices), 
+				testIndices, "test");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
 		
-		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(new File("white.bmp"), new VertexArray(houseVertices), houseIndices, "testHouse");
+		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(
+				new File("white.bmp"), 
+				new VertexArray<TextureVertex>(houseVertices), 
+				houseIndices, "testHouse");
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
 		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
 		
 		Mesh2D mesh2D = new Mesh2D(testPlasters, "doorway");
 		TextureMesh mesh4 = mesh2D.to3D();
 		
-		ColorMesh mesh5 = ColorMesh.createColorGradientMesh(colorMeshTest, new Vec4(1.0f,  0.0f, 0.0f, 0.0f), GL.GL_LINES, "LINES!");
+		ColorMesh mesh5 = ColorMesh.createColorGradientMesh(
+				GL.GL_LINES, 
+				new VertexArray<ColorVertex>(colorMeshVertices), 
+				null, "LINES!");
 		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);

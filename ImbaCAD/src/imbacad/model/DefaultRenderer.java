@@ -8,13 +8,11 @@ import imbacad.model.camera.LevitateUpdater;
 import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh;
 import imbacad.model.mesh.TextureMesh;
-import imbacad.model.mesh.Vertex;
 import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
 
 import java.io.File;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.HashSet;
 
 import com.jogamp.common.nio.Buffers;
@@ -77,7 +75,7 @@ public class DefaultRenderer implements GLEventListener {
 		this.uniformColView = new UniformMatrix4(gl, colShader, "view");
 		this.uniformColModel = new UniformMatrix4(gl, colShader, "model");
 		
-		for (Mesh mesh : ImbaCAD.meshes) {
+		for (Mesh<?> mesh : ImbaCAD.meshes) {
 			mesh.init(gl);
 		}
 		
@@ -298,7 +296,7 @@ public class DefaultRenderer implements GLEventListener {
 		
 		GL3 gl = drawable.getGL().getGL3();
 		
-		for (Mesh mesh : ImbaCAD.meshes) {
+		for (Mesh<?> mesh : ImbaCAD.meshes) {
 			mesh.dispose(gl);
 		}
 		
@@ -350,7 +348,7 @@ public class DefaultRenderer implements GLEventListener {
 //		return colorMeshes;
 //	}
 	
-	public void addMesh(Mesh mesh) {
+	public void addMesh(Mesh<?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.add((TextureMesh)mesh);
 		} else if (mesh instanceof ColorMesh) {
@@ -358,7 +356,7 @@ public class DefaultRenderer implements GLEventListener {
 		}
 	}
 	
-	public void removeMesh(Mesh mesh) {
+	public void removeMesh(Mesh<?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.remove((TextureMesh)mesh);
 		} else if (mesh instanceof ColorMesh) {

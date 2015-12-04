@@ -2,6 +2,8 @@ package imbacad.model.mesh;
 
 import imbacad.model.Material;
 import imbacad.model.Vec3;
+import imbacad.model.mesh.vertex.TextureVertex;
+import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.Shader;
 
 import java.awt.Graphics2D;
@@ -29,27 +31,22 @@ import com.jogamp.opengl.GL3;
  * @author Dirk Kretschmann
  *
  */
-public class TextureMesh extends Mesh {
+public class TextureMesh extends Mesh<TextureVertex> {
 	
 	private Material material = new Material();
 	
 	private File textureFile;
-	private VertexArray vertices;
-	private int[] indices;
 	
 	private int[] texture = new int[1];			// texture id
 
-	private int[] texVAO = new int[1]; 			// Vertex Array Object - holds the set of "everything that needs rendering"
-	private int[] vertexBuffer = new int[1]; 	// Vertex Buffer Object - holds vertices
-	private int[] indexBuffer = new int[1]; 	// Element Buffer Object - holds indices
 	
-	private int[] colVAO = new int[1];
-	private int[] colorBuffer = new int[1];
+//	private int[] colVAO = new int[1];
+//	private int[] colorBuffer = new int[1];
 	
 	
 
-	private TextureMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
-		super(name);
+	private TextureMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
+		super(vertices, indices, name);
 		
 		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
 		
@@ -66,7 +63,7 @@ public class TextureMesh extends Mesh {
 	 * @param indices
 	 * @param name
 	 */
-	public static TextureMesh createMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
+	public static TextureMesh createMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
 		return new TextureMesh(textureFile, vertices, indices, name);
 	}
 	
@@ -79,13 +76,13 @@ public class TextureMesh extends Mesh {
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createFlatShadedMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
+	public static TextureMesh createFlatShadedMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
 		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
 		
 		for (int k = 0; k < indices.length; k += 3) {
-			Vertex vertex0 = new Vertex(vertices.get(indices[k]));
-			Vertex vertex1 = new Vertex(vertices.get(indices[k+1]));
-			Vertex vertex2 = new Vertex(vertices.get(indices[k+2]));
+			TextureVertex vertex0 = new TextureVertex(vertices.get(indices[k]));
+			TextureVertex vertex1 = new TextureVertex(vertices.get(indices[k+1]));
+			TextureVertex vertex2 = new TextureVertex(vertices.get(indices[k+2]));
 			
 			// get normal, add vertex
 			Vec3 v1 = new Vec3(vertex1.position.sub(vertex0.position));
@@ -111,7 +108,7 @@ public class TextureMesh extends Mesh {
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createPhongShadedMesh(File textureFile, VertexArray vertices, int[] indices, String name) {
+	public static TextureMesh createPhongShadedMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
 		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
 		
 		Vec3 v0 = null, v1 = null, v2 = null;
@@ -163,81 +160,39 @@ public class TextureMesh extends Mesh {
 	@Override
 	public void init(GL3 gl) {
 		
-		/*
-		 * 
-		 */
-		float[] colors = new float[4 * getVertexCount()];
-		for (int k = 0; k < colors.length; k += 4) {
-			colors[k+0] = 1.0f;
-			colors[k+1] = 0.0f;
-			colors[k+2] = 0.0f;
-			colors[k+3] = 1.0f;
-		}
 		
-		FloatBuffer colorBuf = Buffers.newDirectFloatBuffer(colors);
 		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
 		IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices);
 		
-		gl.glGenVertexArrays(1, texVAO, 0);
-		gl.glGenBuffers(1, vertexBuffer, 0);
-		gl.glGenBuffers(1, indexBuffer, 0);
+		gl.glGenVertexArrays(1, vao, 0);
+		gl.glGenBuffers(1, vbo, 0);
+		gl.glGenBuffers(1, ibo, 0);
 		
-		gl.glGenVertexArrays(1, colVAO, 0);
-		gl.glGenBuffers(1, colorBuffer, 0);
-		
-		
-		
-		
-		
-		
-		
-		/*
-		 * create color vertex array
-		 */
-		gl.glBindVertexArray(colVAO[0]);
-		
-		// vertices
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBuffer[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.size() * Vertex.SIZE_OF, vertexBuf, GL.GL_STATIC_DRAW);
-
-		gl.glEnableVertexAttribArray(0);
-		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, Vertex.SIZE_OF, 0);
-
-		// colors
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, colorBuffer[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, colors.length * 4, colorBuf, GL.GL_DYNAMIC_DRAW);
-		
-		gl.glEnableVertexAttribArray(1);
-		gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, 0, 0);
-
-		gl.glBindVertexArray(0);
-		
-
 		
 
 		/*
 		 * create texture vertex array
 		 */
-		gl.glBindVertexArray(texVAO[0]);
+		gl.glBindVertexArray(vao[0]);
 
-		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBuffer[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.size() * Vertex.SIZE_OF, vertexBuf, GL.GL_STATIC_DRAW);
+		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
 
-		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, indexBuffer[0]);
+		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
 		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuf, GL.GL_STATIC_DRAW);
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
 		gl.glEnableVertexAttribArray(0);
-		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, Vertex.SIZE_OF, 0);
+		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, vertices.getStrideBytes(), 0);
 		
 		// Vertex Normals
 		gl.glEnableVertexAttribArray(2);
-		gl.glVertexAttribPointer(2, 3, GL.GL_FLOAT, false, Vertex.SIZE_OF, 20);
+		gl.glVertexAttribPointer(2, 3, GL.GL_FLOAT, false, vertices.getStrideBytes(), 20);
 
 		// Vertex Texture Coords
 		gl.glEnableVertexAttribArray(3);
-		gl.glVertexAttribPointer(3, 2, GL.GL_FLOAT, false, Vertex.SIZE_OF, 12);
+		gl.glVertexAttribPointer(3, 2, GL.GL_FLOAT, false, vertices.getStrideBytes(), 12);
 
 		gl.glBindVertexArray(0);
 		
@@ -336,76 +291,20 @@ public class TextureMesh extends Mesh {
 		
 		
 		// Draw mesh
-		gl.glBindVertexArray(texVAO[0]);
+		gl.glBindVertexArray(vao[0]);
 		gl.glDrawElements(GL.GL_TRIANGLES, indices.length, GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
 	}
 	
 	
-	public void drawPoints(GL3 gl) {
-		gl.glBindVertexArray(colVAO[0]);
-		gl.glDrawArrays(GL.GL_POINTS, 0, getVertexCount());
-		gl.glBindVertexArray(0);
-	}
-	
 	@Override
 	public void dispose(GL3 gl) {
-		System.out.println("Mesh.dispose()");
-		
-		gl.glDeleteVertexArrays(1, texVAO, 0);
-		gl.glDeleteBuffers(1, vertexBuffer, 0);
-		gl.glDeleteBuffers(1, indexBuffer, 0);
+		gl.glDeleteVertexArrays(1, vao, 0);
+		gl.glDeleteBuffers(1, vbo, 0);
+		gl.glDeleteBuffers(1, ibo, 0);
 		
 		gl.glDeleteTextures(1, texture, 0);
 	}
 	
-	public int getVertexCount() {
-		return vertices.size();
-	}
-
-
-	public int[] getIndices() {
-		return indices;
-	}
-
-	public Vec3 getPosition() {
-		return position;
-	}
-
-	public void setPosition(Vec3 position) {
-		this.position = position;
-	}
-
-	public Vec3 getRotation() {
-		return rotation;
-	}
-
-	public void setRotation(Vec3 rotation) {
-		this.rotation = rotation;
-	}
-
-	public int getTexVAO() {
-		return texVAO[0];
-	}
-
-	public int getVertexBuffer() {
-		return vertexBuffer[0];
-	}
-
-	public int getIndexBuffer() {
-		return indexBuffer[0];
-	}
-
-	public int getColorBuffer() {
-		return colorBuffer[0];
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
 	
 }

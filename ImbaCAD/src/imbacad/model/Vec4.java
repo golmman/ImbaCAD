@@ -41,5 +41,21 @@ public class Vec4 {
 	public float getW() {
 		return vec[3];
 	}
+	
+	public float getR() {
+		return vec[0];
+	}
+	
+	public float getG() {
+		return vec[1];
+	}
+	
+	public float getB() {
+		return vec[2];
+	}
+	
+	public float getA() {
+		return vec[3];
+	}
 
 }

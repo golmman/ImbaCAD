@@ -1,4 +1,4 @@
-package imbacad.model.mesh;
+package imbacad.model.mesh.vertex;
 
 import java.util.ArrayList;
 
