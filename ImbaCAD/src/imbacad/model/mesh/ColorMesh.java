@@ -8,6 +8,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
 import imbacad.model.Vec4;
+import imbacad.model.mesh.primitive.Primitive;
+import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.vertex.ColorVertex;
 import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.Shader;
@@ -17,40 +19,44 @@ import imbacad.model.shader.Shader;
  * @author Dirk Kretschmann
  *
  */
-public class ColorMesh extends Mesh<ColorVertex> {
+public class ColorMesh<P extends Primitive> extends Mesh<ColorVertex, P> {
 	
 	private int drawMode = GL.GL_LINES;
 	
-	private ColorMesh(int drawMode, VertexArray<ColorVertex> vertices, int[] indices, String name) {
-		super(vertices, indices, name);
+	private ColorMesh(int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
+		super(vertices, primitives, name);
 		this.drawMode = drawMode;
 	}
 	
 	
 	/**
 	 * Creates a mesh where vertex colours are interpolated for each fragment.
-	 * @param vertices
-	 * @param colors
 	 * @param drawMode
+	 * @param vertices
+	 * @param primitives
 	 * @param name
 	 * @return
 	 */
-	public static ColorMesh createColorGradientMesh(int drawMode, VertexArray<ColorVertex> vertices, int[] indices, String name) {
-		return new ColorMesh(drawMode, vertices, indices, name);
+	public static <P extends Primitive> ColorMesh<P> createColorGradientMesh(
+			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
+		
+		return new ColorMesh<P>(drawMode, vertices, primitives, name);
 	}
 	
 	
 	/**
 	 * Creates a mesh where the provoking vertex (first vertex of each primitive) 
 	 * determines the colour of the entire primitive.
-	 * @param vertices
-	 * @param colors
 	 * @param drawMode
+	 * @param vertices
+	 * @param primitives
 	 * @param name
 	 * @return
 	 */
-	public static ColorMesh createColorFlatMesh(int drawMode, VertexArray<ColorVertex> vertices, int[] indices, String name) {
-		ColorMesh mesh = new ColorMesh(drawMode, vertices, indices, name);
+	public static <P extends Primitive> ColorMesh<P> createColorFlatMesh(
+			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
+		
+		ColorMesh<P> mesh = new ColorMesh<P>(drawMode, vertices, primitives, name);
 		
 		if (drawMode == GL.GL_LINES) {
 			for (int k = 1; k < mesh.vertices.size(); k += 2) {
@@ -71,7 +77,7 @@ public class ColorMesh extends Mesh<ColorVertex> {
 		if (indices == null) {
 			gl.glDrawArrays(drawMode, 0, vertices.getTotalBytes());
 		} else {
-			gl.glDrawElements(drawMode, indices.length, GL.GL_UNSIGNED_INT, 0);
+			gl.glDrawElements(drawMode, indices.size() * indices.getStride(), GL.GL_UNSIGNED_INT, 0);
 		}
 		
 		
@@ -96,9 +102,9 @@ public class ColorMesh extends Mesh<ColorVertex> {
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
 		
 		if (indices != null) {
-			IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices);
+			IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices.toInts());
 			gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-			gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuf, GL.GL_STATIC_DRAW);
+			gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.getTotalBytes(), indexBuf, GL.GL_STATIC_DRAW);
 		}
 
 		// Set the vertex attribute pointers

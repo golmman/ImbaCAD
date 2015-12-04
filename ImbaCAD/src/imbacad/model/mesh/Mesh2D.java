@@ -1,8 +1,10 @@
 package imbacad.model.mesh;
 
 import java.io.File;
-import java.util.ArrayList;
 
+import imbacad.model.mesh.primitive.PrimitiveArray;
+import imbacad.model.mesh.primitive.PrimitiveID;
+import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
 
@@ -27,20 +29,14 @@ public class Mesh2D {
 	
 	public TextureMesh to3D() {
 		VertexArray<TextureVertex> vertices3D = new VertexArray<TextureVertex>();
-		ArrayList<Integer> indices3D = new ArrayList<Integer>();
-		
+		PrimitiveArray<Triangle> primitives3D = new PrimitiveArray<Triangle>();
 		
 		int i0;
 		for (int k = 0; k < plasters.length; ++k) {
 			i0 = vertices3D.size();
 			
-			indices3D.add(i0+0);
-			indices3D.add(i0+1);
-			indices3D.add(i0+2);
-			
-			indices3D.add(i0+0);
-			indices3D.add(i0+2);
-			indices3D.add(i0+3);
+			primitives3D.add(new Triangle(i0+0, i0+1, i0+2, new PrimitiveID()));
+			primitives3D.add(new Triangle(i0+0, i0+2, i0+3, new PrimitiveID()));
 			
 			vertices3D.add(new TextureVertex(plasters[k].getTopR()));
 			vertices3D.add(new TextureVertex(plasters[k].getTopL()));
@@ -48,13 +44,7 @@ public class Mesh2D {
 			vertices3D.add(new TextureVertex(plasters[k].getBotR()));
 		}
 		
-		
-		int[] intIndices3D = new int[indices3D.size()];
-		for (int k = 0; k < intIndices3D.length; ++k) {
-			intIndices3D[k] = indices3D.get(k);
-		}
-		
-		return TextureMesh.createFlatShadedMesh(new File("white.bmp"), vertices3D, intIndices3D, this.name + "3D");
+		return TextureMesh.createFlatShadedMesh(new File("white.bmp"), vertices3D, primitives3D, this.name + "3D");
 	}
 	
 	

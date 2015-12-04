@@ -7,6 +7,10 @@ public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
 	private static final long serialVersionUID = -8330805264678691468L;
 	
 	private int stride = 0;
+	
+	public PrimitiveArray() {
+		super();
+	}
 
 	public PrimitiveArray(T[] primitives) {
 		super(primitives.length);
@@ -18,6 +22,14 @@ public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
 		for (int k = 0; k < primitives.length; ++k) {
 			this.add(primitives[k]);
 		}
+	}
+	
+	@Override
+	public boolean add(T e) {
+		if (stride == 0) {
+			stride = e.getIndices().length;
+		}
+		return super.add(e);
 	}
 	
 	public int[] toInts() {
@@ -32,6 +44,14 @@ public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
 		}
 		
 		return result;
+	}
+	
+	public int getStride() {
+		return stride;
+	}
+	
+	public int getTotalBytes() {
+		return 4 * stride * this.size();
 	}
 
 }

@@ -3,25 +3,27 @@ package imbacad.model.mesh;
 import com.jogamp.opengl.GL3;
 
 import imbacad.model.Vec3;
+import imbacad.model.mesh.primitive.Primitive;
+import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.vertex.Vertex;
 import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.Shader;
 
-public abstract class Mesh<T extends Vertex> {
+public abstract class Mesh<V extends Vertex, P extends Primitive> {
 	
 	protected int[] vao = new int[1];	// name for vertex array object
 	protected int[] vbo = new int[1];	// name for vertex buffer object
 	protected int[] ibo = new int[1];	// name for index buffer object
 	
-	protected VertexArray<T> vertices;
-	protected int[] indices;
+	protected VertexArray<V> vertices;
+	protected PrimitiveArray<P> indices;
 	protected String name = null;
 	
 	protected Vec3 position = new Vec3();
 	protected Vec3 rotation = new Vec3();
 	
 	
-	public Mesh(VertexArray<T> vertices, int[] indices, String name) {
+	public Mesh(VertexArray<V> vertices, PrimitiveArray<P> indices, String name) {
 		this.vertices = vertices;
 		this.indices = indices;
 		this.name = name;

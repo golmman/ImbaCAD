@@ -21,7 +21,7 @@ public class ImbaCAD {
 	
 	public static final String PROJECT_NAME = "ImbaCAD";
 	
-	public static LinkedList<Mesh<?>> meshes = new LinkedList<Mesh<?>>();
+	public static LinkedList<Mesh<?, ?>> meshes = new LinkedList<Mesh<?, ?>>();
 	public static LinkedList<Light> lights = new LinkedList<Light>();
 
 

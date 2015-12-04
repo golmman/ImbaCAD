@@ -9,6 +9,10 @@ import imbacad.ImbaCAD;
 import imbacad.model.Light;
 import imbacad.model.Vec3;
 import imbacad.model.mesh.TextureMesh;
+import imbacad.model.mesh.primitive.Line;
+import imbacad.model.mesh.primitive.PrimitiveArray;
+import imbacad.model.mesh.primitive.PrimitiveID;
+import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.ColorVertex;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
@@ -37,8 +41,9 @@ public class MainWindow extends JFrame {
 		new TextureVertex(-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	0.0f, 0.0f, 1.0f), 
 		new TextureVertex( 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.0f, 0.0f, 1.0f)
 	};
-	public static int[] testIndices = {
-		0, 1, 2, 0, 2, 3
+	public static Triangle[] testIndices = {
+		new Triangle(0, 1, 2, new PrimitiveID()), 
+		new Triangle(0, 2, 3, new PrimitiveID())
 	};
 	
 	// 
@@ -56,18 +61,18 @@ public class MainWindow extends JFrame {
 		new TextureVertex( 0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	0.46133813f, 0.0f, 0.8872245f),	// roof
 		new TextureVertex(-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f)
 	};
-	public static int[] houseIndices = {
-		0, 3, 2, 0, 2, 1, 	// bottom
-		0, 4, 7, 0, 7, 3, 	// front (+x)
-		1, 2, 6, 1, 6, 5, 	// back (-x)
-		0, 1, 5, 0, 5, 4, 	// right (+y)
-		2, 3, 7, 2, 7, 6,	// left (-y)
+	public static Triangle[] houseIndices = {
+		new Triangle(0, 3, 2, new PrimitiveID()), new Triangle(0, 2, 1, new PrimitiveID()), 	// bottom
+		new Triangle(0, 4, 7, new PrimitiveID()), new Triangle(0, 7, 3, new PrimitiveID()), 	// front (+x)
+		new Triangle(1, 2, 6, new PrimitiveID()), new Triangle(1, 6, 5, new PrimitiveID()), 	// back (-x)
+		new Triangle(0, 1, 5, new PrimitiveID()), new Triangle(0, 5, 4, new PrimitiveID()), 	// right (+y)
+		new Triangle(2, 3, 7, new PrimitiveID()), new Triangle(2, 7, 6, new PrimitiveID()),		// left (-y)
 		
-		4, 8, 7, 			// front gable
-		5, 6, 9, 			// back gable
+		new Triangle(4, 8, 7, new PrimitiveID()), 			// front gable
+		new Triangle(5, 6, 9, new PrimitiveID()), 			// back gable
 		
-		4, 5, 9, 4, 9, 8, 	// right roof side
-		6, 7, 8, 6, 8, 9	// left roof side
+		new Triangle(4, 5, 9, new PrimitiveID()), new Triangle(4, 9, 8, new PrimitiveID()), 	// right roof side
+		new Triangle(6, 7, 8, new PrimitiveID()), new Triangle(6, 8, 9, new PrimitiveID())		// left roof side
 	};
 	
 	public static Plaster[] testPlasters = {
@@ -86,7 +91,7 @@ public class MainWindow extends JFrame {
 		new ColorVertex(2.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
 		new ColorVertex(0.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f)
 	};
-	public static int[] colorMeshIndices = {0};
+	//public static Triangle[] colorMeshIndices = {0};
 	
 	private Animator animator = new Animator();
 	
@@ -97,28 +102,32 @@ public class MainWindow extends JFrame {
 		TextureMesh mesh1 = TextureMesh.createMesh(
 				new File("test2.jpg"), 
 				new VertexArray<TextureVertex>(testVertices), 
-				testIndices, "flippers");
+				new PrimitiveArray<Triangle>(testIndices), 
+				"flippers");
 		
 		TextureMesh mesh2 = TextureMesh.createMesh(
 				new File("test.bmp"), 
 				new VertexArray<TextureVertex>(testVertices), 
-				testIndices, "test");
+				new PrimitiveArray<Triangle>(testIndices),
+				"test");
 		mesh2.setPosition(new Vec3(-0.5f, 1.5f, 0.0f));
 		
 		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(
 				new File("white.bmp"), 
 				new VertexArray<TextureVertex>(houseVertices), 
-				houseIndices, "testHouse");
+				new PrimitiveArray<Triangle>(houseIndices), 
+				"testHouse");
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
 		mesh3.setRotation(new Vec3(0.0f, 0.0f, 0.2f));
 		
 		Mesh2D mesh2D = new Mesh2D(testPlasters, "doorway");
 		TextureMesh mesh4 = mesh2D.to3D();
 		
-		ColorMesh mesh5 = ColorMesh.createColorGradientMesh(
+		ColorMesh<Line> mesh5 = ColorMesh.createColorGradientMesh(
 				GL.GL_LINES, 
 				new VertexArray<ColorVertex>(colorMeshVertices), 
-				null, "LINES!");
+				null, 
+				"LINES!");
 		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);

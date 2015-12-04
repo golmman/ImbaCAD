@@ -2,6 +2,8 @@ package imbacad.model.mesh;
 
 import imbacad.model.Material;
 import imbacad.model.Vec3;
+import imbacad.model.mesh.primitive.PrimitiveArray;
+import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.Shader;
@@ -31,7 +33,7 @@ import com.jogamp.opengl.GL3;
  * @author Dirk Kretschmann
  *
  */
-public class TextureMesh extends Mesh<TextureVertex> {
+public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	
 	private Material material = new Material();
 	
@@ -45,14 +47,12 @@ public class TextureMesh extends Mesh<TextureVertex> {
 	
 	
 
-	private TextureMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
-		super(vertices, indices, name);
-		
-		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
+	private TextureMesh(File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
+		super(vertices, primitives, name);
 		
 		this.textureFile = textureFile;
 		this.vertices = vertices;
-		this.indices = indices;
+		this.indices = primitives;
 	}
 	
 	
@@ -60,11 +60,12 @@ public class TextureMesh extends Mesh<TextureVertex> {
 	 * Creates a new Mesh from given data.<br>
 	 * @param textureFile
 	 * @param vertices
-	 * @param indices
+	 * @param primitives
 	 * @param name
 	 */
-	public static TextureMesh createMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
-		return new TextureMesh(textureFile, vertices, indices, name);
+	public static TextureMesh createMesh(
+			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
+		return new TextureMesh(textureFile, vertices, primitives, name);
 	}
 	
 	/**
@@ -72,17 +73,20 @@ public class TextureMesh extends Mesh<TextureVertex> {
 	 * TODO: vertex texture coordinates are currently ignored.
 	 * @param textureFile
 	 * @param vertices
-	 * @param indices
+	 * @param primitives
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createFlatShadedMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
-		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
+	public static TextureMesh createFlatShadedMesh(
+			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
+		int[] ind;
 		
-		for (int k = 0; k < indices.length; k += 3) {
-			TextureVertex vertex0 = new TextureVertex(vertices.get(indices[k]));
-			TextureVertex vertex1 = new TextureVertex(vertices.get(indices[k+1]));
-			TextureVertex vertex2 = new TextureVertex(vertices.get(indices[k+2]));
+		for (Triangle tri: primitives) {
+			ind = tri.getIndices();
+			
+			TextureVertex vertex0 = new TextureVertex(vertices.get(ind[0]));
+			TextureVertex vertex1 = new TextureVertex(vertices.get(ind[1]));
+			TextureVertex vertex2 = new TextureVertex(vertices.get(ind[2]));
 			
 			// get normal, add vertex
 			Vec3 v1 = new Vec3(vertex1.position.sub(vertex0.position));
@@ -91,10 +95,11 @@ public class TextureMesh extends Mesh<TextureVertex> {
 			vertices.add(vertex0);
 			
 			// set starting index to newly added vertex
-			indices[k] = vertices.size() - 1;
+			ind[0] = vertices.size() - 1;
+			tri.setIndices(ind);
 		}
 		
-		TextureMesh result = new TextureMesh(textureFile, vertices, indices, name);
+		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
 		result.material.setFlatNormals(true);
 		
 		return result;
@@ -104,37 +109,41 @@ public class TextureMesh extends Mesh<TextureVertex> {
 	 * Creates a new Mesh from given data and sets vertex normals as mean adjacent face normals.<br>
 	 * @param textureFile
 	 * @param vertices
-	 * @param indices
+	 * @param primitives
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createPhongShadedMesh(File textureFile, VertexArray<TextureVertex> vertices, int[] indices, String name) {
-		if (indices.length % 3 != 0) throw new IllegalStateException("The index array has to be divisible by 3.");
+	public static TextureMesh createPhongShadedMesh(
+			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
+		
+		int[] ind;
 		
 		Vec3 v0 = null, v1 = null, v2 = null;
 		Vec3 a1, a2;
 		Vec3 normals;
 		
-		for (int k = 0; k < vertices.size(); ++k) {
+		int k = 0;
+		for (Triangle tri: primitives) {
+			ind = tri.getIndices();
 			
 			normals = new Vec3();
 			
 			// find all the triangles which use vertex k
-			for (int i = 0; i < indices.length; ++i) {
-				if (k == indices[i]) {
+			for (int i = 0; i < ind.length; ++i) {
+				if (k == ind[i]) {
 					// preserve orientation
 					if (i % 3 == 0) {
-						v0 = vertices.get(indices[i+0]).position;
-						v1 = vertices.get(indices[i+1]).position;
-						v2 = vertices.get(indices[i+2]).position;
+						v0 = vertices.get(ind[i+0]).position;
+						v1 = vertices.get(ind[i+1]).position;
+						v2 = vertices.get(ind[i+2]).position;
 					} else if (i % 3 == 1) {
-						v0 = vertices.get(indices[i-1]).position;
-						v1 = vertices.get(indices[i+0]).position;
-						v2 = vertices.get(indices[i+1]).position;
+						v0 = vertices.get(ind[i-1]).position;
+						v1 = vertices.get(ind[i+0]).position;
+						v2 = vertices.get(ind[i+1]).position;
 					} else if (i % 3 == 2) {
-						v0 = vertices.get(indices[i-2]).position;
-						v1 = vertices.get(indices[i-1]).position;
-						v2 = vertices.get(indices[i+0]).position;
+						v0 = vertices.get(ind[i-2]).position;
+						v1 = vertices.get(ind[i-1]).position;
+						v2 = vertices.get(ind[i+0]).position;
 					}
 					
 					// add face normal
@@ -149,10 +158,11 @@ public class TextureMesh extends Mesh<TextureVertex> {
 			// update normal
 			vertices.get(k).normal = normals.normalised();
 			
-			System.out.println(k + " " + vertices.get(k).normal);
+			//System.out.println(k + " " + vertices.get(k).normal);
+			++k;
 		}
 		
-		TextureMesh result = new TextureMesh(textureFile, vertices, indices, name);
+		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
 		
 		return result;
 	}
@@ -162,7 +172,7 @@ public class TextureMesh extends Mesh<TextureVertex> {
 		
 		
 		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
-		IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices);
+		IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices.toInts());
 		
 		gl.glGenVertexArrays(1, vao, 0);
 		gl.glGenBuffers(1, vbo, 0);
@@ -179,7 +189,7 @@ public class TextureMesh extends Mesh<TextureVertex> {
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
 
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.length * 4, indexBuf, GL.GL_STATIC_DRAW);
+		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.getTotalBytes(), indexBuf, GL.GL_STATIC_DRAW);
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -292,7 +302,7 @@ public class TextureMesh extends Mesh<TextureVertex> {
 		
 		// Draw mesh
 		gl.glBindVertexArray(vao[0]);
-		gl.glDrawElements(GL.GL_TRIANGLES, indices.length, GL.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL.GL_TRIANGLES, indices.size() * indices.getStride(), GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
 	}
 	

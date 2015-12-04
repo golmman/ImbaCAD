@@ -48,11 +48,11 @@ public class DefaultRenderer implements GLEventListener {
 	private UniformMatrix4 uniformColView = null;
 	private UniformMatrix4 uniformColModel = null;
 	
-	private TextureMesh selectedMesh = null;
-	private int selectedVertex = -1;
+//	private TextureMesh selectedMesh = null;
+//	private int selectedVertex = -1;
 	
 	private HashSet<TextureMesh> textureMeshes = new HashSet<TextureMesh>();
-	private HashSet<ColorMesh> colorMeshes = new HashSet<ColorMesh>();
+	private HashSet<ColorMesh<?>> colorMeshes = new HashSet<ColorMesh<?>>();
 	
 	public DefaultRenderer(RenderingEventAdapter events, Camera camera) {
 		this.events = events;
@@ -75,7 +75,7 @@ public class DefaultRenderer implements GLEventListener {
 		this.uniformColView = new UniformMatrix4(gl, colShader, "view");
 		this.uniformColModel = new UniformMatrix4(gl, colShader, "model");
 		
-		for (Mesh<?> mesh : ImbaCAD.meshes) {
+		for (Mesh<?, ?> mesh : ImbaCAD.meshes) {
 			mesh.init(gl);
 		}
 		
@@ -189,7 +189,7 @@ public class DefaultRenderer implements GLEventListener {
 		uniformColView.update(gl, view);
 		uniformColProj.update(gl, projection);
 		
-		for (ColorMesh mesh : colorMeshes) {
+		for (ColorMesh<?> mesh : colorMeshes) {
 			
 			model = Glm.diag(1.0f);
 			model = Glm.translate(model, mesh.getPosition().toArray());
@@ -296,7 +296,7 @@ public class DefaultRenderer implements GLEventListener {
 		
 		GL3 gl = drawable.getGL().getGL3();
 		
-		for (Mesh<?> mesh : ImbaCAD.meshes) {
+		for (Mesh<?, ?> mesh : ImbaCAD.meshes) {
 			mesh.dispose(gl);
 		}
 		
@@ -348,19 +348,19 @@ public class DefaultRenderer implements GLEventListener {
 //		return colorMeshes;
 //	}
 	
-	public void addMesh(Mesh<?> mesh) {
+	public void addMesh(Mesh<?, ?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.add((TextureMesh)mesh);
 		} else if (mesh instanceof ColorMesh) {
-			colorMeshes.add((ColorMesh)mesh);
+			colorMeshes.add((ColorMesh<?>)mesh);
 		}
 	}
 	
-	public void removeMesh(Mesh<?> mesh) {
+	public void removeMesh(Mesh<?, ?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.remove((TextureMesh)mesh);
 		} else if (mesh instanceof ColorMesh) {
-			colorMeshes.remove((ColorMesh)mesh);
+			colorMeshes.remove((ColorMesh<?>)mesh);
 		}
 	}
 
