@@ -2,6 +2,7 @@ package imbacad.model.mesh;
 
 import com.jogamp.opengl.GL3;
 
+import imbacad.model.CopyFactory;
 import imbacad.model.Vec3;
 import imbacad.model.mesh.primitive.Primitive;
 import imbacad.model.mesh.primitive.PrimitiveArray;
@@ -15,18 +16,46 @@ public abstract class Mesh<V extends Vertex, P extends Primitive> {
 	protected int[] vbo = new int[1];	// name for vertex buffer object
 	protected int[] ibo = new int[1];	// name for index buffer object
 	
+	protected VertexArray<V> originalVertices;
+	protected PrimitiveArray<P> originalPrimitives;
 	protected VertexArray<V> vertices;
-	protected PrimitiveArray<P> indices;
+	protected PrimitiveArray<P> primitives;
 	protected String name = null;
+	protected CopyFactory<V> vertexCopyFactory;
+	protected CopyFactory<P> primitveCopyFactory;
 	
 	protected Vec3 position = new Vec3();
 	protected Vec3 rotation = new Vec3();
 	
 	
-	public Mesh(VertexArray<V> vertices, PrimitiveArray<P> indices, String name) {
-		this.vertices = vertices;
-		this.indices = indices;
+	protected ColorMesh<P> selectionMesh;
+	
+	/**
+	 * Creates copies of vertices and primitives for further use.
+	 * @param vertices
+	 * @param primitives
+	 * @param name
+	 * @param vcf
+	 * @param pcf
+	 */
+	protected Mesh(VertexArray<V> vertices, PrimitiveArray<P> primitives, String name, CopyFactory<V> vcf, CopyFactory<P> pcf) {
+		this.originalVertices = vertices;
+		this.originalPrimitives = primitives;
+		this.vertices = new VertexArray<V>(vertices, vcf);
+		this.primitives = new PrimitiveArray<P>(primitives, pcf);
 		this.name = name;
+		this.vertexCopyFactory = vcf;
+		this.primitveCopyFactory = pcf;
+	}
+	
+	protected Mesh(Mesh<V, P> mesh) {
+		this.originalVertices = mesh.originalVertices;
+		this.originalPrimitives = mesh.originalPrimitives;
+		this.vertices = new VertexArray<V>(mesh.vertices, mesh.vertexCopyFactory);
+		this.primitives = new PrimitiveArray<P>(mesh.primitives, mesh.primitveCopyFactory);
+		this.name = mesh.name;
+		this.vertexCopyFactory = mesh.vertexCopyFactory;
+		this.primitveCopyFactory = mesh.primitveCopyFactory;
 	}
 	
 	

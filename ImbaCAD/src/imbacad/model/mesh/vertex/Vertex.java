@@ -1,7 +1,11 @@
 package imbacad.model.mesh.vertex;
 
-public abstract class Vertex {
+import imbacad.model.Vec3;
 
+public abstract class Vertex {
+	
+	public Vec3 position;
+	
 	public Vertex() {
 		
 	}

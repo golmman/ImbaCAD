@@ -2,7 +2,9 @@ package imbacad.model.mesh.primitive;
 
 import java.util.ArrayList;
 
-public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
+import imbacad.model.CopyFactory;
+
+public class PrimitiveArray<P extends Primitive> extends ArrayList<P> {
 	
 	private static final long serialVersionUID = -8330805264678691468L;
 	
@@ -11,8 +13,17 @@ public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
 	public PrimitiveArray() {
 		super();
 	}
+	
+	public PrimitiveArray(PrimitiveArray<P> primitives, CopyFactory<P> copyFactory) {
+		super(primitives.size());
+		this.stride = primitives.stride;
+		
+		for (P vertex: primitives) {
+			this.add(copyFactory.copy(vertex));
+		}
+	}
 
-	public PrimitiveArray(T[] primitives) {
+	public PrimitiveArray(P[] primitives) {
 		super(primitives.length);
 		
 		if (primitives.length == 0) return;
@@ -25,7 +36,7 @@ public class PrimitiveArray<T extends Primitive> extends ArrayList<T> {
 	}
 	
 	@Override
-	public boolean add(T e) {
+	public boolean add(P e) {
 		if (stride == 0) {
 			stride = e.getIndices().length;
 		}

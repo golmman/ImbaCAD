@@ -48,11 +48,9 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	
 
 	private TextureMesh(File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
-		super(vertices, primitives, name);
+		super(vertices, primitives, name, TextureVertex.COPY, Triangle.COPY);
 		
 		this.textureFile = textureFile;
-		this.vertices = vertices;
-		this.indices = primitives;
 	}
 	
 	
@@ -79,27 +77,30 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	 */
 	public static TextureMesh createFlatShadedMesh(
 			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
+		
+		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
+		
 		int[] ind;
 		
-		for (Triangle tri: primitives) {
+		for (Triangle tri: result.primitives) {
 			ind = tri.getIndices();
 			
-			TextureVertex vertex0 = new TextureVertex(vertices.get(ind[0]));
-			TextureVertex vertex1 = new TextureVertex(vertices.get(ind[1]));
-			TextureVertex vertex2 = new TextureVertex(vertices.get(ind[2]));
+			TextureVertex vertex0 = new TextureVertex(result.vertices.get(ind[0]));
+			TextureVertex vertex1 = new TextureVertex(result.vertices.get(ind[1]));
+			TextureVertex vertex2 = new TextureVertex(result.vertices.get(ind[2]));
 			
 			// get normal, add vertex
 			Vec3 v1 = new Vec3(vertex1.position.sub(vertex0.position));
 			Vec3 v2 = new Vec3(vertex2.position.sub(vertex0.position));
 			vertex0.normal = v1.cross(v2).normalised();
-			vertices.add(vertex0);
+			result.vertices.add(vertex0);
 			
 			// set starting index to newly added vertex
-			ind[0] = vertices.size() - 1;
+			ind[0] = result.vertices.size() - 1;
 			tri.setIndices(ind);
 		}
 		
-		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
+		
 		result.material.setFlatNormals(true);
 		
 		return result;
@@ -116,6 +117,8 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	public static TextureMesh createPhongShadedMesh(
 			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
 		
+		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
+		
 		int[] ind;
 		
 		Vec3 v0 = null, v1 = null, v2 = null;
@@ -123,7 +126,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		Vec3 normals;
 		
 		int k = 0;
-		for (Triangle tri: primitives) {
+		for (Triangle tri: result.primitives) {
 			ind = tri.getIndices();
 			
 			normals = new Vec3();
@@ -133,17 +136,17 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 				if (k == ind[i]) {
 					// preserve orientation
 					if (i % 3 == 0) {
-						v0 = vertices.get(ind[i+0]).position;
-						v1 = vertices.get(ind[i+1]).position;
-						v2 = vertices.get(ind[i+2]).position;
+						v0 = result.vertices.get(ind[i+0]).position;
+						v1 = result.vertices.get(ind[i+1]).position;
+						v2 = result.vertices.get(ind[i+2]).position;
 					} else if (i % 3 == 1) {
-						v0 = vertices.get(ind[i-1]).position;
-						v1 = vertices.get(ind[i+0]).position;
-						v2 = vertices.get(ind[i+1]).position;
+						v0 = result.vertices.get(ind[i-1]).position;
+						v1 = result.vertices.get(ind[i+0]).position;
+						v2 = result.vertices.get(ind[i+1]).position;
 					} else if (i % 3 == 2) {
-						v0 = vertices.get(ind[i-2]).position;
-						v1 = vertices.get(ind[i-1]).position;
-						v2 = vertices.get(ind[i+0]).position;
+						v0 = result.vertices.get(ind[i-2]).position;
+						v1 = result.vertices.get(ind[i-1]).position;
+						v2 = result.vertices.get(ind[i+0]).position;
 					}
 					
 					// add face normal
@@ -156,23 +159,17 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 			}
 			
 			// update normal
-			vertices.get(k).normal = normals.normalised();
+			result.vertices.get(k).normal = normals.normalised();
 			
 			//System.out.println(k + " " + vertices.get(k).normal);
 			++k;
 		}
-		
-		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
 		
 		return result;
 	}
 	
 	@Override
 	public void init(GL3 gl) {
-		
-		
-		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
-		IntBuffer indexBuf = Buffers.newDirectIntBuffer(indices.toInts());
 		
 		gl.glGenVertexArrays(1, vao, 0);
 		gl.glGenBuffers(1, vbo, 0);
@@ -184,12 +181,14 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		 * create texture vertex array
 		 */
 		gl.glBindVertexArray(vao[0]);
-
+		
+		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
 		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
-
+		
+		IntBuffer indexBuf = Buffers.newDirectIntBuffer(primitives.toInts());
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
-		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, indices.getTotalBytes(), indexBuf, GL.GL_STATIC_DRAW);
+		gl.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER, primitives.getTotalBytes(), indexBuf, GL.GL_STATIC_DRAW);
 
 		// Set the vertex attribute pointers
 		// Vertex Positions
@@ -302,13 +301,14 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		
 		// Draw mesh
 		gl.glBindVertexArray(vao[0]);
-		gl.glDrawElements(GL.GL_TRIANGLES, indices.size() * indices.getStride(), GL.GL_UNSIGNED_INT, 0);
+		gl.glDrawElements(GL.GL_TRIANGLES, primitives.size() * primitives.getStride(), GL.GL_UNSIGNED_INT, 0);
 		gl.glBindVertexArray(0);
 	}
 	
 	
 	@Override
 	public void dispose(GL3 gl) {
+		
 		gl.glDeleteVertexArrays(1, vao, 0);
 		gl.glDeleteBuffers(1, vbo, 0);
 		gl.glDeleteBuffers(1, ibo, 0);

@@ -2,7 +2,9 @@ package imbacad.model.mesh.vertex;
 
 import java.util.ArrayList;
 
-public class VertexArray<T extends Vertex> extends ArrayList<T> {
+import imbacad.model.CopyFactory;
+
+public class VertexArray<V extends Vertex> extends ArrayList<V> {
 	
 	private static final long serialVersionUID = -2014915524213423510L;
 	
@@ -14,7 +16,16 @@ public class VertexArray<T extends Vertex> extends ArrayList<T> {
 	}
 	
 	
-	public VertexArray(T[] vertices) {
+	public VertexArray(VertexArray<V> vertices, CopyFactory<V> copyFactory) {
+		super(vertices.size());
+		this.stride = vertices.stride;
+		
+		for (V vertex: vertices) {
+			this.add(copyFactory.copy(vertex));
+		}
+	}
+	
+	public VertexArray(V[] vertices) {
 		super(vertices.length);
 		
 		if (vertices.length == 0) return;
@@ -27,7 +38,7 @@ public class VertexArray<T extends Vertex> extends ArrayList<T> {
 	}
 	
 	@Override
-	public boolean add(T e) {
+	public boolean add(V e) {
 		if (stride == 0) {
 			stride = e.toFloats().length;
 		}
@@ -39,7 +50,7 @@ public class VertexArray<T extends Vertex> extends ArrayList<T> {
 		float[] vertexFloats;
 		
 		int i = 0;
-		for (T v: this) {
+		for (V v: this) {
 			vertexFloats = v.toFloats();
 			
 			for (int j = 0; j < vertexFloats.length; ++j) {

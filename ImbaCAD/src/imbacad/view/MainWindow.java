@@ -47,7 +47,7 @@ public class MainWindow extends JFrame {
 	};
 	
 	// 
-	private static TextureVertex[] houseVertices = {
+	private static TextureVertex[] houseVerticesTexture = {
 		new TextureVertex( 0.5f,  0.5f, -0.5f,  	1.0f,  0.0f,	0.57735026f, 0.57735026f, -0.57735026f),	// bottom
 		new TextureVertex(-0.5f,  0.5f, -0.5f,  	0.0f,  0.0f, 	-0.57735026f, 0.57735026f, -0.57735026f),
 		new TextureVertex(-0.5f, -0.5f, -0.5f,  	0.0f,  1.0f, 	-0.57735026f, -0.57735026f, -0.57735026f),
@@ -61,6 +61,20 @@ public class MainWindow extends JFrame {
 		new TextureVertex( 0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	0.46133813f, 0.0f, 0.8872245f),	// roof
 		new TextureVertex(-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f)
 	};
+	private static ColorVertex[] houseVerticesColor = {
+			new ColorVertex( 0.5f,  0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),	// bottom
+			new ColorVertex(-0.5f,  0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex(-0.5f, -0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex( 0.5f, -0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			 
+			new ColorVertex( 0.5f,  0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),	// top
+			new ColorVertex(-0.5f,  0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex(-0.5f, -0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex( 0.5f, -0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			 
+			new ColorVertex( 0.3f,  0.0f,  1.0f,  	0.0f, 1.0f, 0.0f, 1.0f),	// roof
+			new ColorVertex(-0.3f,  0.0f,  1.0f,  	0.0f, 1.0f, 0.0f, 1.0f)
+		};
 	public static Triangle[] houseIndices = {
 		new Triangle(0, 3, 2, new PrimitiveID()), new Triangle(0, 2, 1, new PrimitiveID()), 	// bottom
 		new Triangle(0, 4, 7, new PrimitiveID()), new Triangle(0, 7, 3, new PrimitiveID()), 	// front (+x)
@@ -91,7 +105,11 @@ public class MainWindow extends JFrame {
 		new ColorVertex(2.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f),
 		new ColorVertex(0.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f)
 	};
-	//public static Triangle[] colorMeshIndices = {0};
+	public static Line[] colorMeshIndices = {
+		new Line(0, 1, new PrimitiveID()),
+		new Line(2, 3, new PrimitiveID()), 
+		new Line(4, 5, new PrimitiveID()), 
+	};
 	
 	private Animator animator = new Animator();
 	
@@ -114,7 +132,7 @@ public class MainWindow extends JFrame {
 		
 		TextureMesh mesh3 = TextureMesh.createFlatShadedMesh(
 				new File("white.bmp"), 
-				new VertexArray<TextureVertex>(houseVertices), 
+				new VertexArray<TextureVertex>(houseVerticesTexture), 
 				new PrimitiveArray<Triangle>(houseIndices), 
 				"testHouse");
 		mesh3.setPosition(new Vec3(2.5f, -0.5f, 0.0f));
@@ -126,14 +144,23 @@ public class MainWindow extends JFrame {
 		ColorMesh<Line> mesh5 = ColorMesh.createColorGradientMesh(
 				GL.GL_LINES, 
 				new VertexArray<ColorVertex>(colorMeshVertices), 
-				null, 
-				"LINES!");
+				new PrimitiveArray<Line>(colorMeshIndices), 
+				"LINES!", Line.COPY);
+		
+		ColorMesh<Triangle> mesh6 = ColorMesh.createColorGradientMesh(
+				GL.GL_TRIANGLES, 
+				new VertexArray<ColorVertex>(houseVerticesColor), 
+				new PrimitiveArray<Triangle>(houseIndices), 
+				"ColorHouse", Triangle.COPY);
+		mesh6.setPosition(new Vec3(2.5f, -2.5f, 0.0f));
+		mesh6.setRotation(new Vec3(0.0f, 0.0f, 0.0f));
 		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
 		ImbaCAD.meshes.add(mesh4);
 		ImbaCAD.meshes.add(mesh5);
+		ImbaCAD.meshes.add(mesh6);
 		
 		// add directional lights
 		Vec3 dirLightPos0 = new Vec3(1.0f, 1.0f, 1.0f).normalised();

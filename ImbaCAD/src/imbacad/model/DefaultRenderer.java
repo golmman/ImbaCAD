@@ -12,7 +12,7 @@ import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
 
 import java.io.File;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
 import java.util.HashSet;
 
 import com.jogamp.common.nio.Buffers;
@@ -169,18 +169,29 @@ public class DefaultRenderer implements GLEventListener {
 			mesh.draw(gl, texShader);
 		}
 		
-		FloatBuffer data = Buffers.newDirectFloatBuffer(4);
-		gl.glReadPixels(
-				events.getMouseX(), 
-				height - events.getMouseY(), 
-				1, 1, GL.GL_RGBA, GL3.GL_FLOAT, data);
-		System.out.println(255.0f*data.get(0) + " " + 255.0f*data.get(1) + " " + 255.0f*data.get(2) + " " + 255.0f*data.get(3) + " ");
+//		FloatBuffer data = Buffers.newDirectFloatBuffer(4);
+//		gl.glReadPixels(
+//				events.getMouseX(), 
+//				height - events.getMouseY(), 
+//				1, 1, GL.GL_RGBA, GL3.GL_FLOAT, data);
+//		System.out.println(255.0f*data.get(0) + " " + 255.0f*data.get(1) + " " + 255.0f*data.get(2) + " " + 255.0f*data.get(3) + " ");
+		
+		
+//		ByteBuffer data = Buffers.newDirectByteBuffer(4);
+//		gl.glReadPixels(
+//				events.getMouseX(), 
+//				height - events.getMouseY(), 
+//				1, 1, GL.GL_RGBA, GL3.GL_UNSIGNED_BYTE, data);
+//		System.out.println(
+//			  (int)(data.get(0) & 0xFF) + " " 
+//			+ (int)(data.get(1) & 0xFF) + " " 
+//			+ (int)(data.get(2) & 0xFF) + " " 
+//			+ (int)(data.get(3) & 0xFF) + " ");
 		
 		
 		/*
 		 * draw selection TODO: Create class which handles that
 		 * 
-		 * glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &c);
 		 * 
 		 */
 		gl.glUseProgram(colShader.getProgram());
@@ -351,8 +362,10 @@ public class DefaultRenderer implements GLEventListener {
 	public void addMesh(Mesh<?, ?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.add((TextureMesh)mesh);
+			System.out.println("TextureMesh added: " + mesh.getName());
 		} else if (mesh instanceof ColorMesh) {
 			colorMeshes.add((ColorMesh<?>)mesh);
+			System.out.println("ColorMesh added: " + mesh.getName());
 		}
 	}
 	

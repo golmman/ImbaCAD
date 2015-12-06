@@ -1,13 +1,26 @@
 package imbacad.model.mesh.vertex;
 
+import imbacad.model.CopyFactory;
 import imbacad.model.Vec3;
 import imbacad.model.Vec4;
 
 public class ColorVertex extends Vertex {
 
-	
-	public Vec3 position;
 	public Vec4 color;
+	
+	
+	public static final CopyFactory<ColorVertex> COPY = new CopyFactory<ColorVertex>() {
+		@Override
+		public ColorVertex copy(ColorVertex type) {
+			return new ColorVertex(type);
+		}
+	};
+	
+	
+	public ColorVertex(ColorVertex vertex) {
+		position = new Vec3(vertex.position);
+		color  = new Vec4(vertex.color);
+	}
 	
 	public ColorVertex(float[] f, int offset) {
 		position = new Vec3(f[offset+0], f[offset+1], f[offset+2]);

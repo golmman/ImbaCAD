@@ -1,13 +1,23 @@
 package imbacad.model.mesh.vertex;
 
+import imbacad.model.CopyFactory;
 import imbacad.model.Vec2;
 import imbacad.model.Vec3;
 
 public class TextureVertex extends Vertex {
 	
-	public Vec3 position = null;
 	public Vec2 texture = null;
 	public Vec3 normal = null;
+	
+	
+	public static final CopyFactory<TextureVertex> COPY = new CopyFactory<TextureVertex>() {
+		@Override
+		public TextureVertex copy(TextureVertex vertex) {
+			return new TextureVertex(vertex);
+		}
+	};
+	
+	
 	
 	public TextureVertex(float[] f, int offset) {
 		position = new Vec3(f[offset+0], f[offset+1], f[offset+2]);
@@ -61,6 +71,5 @@ public class TextureVertex extends Vertex {
 				normal.getX(), normal.getY(), normal.getZ()};
 		return floats;
 	}
-	
 
 }

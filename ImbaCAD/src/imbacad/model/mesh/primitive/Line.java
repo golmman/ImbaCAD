@@ -2,9 +2,26 @@ package imbacad.model.mesh.primitive;
 
 import com.jogamp.opengl.GL;
 
+import imbacad.model.CopyFactory;
+
 public class Line extends Primitive {
 	
 	private int i0, i1;
+	
+	
+	public static final CopyFactory<Line> COPY = new CopyFactory<Line>() {
+		@Override
+		public Line copy(Line type) {
+			return new Line(type);
+		}
+	};
+	
+	
+	public Line(Line l) {
+		super(l.id);
+		this.i0 = l.i0;
+		this.i1 = l.i1;
+	}
 	
 	public Line(int i0, int i1, PrimitiveID id) {
 		super(id);

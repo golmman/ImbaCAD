@@ -57,5 +57,11 @@ public class Vec4 {
 	public float getA() {
 		return vec[3];
 	}
-
+	
+	
+	@Override
+	public String toString() {
+		return "(" + vec[0] + ", " + vec[1] + ", " + vec[2] + ", " + vec[3] + ")";
+	}
+	
 }

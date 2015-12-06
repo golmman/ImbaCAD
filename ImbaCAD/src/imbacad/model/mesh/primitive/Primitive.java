@@ -7,11 +7,14 @@ package imbacad.model.mesh.primitive;
  */
 public abstract class Primitive {
 	
-	private PrimitiveID id;
+	protected PrimitiveID id;
+	
+	
 	
 	protected Primitive(PrimitiveID id) {
 		this.id = id;
 	}
+	
 	
 	
 	public abstract int[] getIndices();

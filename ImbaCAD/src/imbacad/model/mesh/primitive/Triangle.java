@@ -2,9 +2,26 @@ package imbacad.model.mesh.primitive;
 
 import com.jogamp.opengl.GL;
 
+import imbacad.model.CopyFactory;
+
 public class Triangle extends Primitive {
 	
 	private int i0, i1, i2;
+	
+	public static final CopyFactory<Triangle> COPY = new CopyFactory<Triangle>() {
+		@Override
+		public Triangle copy(Triangle type) {
+			return new Triangle(type);
+		}
+	};
+	
+	
+	public Triangle(Triangle t) {
+		super(t.id);
+		this.i0 = t.i0;
+		this.i1 = t.i1;
+		this.i2 = t.i2;
+	}
 	
 	public Triangle(int i0, int i1, int i2, PrimitiveID id) {
 		super(id);
