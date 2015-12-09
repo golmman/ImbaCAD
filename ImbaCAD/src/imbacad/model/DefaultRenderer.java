@@ -12,11 +12,8 @@ import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
 
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.HashSet;
 
-import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -362,11 +359,13 @@ public class DefaultRenderer implements GLEventListener {
 	public void addMesh(Mesh<?, ?> mesh) {
 		if (mesh instanceof TextureMesh) {
 			textureMeshes.add((TextureMesh)mesh);
-			System.out.println("TextureMesh added: " + mesh.getName());
+			System.out.print("TextureMesh added: ");
 		} else if (mesh instanceof ColorMesh) {
 			colorMeshes.add((ColorMesh<?>)mesh);
-			System.out.println("ColorMesh added: " + mesh.getName());
+			System.out.print("ColorMesh added: ");
 		}
+		
+		System.out.println(mesh.getName() + ", " + mesh.getVertices().size() + " vertices");
 	}
 	
 	public void removeMesh(Mesh<?, ?> mesh) {

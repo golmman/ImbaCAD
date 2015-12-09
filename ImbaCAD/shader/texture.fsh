@@ -24,7 +24,7 @@ uniform struct Material {
 	sampler2D texture;
 	float shininess;
 	vec3 specularColor;
-	int flatNormals;
+	bool flatNormals;
 } material;
 
 uniform int numLights;
@@ -40,12 +40,12 @@ vec3 ApplyLight(Light, vec3, vec3, vec3, vec3);
 void main (void) {
 	
 	vec3 normal;
-	if (material.flatNormals == 0) {
+	if (material.flatNormals) {
+		normal = normalize(mat3(model) * fragNorFlat);
+	} else {
 		// remove translation/scaling of the model
 		//vec3 normal = normalize(transpose(inverse(mat3(model))) * fragNor);
 		normal = normalize(mat3(model) * fragNor);
-	} else {
-		normal = normalize(mat3(model) * fragNorFlat);
 	}
 	vec3 surfacePos = vec3(model * vec4(fragPos, 1.0f));
 	vec4 surfaceColor = texture(material.texture, fragTex);

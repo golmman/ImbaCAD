@@ -3,7 +3,6 @@ package imbacad.model.mesh;
 import java.io.File;
 
 import imbacad.model.mesh.primitive.PrimitiveArray;
-import imbacad.model.mesh.primitive.PrimitiveID;
 import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
@@ -35,8 +34,8 @@ public class Mesh2D {
 		for (int k = 0; k < plasters.length; ++k) {
 			i0 = vertices3D.size();
 			
-			primitives3D.add(new Triangle(i0+0, i0+1, i0+2, new PrimitiveID()));
-			primitives3D.add(new Triangle(i0+0, i0+2, i0+3, new PrimitiveID()));
+			primitives3D.add(new Triangle(i0+0, i0+1, i0+2, 2*k));
+			primitives3D.add(new Triangle(i0+0, i0+2, i0+3, 2*k+1));
 			
 			vertices3D.add(new TextureVertex(plasters[k].getTopR()));
 			vertices3D.add(new TextureVertex(plasters[k].getTopL()));

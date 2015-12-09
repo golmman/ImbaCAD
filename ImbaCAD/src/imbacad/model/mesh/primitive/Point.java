@@ -1,41 +1,23 @@
 package imbacad.model.mesh.primitive;
 
-import com.jogamp.opengl.GL;
 
-import imbacad.model.CopyFactory;
-
-public class Point extends Primitive {
+public class Point extends Primitive<Point> {
 	
-	
-	public static final CopyFactory<Point> COPY = new CopyFactory<Point>() {
-		@Override
-		public Point copy(Point type) {
-			return new Point(type);
-		}
-	};
+	public static final int STRIDE = 1;
 	
 	
 	public Point(Point p) {
-		super(p.id);
+		super(STRIDE, p.id);
 	}
 	
 	
-	public Point(PrimitiveID id) {
-		super(id);
+	public Point(long id) {
+		super(STRIDE, id);
 	}
 
-	@Override
-	public int[] getIndices() {
-		return null;
-	}
 
 	@Override
-	public void setIndices(int[] indices) {
-		
-	}
-	
-	@Override
-	public int getDrawMode() {
-		return GL.GL_POINTS;
+	public Point copy() {
+		return new Point(this);
 	}
 }

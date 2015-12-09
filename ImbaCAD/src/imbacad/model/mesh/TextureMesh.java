@@ -1,12 +1,14 @@
 package imbacad.model.mesh;
 
-import imbacad.model.Material;
 import imbacad.model.Vec3;
 import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.Shader;
+import imbacad.model.shader.UniformFloat;
+import imbacad.model.shader.UniformInt;
+import imbacad.model.shader.UniformVec3;
 
 import java.awt.Graphics2D;
 import java.awt.color.ColorSpace;
@@ -35,7 +37,16 @@ import com.jogamp.opengl.GL3;
  */
 public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	
-	private Material material = new Material();
+	//private Material material = new Material();
+	private UniformFloat uniformTex = null;
+	private UniformFloat uniformShi = null;
+	private UniformVec3 uniformSpeCol = null;
+	private UniformInt uniformFlatNor = null;
+	
+	private float textureU = 0.0f;
+	private float shininess = 200.0f;
+	private Vec3 specularColor = new Vec3(0.5f, 0.5f, 0.5f);
+	
 	
 	private File textureFile;
 	
@@ -48,7 +59,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	
 
 	private TextureMesh(File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
-		super(vertices, primitives, name, TextureVertex.COPY, Triangle.COPY);
+		super(vertices, primitives, name);
 		
 		this.textureFile = textureFile;
 	}
@@ -80,28 +91,22 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		
 		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
 		
+		result.makeFlatData();
+		
 		int[] ind;
 		
 		for (Triangle tri: result.primitives) {
-			ind = tri.getIndices();
+			ind = tri.getData();
 			
-			TextureVertex vertex0 = new TextureVertex(result.vertices.get(ind[0]));
-			TextureVertex vertex1 = new TextureVertex(result.vertices.get(ind[1]));
-			TextureVertex vertex2 = new TextureVertex(result.vertices.get(ind[2]));
+			TextureVertex vertex0 = result.vertices.get(ind[0]);
+			TextureVertex vertex1 = result.vertices.get(ind[1]);
+			TextureVertex vertex2 = result.vertices.get(ind[2]);
 			
-			// get normal, add vertex
-			Vec3 v1 = new Vec3(vertex1.position.sub(vertex0.position));
-			Vec3 v2 = new Vec3(vertex2.position.sub(vertex0.position));
-			vertex0.normal = v1.cross(v2).normalised();
-			result.vertices.add(vertex0);
-			
-			// set starting index to newly added vertex
-			ind[0] = result.vertices.size() - 1;
-			tri.setIndices(ind);
+			// set normal
+			Vec3 v1 = new Vec3(vertex1.getPosition().sub(vertex0.getPosition()));
+			Vec3 v2 = new Vec3(vertex2.getPosition().sub(vertex0.getPosition()));
+			vertex0.setNormal(v1.cross(v2).normalised());
 		}
-		
-		
-		result.material.setFlatNormals(true);
 		
 		return result;
 	}
@@ -127,7 +132,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		
 		int k = 0;
 		for (Triangle tri: result.primitives) {
-			ind = tri.getIndices();
+			ind = tri.getData();
 			
 			normals = new Vec3();
 			
@@ -136,17 +141,17 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 				if (k == ind[i]) {
 					// preserve orientation
 					if (i % 3 == 0) {
-						v0 = result.vertices.get(ind[i+0]).position;
-						v1 = result.vertices.get(ind[i+1]).position;
-						v2 = result.vertices.get(ind[i+2]).position;
+						v0 = result.vertices.get(ind[i+0]).getPosition();
+						v1 = result.vertices.get(ind[i+1]).getPosition();
+						v2 = result.vertices.get(ind[i+2]).getPosition();
 					} else if (i % 3 == 1) {
-						v0 = result.vertices.get(ind[i-1]).position;
-						v1 = result.vertices.get(ind[i+0]).position;
-						v2 = result.vertices.get(ind[i+1]).position;
+						v0 = result.vertices.get(ind[i-1]).getPosition();
+						v1 = result.vertices.get(ind[i+0]).getPosition();
+						v2 = result.vertices.get(ind[i+1]).getPosition();
 					} else if (i % 3 == 2) {
-						v0 = result.vertices.get(ind[i-2]).position;
-						v1 = result.vertices.get(ind[i-1]).position;
-						v2 = result.vertices.get(ind[i+0]).position;
+						v0 = result.vertices.get(ind[i-2]).getPosition();
+						v1 = result.vertices.get(ind[i-1]).getPosition();
+						v2 = result.vertices.get(ind[i+0]).getPosition();
 					}
 					
 					// add face normal
@@ -154,16 +159,18 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 					a2 = v2.sub(v0);
 					normals = normals.add( a1.cross(a2) );
 					
-					System.out.println(normals);
+					//System.out.println(normals);
 				}
 			}
 			
 			// update normal
-			result.vertices.get(k).normal = normals.normalised();
+			result.vertices.get(k).setNormal(normals.normalised());
 			
 			//System.out.println(k + " " + vertices.get(k).normal);
 			++k;
 		}
+		
+		result.clean();
 		
 		return result;
 	}
@@ -289,7 +296,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		//gl.glUniform1f(gl.glGetUniformLocation(shader, "material.texture"), 0.0f);
 		//gl.glUniform1f(gl.glGetUniformLocation(shader, "material.shininess"), 200.0f);
 		//gl.glUniform3f(gl.glGetUniformLocation(shader, "material.specularColor"), 1.0f, 1.0f, 1.0f);
-		material.updateUniforms(gl, shader);
+		updateUniforms(gl, shader);
 		
 		
 		// And finally bind the texture
@@ -314,6 +321,22 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		gl.glDeleteBuffers(1, ibo, 0);
 		
 		gl.glDeleteTextures(1, texture, 0);
+	}
+
+
+	@Override
+	public void updateUniforms(GL3 gl, Shader shader) {
+		if (uniformTex == null) {
+			uniformTex = new UniformFloat(gl, shader, "material.texture");
+			uniformShi = new UniformFloat(gl, shader, "material.shininess");
+			uniformSpeCol = new UniformVec3(gl, shader, "material.specularColor");
+			uniformFlatNor = new UniformInt(gl, shader, "material.flatNormals");
+		}
+		
+		uniformTex.update(gl, textureU);
+		uniformShi.update(gl, shininess);
+		uniformSpeCol.update(gl, specularColor);
+		uniformFlatNor.update(gl, flat ? 1 : 0);
 	}
 	
 	

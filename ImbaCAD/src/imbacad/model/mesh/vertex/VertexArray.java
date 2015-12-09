@@ -2,9 +2,7 @@ package imbacad.model.mesh.vertex;
 
 import java.util.ArrayList;
 
-import imbacad.model.CopyFactory;
-
-public class VertexArray<V extends Vertex> extends ArrayList<V> {
+public class VertexArray<V extends Vertex<V>> extends ArrayList<V> {
 	
 	private static final long serialVersionUID = -2014915524213423510L;
 	
@@ -16,12 +14,12 @@ public class VertexArray<V extends Vertex> extends ArrayList<V> {
 	}
 	
 	
-	public VertexArray(VertexArray<V> vertices, CopyFactory<V> copyFactory) {
+	public VertexArray(VertexArray<V> vertices) {
 		super(vertices.size());
 		this.stride = vertices.stride;
 		
 		for (V vertex: vertices) {
-			this.add(copyFactory.copy(vertex));
+			this.add(vertex.copy());
 		}
 	}
 	
@@ -30,19 +28,19 @@ public class VertexArray<V extends Vertex> extends ArrayList<V> {
 		
 		if (vertices.length == 0) return;
 		
-		stride = vertices[0].toFloats().length;
+		stride = vertices[0].getData().length;
 		
 		for (int k = 0; k < vertices.length; ++k) {
-			this.add(vertices[k]);
+			this.add(vertices[k].copy());
 		}
 	}
 	
 	@Override
 	public boolean add(V e) {
 		if (stride == 0) {
-			stride = e.toFloats().length;
+			stride = e.getData().length;
 		}
-		return super.add(e);
+		return super.add(e.copy());
 	}
 	
 	public float[] toFloats() {
@@ -51,7 +49,7 @@ public class VertexArray<V extends Vertex> extends ArrayList<V> {
 		
 		int i = 0;
 		for (V v: this) {
-			vertexFloats = v.toFloats();
+			vertexFloats = v.getData();
 			
 			for (int j = 0; j < vertexFloats.length; ++j) {
 				result[i+j] = vertexFloats[j];

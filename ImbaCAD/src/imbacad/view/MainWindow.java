@@ -11,7 +11,6 @@ import imbacad.model.Vec3;
 import imbacad.model.mesh.TextureMesh;
 import imbacad.model.mesh.primitive.Line;
 import imbacad.model.mesh.primitive.PrimitiveArray;
-import imbacad.model.mesh.primitive.PrimitiveID;
 import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.ColorVertex;
 import imbacad.model.mesh.vertex.TextureVertex;
@@ -19,6 +18,7 @@ import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh2D;
 import imbacad.model.mesh.Plaster;
+import imbacad.model.mesh.SelectionMesh;
 import imbacad.view.docking.Dockable;
 import imbacad.view.docking.DockingCanvas;
 import imbacad.view.docking.DockingRoot;
@@ -42,8 +42,8 @@ public class MainWindow extends JFrame {
 		new TextureVertex( 0.5f, -0.5f, -0.5f,  	1.0f,  1.0f, 	0.0f, 0.0f, 1.0f)
 	};
 	public static Triangle[] testIndices = {
-		new Triangle(0, 1, 2, new PrimitiveID()), 
-		new Triangle(0, 2, 3, new PrimitiveID())
+		new Triangle(0, 1, 2, 0L), 
+		new Triangle(0, 2, 3, 1L)
 	};
 	
 	// 
@@ -62,31 +62,31 @@ public class MainWindow extends JFrame {
 		new TextureVertex(-0.3f,  0.0f,  1.0f,  	0.0f,  0.0f,	-0.46133813f, 0.0f, 0.8872245f)
 	};
 	private static ColorVertex[] houseVerticesColor = {
-			new ColorVertex( 0.5f,  0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),	// bottom
-			new ColorVertex(-0.5f,  0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
-			new ColorVertex(-0.5f, -0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex( 0.5f,  0.5f, -0.5f,  	0.0f, 0.0f, 1.0f, 1.0f),	// bottom
+			new ColorVertex(-0.5f,  0.5f, -0.5f,  	0.0f, 1.0f, 0.0f, 1.0f),
+			new ColorVertex(-0.5f, -0.5f, -0.5f,  	0.0f, 1.0f, 1.0f, 1.0f),
 			new ColorVertex( 0.5f, -0.5f, -0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
 			 
-			new ColorVertex( 0.5f,  0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),	// top
-			new ColorVertex(-0.5f,  0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
-			new ColorVertex(-0.5f, -0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
-			new ColorVertex( 0.5f, -0.5f,  0.5f,  	1.0f, 0.0f, 0.0f, 1.0f),
+			new ColorVertex( 0.5f,  0.5f,  0.5f,  	1.0f, 0.0f, 1.0f, 1.0f),	// top
+			new ColorVertex(-0.5f,  0.5f,  0.5f,  	1.0f, 1.0f, 0.0f, 1.0f),
+			new ColorVertex(-0.5f, -0.5f,  0.5f,  	1.0f, 1.0f, 1.0f, 1.0f),
+			new ColorVertex( 0.5f, -0.5f,  0.5f,  	0.0f, 0.0f, 0.0f, 1.0f),
 			 
-			new ColorVertex( 0.3f,  0.0f,  1.0f,  	0.0f, 1.0f, 0.0f, 1.0f),	// roof
-			new ColorVertex(-0.3f,  0.0f,  1.0f,  	0.0f, 1.0f, 0.0f, 1.0f)
+			new ColorVertex( 0.3f,  0.0f,  1.0f,  	0.5f, 0.5f, 0.5f, 1.0f),	// roof
+			new ColorVertex(-0.3f,  0.0f,  1.0f,  	1.0f, 1.0f, 1.0f, 1.0f)
 		};
 	public static Triangle[] houseIndices = {
-		new Triangle(0, 3, 2, new PrimitiveID()), new Triangle(0, 2, 1, new PrimitiveID()), 	// bottom
-		new Triangle(0, 4, 7, new PrimitiveID()), new Triangle(0, 7, 3, new PrimitiveID()), 	// front (+x)
-		new Triangle(1, 2, 6, new PrimitiveID()), new Triangle(1, 6, 5, new PrimitiveID()), 	// back (-x)
-		new Triangle(0, 1, 5, new PrimitiveID()), new Triangle(0, 5, 4, new PrimitiveID()), 	// right (+y)
-		new Triangle(2, 3, 7, new PrimitiveID()), new Triangle(2, 7, 6, new PrimitiveID()),		// left (-y)
+		new Triangle(0, 3, 2, 0L), new Triangle(0, 2, 1, 0L), 	// bottom
+		new Triangle(0, 4, 7, 1L), new Triangle(0, 7, 3, 1L), 	// front (+x)
+		new Triangle(1, 2, 6, 2L), new Triangle(1, 6, 5, 20L), 	// back (-x)
+		new Triangle(0, 1, 5, 3L), new Triangle(0, 5, 4, 3L), 	// right (+y)
+		new Triangle(2, 3, 7, 4L), new Triangle(2, 7, 6, 4L),	// left (-y)
 		
-		new Triangle(4, 8, 7, new PrimitiveID()), 			// front gable
-		new Triangle(5, 6, 9, new PrimitiveID()), 			// back gable
+		new Triangle(4, 8, 7, 5L), 								// front gable
+		new Triangle(5, 6, 9, 6L), 								// back gable
 		
-		new Triangle(4, 5, 9, new PrimitiveID()), new Triangle(4, 9, 8, new PrimitiveID()), 	// right roof side
-		new Triangle(6, 7, 8, new PrimitiveID()), new Triangle(6, 8, 9, new PrimitiveID())		// left roof side
+		new Triangle(4, 5, 9, 7L), new Triangle(4, 9, 8, 7L), 	// right roof side
+		new Triangle(6, 7, 8, 8L), new Triangle(6, 8, 9, 8L)	// left roof side
 	};
 	
 	public static Plaster[] testPlasters = {
@@ -106,9 +106,9 @@ public class MainWindow extends JFrame {
 		new ColorVertex(0.0f, 0.0f, 0.0f,	1.0f, 0.0f, 0.0f, 1.0f)
 	};
 	public static Line[] colorMeshIndices = {
-		new Line(0, 1, new PrimitiveID()),
-		new Line(2, 3, new PrimitiveID()), 
-		new Line(4, 5, new PrimitiveID()), 
+		new Line(0, 1, 0L),
+		new Line(2, 3, 1L), 
+		new Line(4, 5, 2L), 
 	};
 	
 	private Animator animator = new Animator();
@@ -141,17 +141,24 @@ public class MainWindow extends JFrame {
 		Mesh2D mesh2D = new Mesh2D(testPlasters, "doorway");
 		TextureMesh mesh4 = mesh2D.to3D();
 		
-		ColorMesh<Line> mesh5 = ColorMesh.createColorGradientMesh(
+		ColorMesh<Line> mesh5 = ColorMesh.createGradientColorMesh(
 				GL.GL_LINES, 
 				new VertexArray<ColorVertex>(colorMeshVertices), 
 				new PrimitiveArray<Line>(colorMeshIndices), 
-				"LINES!", Line.COPY);
+				"LINES!");
 		
-		ColorMesh<Triangle> mesh6 = ColorMesh.createColorGradientMesh(
+//		ColorMesh<Triangle> mesh6 = ColorMesh.createFlatColorMesh(
+//				GL.GL_TRIANGLES, 
+//				new VertexArray<ColorVertex>(houseVerticesColor), 
+//				new PrimitiveArray<Triangle>(houseIndices), 
+//				"ColorHouse");
+		
+		ColorMesh<Triangle> testMesh = ColorMesh.createFlatColorMesh(
 				GL.GL_TRIANGLES, 
 				new VertexArray<ColorVertex>(houseVerticesColor), 
 				new PrimitiveArray<Triangle>(houseIndices), 
-				"ColorHouse", Triangle.COPY);
+				"ColorHouse");
+		SelectionMesh<Triangle> mesh6 = SelectionMesh.createSelectionMesh(mesh3);
 		mesh6.setPosition(new Vec3(2.5f, -2.5f, 0.0f));
 		mesh6.setRotation(new Vec3(0.0f, 0.0f, 0.0f));
 		

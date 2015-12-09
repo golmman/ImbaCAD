@@ -9,31 +9,31 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
-import imbacad.model.CopyFactory;
-import imbacad.model.Vec4;
 import imbacad.model.mesh.primitive.Primitive;
 import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.vertex.ColorVertex;
-import imbacad.model.mesh.vertex.Vertex;
 import imbacad.model.mesh.vertex.VertexArray;
+import imbacad.model.shader.HasUniforms;
 import imbacad.model.shader.Shader;
+import imbacad.model.shader.UniformInt;
 
 /**
  * Represents a mesh using a simplyfied shader which only outputs colors
  * @author Dirk Kretschmann
  *
  */
-public class ColorMesh<P extends Primitive> extends Mesh<ColorVertex, P> {
+public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> implements HasUniforms {
 	
 	public static final List<Integer> SUPPORTED_DRAW_MODES = Arrays.asList(
 			GL.GL_POINTS, GL.GL_LINES, GL.GL_TRIANGLES);
 	
 	private int drawMode = GL.GL_LINES;
 	
+	private UniformInt uniformFlatCol = null;
 	
 	
-	private ColorMesh(int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name, CopyFactory<P> pcf) {
-		super(vertices, primitives, name, ColorVertex.COPY, pcf);
+	protected ColorMesh(int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
+		super(vertices, primitives, name);
 		
 		if (!SUPPORTED_DRAW_MODES.contains(drawMode)) {
 			throw new UnsupportedOperationException("unsupported drawmode, check ColorMesh.SUPPORTED_DRAW_MODES");
@@ -51,10 +51,10 @@ public class ColorMesh<P extends Primitive> extends Mesh<ColorVertex, P> {
 	 * @param name
 	 * @return
 	 */
-	public static <P extends Primitive> ColorMesh<P> createColorGradientMesh(
-			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name, CopyFactory<P> pcf) {
+	public static <P extends Primitive<P>> ColorMesh<P> createGradientColorMesh(
+			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
 		
-		return new ColorMesh<P>(drawMode, vertices, primitives, name, pcf);
+		return new ColorMesh<P>(drawMode, vertices, primitives, name);
 	}
 	
 	
@@ -67,64 +67,60 @@ public class ColorMesh<P extends Primitive> extends Mesh<ColorVertex, P> {
 	 * @param name
 	 * @return
 	 */
-	public static <P extends Primitive> ColorMesh<P> createColorFlatMesh(
-			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name, CopyFactory<P> pcf) {
+	public static <P extends Primitive<P>> ColorMesh<P> createFlatColorMesh(
+			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
 		
-		ColorMesh<P> result = new ColorMesh<P>(drawMode, vertices, primitives, name, pcf);
 		
-		if (drawMode == GL.GL_LINES) {
-			for (int k = 1; k < result.vertices.size(); k += 2) {
-				result.vertices.get(k).color = new Vec4(result.vertices.get(k-1).color);
-			}
-		} else if (drawMode == GL.GL_TRIANGLES) {
-			
-		}
+		ColorMesh<P> result = new ColorMesh<P>(drawMode, vertices, primitives, name);
+		
+		result.makeFlatData();
 		
 		return result;
 	}
 	
 	
-	public static <V extends Vertex, P extends Primitive> ColorMesh<P> 
-		createSelectionMesh(Mesh<V, P> mesh, CopyFactory<P> pcf) {
-		
-		// determine draw mode
-		int drawMode = -1;
-		if (mesh instanceof ColorMesh<?>) {
-			drawMode = ((ColorMesh<?>)mesh).drawMode;
-		} else if (mesh instanceof TextureMesh) {
-			drawMode = GL.GL_TRIANGLES;
-		}
-		
-		// copy primitive data
-		PrimitiveArray<P> primitives = new PrimitiveArray<P>(mesh.originalPrimitives, pcf);
-		
-		// copy positional data
-		VertexArray<ColorVertex> vertices = new VertexArray<ColorVertex>();
-		for (V vertex: mesh.originalVertices) {
-			vertices.add(new ColorVertex(
-					vertex.position.getX(), 
-					vertex.position.getY(), 
-					vertex.position.getZ(), 
-					0.0f, 0.0f, 0.0f, 0.0f));
-		}
-		
-		// add colours
-		int[] indices;
-		for (P prim: primitives) {
-			
-			indices = prim.getIndices();
-			for (int k = 0; k < indices.length; ++k) {
-				
-			}
-			
-		}
-		
-		return new ColorMesh<P>(drawMode, vertices, primitives, mesh.name + "_SELECTION", pcf);
-	}
+//	public static <V extends Vertex<V>, P extends Primitive<P>> ColorMesh<P> 
+//		createSelectionMesh(Mesh<V, P> mesh) {
+//		
+//		// determine draw mode
+//		int drawMode = -1;
+//		if (mesh instanceof ColorMesh<?>) {
+//			drawMode = ((ColorMesh<?>)mesh).drawMode;
+//		} else if (mesh instanceof TextureMesh) {
+//			drawMode = GL.GL_TRIANGLES;
+//		}
+//		
+//		// copy primitive data
+//		PrimitiveArray<P> primitives = new PrimitiveArray<P>(mesh.originalPrimitives);
+//		
+//		// copy position data
+//		VertexArray<ColorVertex> vertices = new VertexArray<ColorVertex>();
+//		for (V vertex: mesh.originalVertices) {
+//			vertices.add(new ColorVertex(
+//					vertex.getPosition().getX(), 
+//					vertex.getPosition().getY(), 
+//					vertex.getPosition().getZ(), 
+//					0.0f, 0.0f, 0.0f, 0.0f));
+//		}
+//		
+//		// add colours
+//		int[] indices;
+//		for (P prim: primitives) {
+//			
+//			indices = prim.getData();
+//			for (int k = 0; k < indices.length; ++k) {
+//				
+//			}
+//			
+//		}
+//		
+//		return new ColorMesh<P>(drawMode, vertices, primitives, mesh.name + "_SELECTION");
+//	}
 	
 
 	@Override
 	public void draw(GL3 gl, Shader shader) {
+		updateUniforms(gl, shader);		
 		
 		gl.glBindVertexArray(vao[0]);
 		gl.glDrawElements(drawMode, primitives.size() * primitives.getStride(), GL.GL_UNSIGNED_INT, 0);
@@ -179,6 +175,16 @@ public class ColorMesh<P extends Primitive> extends Mesh<ColorVertex, P> {
 	public int getDrawMode() {
 		return drawMode;
 	}
+
+
+	@Override
+	public void updateUniforms(GL3 gl, Shader shader) {
+		if (uniformFlatCol == null) {
+			uniformFlatCol = new UniformInt(gl, shader, "flatColors");
+		}
+		uniformFlatCol.update(gl, flat ? 1 : 0);		
+	}
+
 
 
 }
