@@ -41,11 +41,15 @@ public class FrameBuffer {
 		gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL3.GL_DEPTH_STENCIL_ATTACHMENT, GL.GL_RENDERBUFFER, rboDepthStencil[0]);
 		gl.glFramebufferRenderbuffer(GL.GL_FRAMEBUFFER, GL3.GL_COLOR_ATTACHMENT0, GL.GL_RENDERBUFFER, rboColor[0]);
 		
+		//gl.glViewport(0, 0, width, height);
+		
 		// check status
 		int fbstatus = gl.glCheckFramebufferStatus(GL.GL_FRAMEBUFFER);
 		if (fbstatus != GL.GL_FRAMEBUFFER_COMPLETE) {
 			System.err.println("Framebuffer check failed, status: " + fbstatus);
 		}
+		
+		
 		
 		// unbind fbo, i.e. rebind window framebuffer
 		gl.glBindFramebuffer(GL.GL_FRAMEBUFFER, 0);

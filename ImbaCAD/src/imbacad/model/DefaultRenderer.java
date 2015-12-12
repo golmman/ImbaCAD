@@ -2,18 +2,25 @@ package imbacad.model;
 
 import imbacad.ImbaCAD;
 import imbacad.control.RenderingEventAdapter;
+import imbacad.control.Selection;
 import imbacad.model.camera.Camera;
 import imbacad.model.camera.CameraUpdater;
 import imbacad.model.camera.LevitateUpdater;
 import imbacad.model.mesh.ColorMesh;
 import imbacad.model.mesh.Mesh;
+import imbacad.model.mesh.SelectionMesh;
 import imbacad.model.mesh.TextureMesh;
 import imbacad.model.shader.Shader;
 import imbacad.model.shader.UniformMatrix4;
 
 import java.io.File;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.HashSet;
 
+import com.jogamp.common.nio.Buffers;
+import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -47,6 +54,7 @@ public class DefaultRenderer implements GLEventListener {
 	
 //	private TextureMesh selectedMesh = null;
 //	private int selectedVertex = -1;
+	private ArrayList<Selection> lastSelection = null;
 	
 	private HashSet<TextureMesh> textureMeshes = new HashSet<TextureMesh>();
 	private HashSet<ColorMesh<?>> colorMeshes = new HashSet<ColorMesh<?>>();
@@ -97,12 +105,6 @@ public class DefaultRenderer implements GLEventListener {
 		 */
 		cameraUpdater.update(camera, events);
 		
-//		if (processor.getKey(KeyEvent.VK_ESCAPE)) {
-//			//this.dispose();
-//			// TODO: dispose?
-//			return;
-//		}
-		
 		
 		/*
 		 * Drawing
@@ -115,6 +117,11 @@ public class DefaultRenderer implements GLEventListener {
 		
 		
 		// Clear screen
+		frameBuffer.bind(gl);
+		gl.glClearColor(0, 0, 0, 1.0f); 
+		gl.glClear(GL3.GL_STENCIL_BUFFER_BIT | GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
+		
+		frameBuffer.unbind(gl);
 		gl.glClearColor(0, 0, 0, 1.0f); 
 		gl.glClear(GL3.GL_STENCIL_BUFFER_BIT | GL3.GL_COLOR_BUFFER_BIT | GL3.GL_DEPTH_BUFFER_BIT);
 		
@@ -131,7 +138,7 @@ public class DefaultRenderer implements GLEventListener {
 		view = Glm.translate(view, camera.getPosition().mul(-1.0f).toArray());
 		
 		/*
-		 * draw meshes
+		 * Draw texture meshes
 		 */
 		gl.glUseProgram(texShader.getProgram());
 		
@@ -166,29 +173,11 @@ public class DefaultRenderer implements GLEventListener {
 			mesh.draw(gl, texShader);
 		}
 		
-//		FloatBuffer data = Buffers.newDirectFloatBuffer(4);
-//		gl.glReadPixels(
-//				events.getMouseX(), 
-//				height - events.getMouseY(), 
-//				1, 1, GL.GL_RGBA, GL3.GL_FLOAT, data);
-//		System.out.println(255.0f*data.get(0) + " " + 255.0f*data.get(1) + " " + 255.0f*data.get(2) + " " + 255.0f*data.get(3) + " ");
-		
-		
-//		ByteBuffer data = Buffers.newDirectByteBuffer(4);
-//		gl.glReadPixels(
-//				events.getMouseX(), 
-//				height - events.getMouseY(), 
-//				1, 1, GL.GL_RGBA, GL3.GL_UNSIGNED_BYTE, data);
-//		System.out.println(
-//			  (int)(data.get(0) & 0xFF) + " " 
-//			+ (int)(data.get(1) & 0xFF) + " " 
-//			+ (int)(data.get(2) & 0xFF) + " " 
-//			+ (int)(data.get(3) & 0xFF) + " ");
+
 		
 		
 		/*
-		 * draw selection TODO: Create class which handles that
-		 * 
+		 * Draw colour meshes
 		 * 
 		 */
 		gl.glUseProgram(colShader.getProgram());
@@ -207,8 +196,96 @@ public class DefaultRenderer implements GLEventListener {
 			// send data to gpu
 			uniformColModel.update(gl, model);
 			
+			if (mesh instanceof SelectionMesh) {
+				// draw selection mesh to designated framebuffer
+				frameBuffer.bind(gl);
+			} else {
+				frameBuffer.unbind(gl);
+			}
+			
 			mesh.draw(gl, colShader);
 		}
+		
+		
+		/*
+		 * Update selection
+		 */
+		
+		frameBuffer.bind(gl);
+		
+		IntBuffer data = Buffers.newDirectIntBuffer(1);
+		gl.glReadPixels(
+				events.getMouseX(), 
+				height - events.getMouseY(), 
+				1, 1, GL.GL_RGBA, GL3.GL_UNSIGNED_INT_8_8_8_8, data);
+		Long key = (long)(data.get(0) & 0xFFFFFFFFL);
+		
+		
+		
+		// remove last selection
+		if (lastSelection != null) {
+			for (Selection sel: lastSelection) {
+				int ind0 = sel.getPrimitive().getData()[0];
+				
+				Vec4 colr = new Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+				FloatBuffer colBuf = Buffers.newDirectFloatBuffer(colr.toArray());
+				
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, sel.getMesh().getVBO());
+				if (sel.getMesh() instanceof TextureMesh) {
+					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, ind0 * 48 + 32, 16, colBuf);
+				} else if (sel.getMesh() instanceof ColorMesh<?>) {
+					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, ind0 * 28 + 12, 16, colBuf);
+				}
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+			}
+		}
+		
+		// add new selection
+		ArrayList<Selection> selections = SelectionMesh.getVertices(key);
+		lastSelection = selections;
+		if (selections != null) {
+			for (Selection sel: selections) {
+				int ind0 = sel.getPrimitive().getData()[0];
+				
+				Vec4 colr = new Vec4(0.0f, 1.0f, 0.0f, 0.25f);
+				FloatBuffer colBuf = Buffers.newDirectFloatBuffer(colr.toArray());
+				
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, sel.getMesh().getVBO());
+				if (sel.getMesh() instanceof TextureMesh) {
+					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, ind0 * 48 + 32, 16, colBuf);
+				} else if (sel.getMesh() instanceof ColorMesh<?>) {
+					gl.glBufferSubData(GL.GL_ARRAY_BUFFER, ind0 * 28 + 12, 16, colBuf);
+				}
+				gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+			}
+		}
+		
+		
+		frameBuffer.unbind(gl);
+		
+		
+		
+		
+//		ByteBuffer data = Buffers.newDirectByteBuffer(4);
+//		gl.glReadPixels(
+//				events.getMouseX(), 
+//				height - events.getMouseY(), 
+//				1, 1, GL.GL_RGBA, GL3.GL_UNSIGNED_BYTE, data);
+//		
+//		int r = (int)(data.get(0) & 0xFF);
+//		int g = (int)(data.get(1) & 0xFF);
+//		int b = (int)(data.get(2) & 0xFF);
+//		int a = (int)(data.get(3) & 0xFF);
+//		
+//		System.out.println(
+//			  (int)(data.get(0) & 0xFF) + " " 
+//			+ (int)(data.get(1) & 0xFF) + " " 
+//			+ (int)(data.get(2) & 0xFF) + " " 
+//			+ (int)(data.get(3) & 0xFF) + " ");
+		//System.out.println(SelectionMesh.getKey(r, g, b, a));
+		
+		
+		
 		
 //		
 //		// remove last selection

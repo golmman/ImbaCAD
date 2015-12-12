@@ -41,7 +41,6 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	private UniformFloat uniformTex = null;
 	private UniformFloat uniformShi = null;
 	private UniformVec3 uniformSpeCol = null;
-	private UniformInt uniformFlatNor = null;
 	
 	private float textureU = 0.0f;
 	private float shininess = 200.0f;
@@ -191,7 +190,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		
 		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_DYNAMIC_DRAW);
 		
 		IntBuffer indexBuf = Buffers.newDirectIntBuffer(primitives.toInts());
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
@@ -201,6 +200,10 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		// Vertex Positions
 		gl.glEnableVertexAttribArray(0);
 		gl.glVertexAttribPointer(0, 3, GL.GL_FLOAT, false, vertices.getStrideBytes(), 0);
+		
+		// Vertex Colours
+		gl.glEnableVertexAttribArray(1);
+		gl.glVertexAttribPointer(1, 4, GL.GL_FLOAT, false, vertices.getStrideBytes(), 32);
 		
 		// Vertex Normals
 		gl.glEnableVertexAttribArray(2);
@@ -213,9 +216,11 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 		gl.glBindVertexArray(0);
 		
 		
-		
 		loadTexture(gl, textureFile);
 	}
+	
+	
+	
 	
 	private void loadTexture(GL3 gl, File file) {
 
@@ -330,13 +335,13 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 			uniformTex = new UniformFloat(gl, shader, "material.texture");
 			uniformShi = new UniformFloat(gl, shader, "material.shininess");
 			uniformSpeCol = new UniformVec3(gl, shader, "material.specularColor");
-			uniformFlatNor = new UniformInt(gl, shader, "material.flatNormals");
+			uniformFlat = new UniformInt(gl, shader, "material.flatNormals");
 		}
 		
 		uniformTex.update(gl, textureU);
 		uniformShi.update(gl, shininess);
 		uniformSpeCol.update(gl, specularColor);
-		uniformFlatNor.update(gl, flat ? 1 : 0);
+		uniformFlat.update(gl, flat ? 1 : 0);
 	}
 	
 	

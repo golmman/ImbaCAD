@@ -29,8 +29,6 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 	
 	private int drawMode = GL.GL_LINES;
 	
-	private UniformInt uniformFlatCol = null;
-	
 	
 	protected ColorMesh(int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
 		super(vertices, primitives, name);
@@ -143,7 +141,7 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 		
 		FloatBuffer vertexBuf = Buffers.newDirectFloatBuffer(vertices.toFloats());
 		gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo[0]);
-		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_STATIC_DRAW);
+		gl.glBufferData(GL.GL_ARRAY_BUFFER, vertices.getTotalBytes(), vertexBuf, GL.GL_DYNAMIC_DRAW);
 		
 		IntBuffer indexBuf = Buffers.newDirectIntBuffer(primitives.toInts());
 		gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, ibo[0]);
@@ -179,10 +177,10 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 
 	@Override
 	public void updateUniforms(GL3 gl, Shader shader) {
-		if (uniformFlatCol == null) {
-			uniformFlatCol = new UniformInt(gl, shader, "flatColors");
+		if (uniformFlat == null) {
+			uniformFlat = new UniformInt(gl, shader, "flatColors");
 		}
-		uniformFlatCol.update(gl, flat ? 1 : 0);		
+		uniformFlat.update(gl, flat ? 1 : 0);		
 	}
 
 

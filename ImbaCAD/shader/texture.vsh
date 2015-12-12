@@ -11,6 +11,7 @@ out vec3 fragNor;
 out vec2 fragTex;
 
 flat out vec3 fragNorFlat;
+flat out vec4 fragColFlat;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -24,6 +25,7 @@ void main(void) {
 	fragTex = vertTex;
 
 	fragNorFlat = vertNor;
+	fragColFlat = vertCol;
 	
 	gl_Position = projection * view * model * vec4(vertPos, 1.0f);
 	

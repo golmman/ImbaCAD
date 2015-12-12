@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.jogamp.opengl.GL;
 
+import imbacad.control.Selection;
 import imbacad.model.Vec4;
 import imbacad.model.mesh.primitive.Primitive;
 import imbacad.model.mesh.primitive.PrimitiveArray;
@@ -17,7 +18,7 @@ import imbacad.model.mesh.vertex.VertexArray;
 public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 	
 	private static long colorCount = 0L;
-	private static HashMap<Long, ArrayList<Vertex<?>>> colorMap = new HashMap<Long, ArrayList<Vertex<?>>>();
+	private static HashMap<Long, ArrayList<Selection>> colorMap = new HashMap<Long, ArrayList<Selection>>();
 	
 	
 	protected SelectionMesh(int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
@@ -69,7 +70,7 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 		
 		for (P prim: primitives) {
 			
-			// change colours if ids change (note that primitives is sorted)
+			// change colours if ids change (note that primitives are sorted by id)
 			currentID = prim.getID();
 			if (currentID != lastID) {
 				//color = nextColor();
@@ -85,9 +86,9 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 			
 			// add vertex to colorMap
 			if (colorMap.get(key) == null) {
-				colorMap.put(key, new ArrayList<Vertex<?>>());
+				colorMap.put(key, new ArrayList<Selection>());
 			}
-			colorMap.get(key).add(mesh.vertices.get(ind[0]));
+			colorMap.get(key).add(new Selection(mesh, prim));
 			
 			// remember last id
 			lastID = currentID;
@@ -95,6 +96,14 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 		
 		SelectionMesh<P> result = new SelectionMesh<P>(drawMode, vertices, primitives, mesh.name + "_SELECTION");
 		result.setFlat(true);
+		
+		result.setPosition(mesh.position);
+		result.setRotation(mesh.rotation);
+		
+//		System.out.println("KEYS");
+//		for (Long keyz: colorMap.keySet()) {
+//			System.out.println(keyR(keyz) + " " + keyG(keyz) + " " + keyB(keyz) + " " + keyA(keyz));
+//		}
 		
 		return result;
 	}
@@ -117,10 +126,22 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 	
 	protected static Vec4 nextRandomColor() {
 		Random r = new Random();		
-		return new Vec4(r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat());
+		
+		//return new Vec4(r.nextFloat(), r.nextFloat(), r.nextFloat(), r.nextFloat());
+		
+		return new Vec4(
+				(float)r.nextInt(256) / 255.0f, 
+				(float)r.nextInt(256) / 255.0f, 
+				(float)r.nextInt(256) / 255.0f, 
+				(float)r.nextInt(256) / 255.0f);
 	}
 	
-	protected static long getKey(Vec4 color) {
+	public static long getKey(Vec4 color) {
+//		long r = (long)(Math.round(255.0f * color.getR())) << 24;
+//		long g = (long)(Math.round(255.0f * color.getG())) << 16;
+//		long b = (long)(Math.round(255.0f * color.getB())) << 8;
+//		long a = (long)(Math.round(255.0f * color.getA()));
+		
 		long r = (long)(255.0f * color.getR()) << 24;
 		long g = (long)(255.0f * color.getG()) << 16;
 		long b = (long)(255.0f * color.getB()) << 8;
@@ -130,7 +151,36 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 	}
 	
 	
-	public static ArrayList<Vertex<?>> getVertices(Vec4 color) {
+	public static long getKey(int colr, int colg, int colb, int cola) {
+		long r = (long)(colr) << 24;
+		long g = (long)(colg) << 16;
+		long b = (long)(colb) << 8;
+		long a = (long)(cola);
+		
+		return r | g | b | a;
+	}
+	
+	public static long keyR(long key) {
+		return (key >> 24) & 0xFF;
+	}
+	
+	public static long keyG(long key) {
+		return (key >> 16) & 0xFF;
+	}
+	
+	public static long keyB(long key) {
+		return (key >> 8) & 0xFF;
+	}
+	
+	public static long keyA(long key) {
+		return key & 0xFF;
+	}
+	
+	public static ArrayList<Selection> getVertices(long key) {
+		return colorMap.get(key);
+	}
+	
+	public static ArrayList<Selection> getVertices(Vec4 color) {
 		return colorMap.get(getKey(color));
 	}
 }

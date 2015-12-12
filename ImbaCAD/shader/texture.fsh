@@ -8,6 +8,7 @@ in vec3 fragNor;
 in vec2 fragTex;
 
 flat in vec3 fragNorFlat;
+flat in vec4 fragColFlat;
 
 out vec4 outCol;
 
@@ -57,9 +58,26 @@ void main (void) {
 		linearColor += ApplyLight(light[i], surfaceColor.rgb, normal, surfacePos, surfaceToCamera);
 	}
 	
-	//final color (after gamma correction)
+	//final lighting color (after gamma correction)
 	vec3 gamma = vec3(1.0f); //vec3(1.0f/2.2f);
-	outCol = vec4(pow(linearColor, gamma), surfaceColor.a);
+	vec4 lighting = vec4(pow(linearColor, gamma), surfaceColor.a);
+	
+	// alpha blend with input color
+	vec4 srcCol;
+	vec3 outRGB;
+	float outA = lighting.a + srcCol.a * (1.0f - lighting.a);
+	if (material.flatNormals) {
+		srcCol = fragColFlat;
+	} else {
+		srcCol = fragCol;
+	}
+	if (outA == 0.0f) {
+		outRGB = vec3(0.0f);
+	} else {
+		outRGB = (srcCol.a * srcCol.rgb + lighting.a * (1.0f - srcCol.a) * lighting.rgb) / outA;
+	}
+	
+	outCol = vec4(outRGB, outA);
 }
 
 

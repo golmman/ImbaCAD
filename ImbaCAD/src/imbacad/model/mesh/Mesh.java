@@ -12,6 +12,7 @@ import imbacad.model.mesh.vertex.Vertex;
 import imbacad.model.mesh.vertex.VertexArray;
 import imbacad.model.shader.HasUniforms;
 import imbacad.model.shader.Shader;
+import imbacad.model.shader.UniformInt;
 
 public abstract class Mesh<V extends Vertex<V>, P extends Primitive<P>> implements HasUniforms {
 	
@@ -28,6 +29,8 @@ public abstract class Mesh<V extends Vertex<V>, P extends Primitive<P>> implemen
 	protected Vec3 position = new Vec3();
 	protected Vec3 rotation = new Vec3();
 	
+	// uniforms
+	protected UniformInt uniformFlat = null;
 	protected boolean flat;
 	
 	protected ColorMesh<P> selectionMesh;
@@ -254,5 +257,17 @@ public abstract class Mesh<V extends Vertex<V>, P extends Primitive<P>> implemen
 
 	public void setFlat(boolean flat) {
 		this.flat = flat;
+	}
+
+	public int getVAO() {
+		return vao[0];
+	}
+
+	public int getVBO() {
+		return vbo[0];
+	}
+
+	public int getIBO() {
+		return ibo[0];
 	}
 }

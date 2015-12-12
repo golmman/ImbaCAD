@@ -64,4 +64,7 @@ public class Vec4 {
 		return "(" + vec[0] + ", " + vec[1] + ", " + vec[2] + ", " + vec[3] + ")";
 	}
 	
+	public float[] toArray() {
+		return this.vec;
+	}
 }
