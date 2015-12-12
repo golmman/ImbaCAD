@@ -12,6 +12,7 @@ import imbacad.model.Vec4;
 import imbacad.model.mesh.primitive.Primitive;
 import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.vertex.ColorVertex;
+import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.Vertex;
 import imbacad.model.mesh.vertex.VertexArray;
 
@@ -67,8 +68,11 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 		long currentID = 0L, lastID = 933466737971350058L; // should not use that number as id...
 		long key;
 		Vec4 color = null;
+		Vec4 oldColor = null;
 		
 		for (P prim: primitives) {
+			
+			ind = prim.getData();
 			
 			// change colours if ids change (note that primitives are sorted by id)
 			currentID = prim.getID();
@@ -80,15 +84,21 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 			// get the current colorMap key
 			key = getKey(color);
 			
+			// save old colour
+			if (mesh instanceof TextureMesh) {
+				oldColor = ((TextureVertex)mesh.vertices.get(ind[0])).getColor();
+			} else if (mesh instanceof ColorMesh) {
+				oldColor = ((ColorVertex)mesh.vertices.get(ind[0])).getColor();
+			}
+			
 			// assign colour to first vertex of each primitive
-			ind = prim.getData();
 			vertices.get(ind[0]).setColor(color);
 			
 			// add vertex to colorMap
 			if (colorMap.get(key) == null) {
 				colorMap.put(key, new ArrayList<Selection>());
 			}
-			colorMap.get(key).add(new Selection(mesh, prim));
+			colorMap.get(key).add(new Selection(mesh, prim, oldColor));
 			
 			// remember last id
 			lastID = currentID;

@@ -1,6 +1,7 @@
 package imbacad.view;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
@@ -29,7 +30,6 @@ import javax.swing.JToggleButton;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
-import com.jogamp.opengl.util.Animator;
 
 
 
@@ -56,8 +56,6 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	private DefaultRenderer renderer = null;
 	private RenderingEventAdapter events = null;
 	
-	private Animator animator = null;
-	
 	private JPanel panelControl = new JPanel();
 	private GLJPanel panelRendering = null;
 	
@@ -70,9 +68,9 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	private JMenu menuShow = new JMenu("Show Mesh");
 	private LinkedList<MenuMesh> menuMeshes = new LinkedList<MenuMesh>();
 	
+	private Container parent = null;
 	
-	
-	public ModelingPanel(Animator animator) {
+	public ModelingPanel(Container parent) {
 		super();
 		
 		System.out.println("new ModelingWindow");		
@@ -133,6 +131,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		panelRendering.addFocusListener(events);
 		
 		
+		
 		this.setLayout(null);
 		
 		this.addComponentListener(this);
@@ -140,8 +139,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		this.add(panelControl);
 		this.add(panelRendering);
 		
-		this.animator = animator;
-		this.animator.add(panelRendering);
+		this.parent = parent;
 	}
 
 

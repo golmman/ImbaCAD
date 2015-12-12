@@ -1,9 +1,17 @@
 package imbacad.view;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 
 import imbacad.ImbaCAD;
 import imbacad.model.Light;
@@ -23,6 +31,8 @@ import imbacad.view.docking.Dockable;
 import imbacad.view.docking.DockingCanvas;
 import imbacad.view.docking.DockingRoot;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -111,7 +121,6 @@ public class MainWindow extends JFrame {
 		new Line(4, 5, 2L), 
 	};
 	
-	private Animator animator = new Animator();
 	
 	public MainWindow(String title) {
 		super(title);
@@ -208,13 +217,13 @@ public class MainWindow extends JFrame {
 		Dockable dockable4 = new Dockable(this, new JLabel("dockable4"), "dockable4");
 		
 		dockable1.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable1.getContentPane().add(new ModelingPanel(animator));
+		dockable1.getContentPane().add(new ModelingPanel(dockable1));
 		
 		dockable2.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable2.getContentPane().add(new ModelingPanel(animator));
+		dockable2.getContentPane().add(new ModelingPanel(dockable2));
 		
 		dockable3.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable3.getContentPane().add(new ModelingPanel(animator));
+		dockable3.getContentPane().add(new ModelingPanel(dockable3));
 		
 		dockable4.getContentPane().setLayout(new GridLayout(1, 1));
 		dockable4.getContentPane().add(new JButton("Miau"));
@@ -230,6 +239,11 @@ public class MainWindow extends JFrame {
 		
 		
 		this.add(dockingCanvas);
+		
+		
+		
+		dockable1.setCursor(CustomCursor.createEraser(5, 5));
+		
 		
 		
 		this.setVisible(true);
