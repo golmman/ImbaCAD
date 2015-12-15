@@ -12,11 +12,12 @@ import imbacad.model.Vec3;
  */
 public class OrbitUpdater implements CameraUpdater {
 	
-	
 	public OrbitUpdater() {}
 
 	@Override
 	public void update(Camera camera, RenderingEventAdapter events) {
+		
+		
 		
 		camera.lookAt(new Vec3());
 		
@@ -30,11 +31,17 @@ public class OrbitUpdater implements CameraUpdater {
 			float relY = 0.003f * events.getMouseDy();
 			
 			newPos = newPos.rotateZ(-newAzi);
-			newPos = newPos.rotateY(relY);
-			newPol += relY;
+			newPos = newPos.rotateY(-newPol);
 			
-			newPos = newPos.rotateZ(newAzi - relX);
+			newPol += relY;
 			newAzi -= relX;
+			
+			newPol = Camera.correctPol(newPol);
+			newAzi = Camera.correctAzi(newAzi);
+			
+			newPos = newPos.rotateY(newPol);
+			newPos = newPos.rotateZ(newAzi);
+			
 		}
 		
 		if (events.getMouseWheel() != 0) {

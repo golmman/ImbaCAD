@@ -24,6 +24,8 @@ import imbacad.model.shader.UniformVec3;
  */
 public class Camera implements HasUniforms {
 	
+	public static final float POL_MIN = 0.01f;
+	
 	private UniformVec3 uniformPos = null;
 	
 	private Vec3 position = new Vec3();
@@ -42,6 +44,27 @@ public class Camera implements HasUniforms {
 		this.velocity = velocity;
 	}
 	
+	public static float correctPol(float pol) {
+		if (pol >= Math.PI - POL_MIN) {
+			pol = (float)Math.PI - POL_MIN;
+		} else if (pol <= POL_MIN) {
+			pol = POL_MIN;
+		}
+		
+		return pol;
+	}
+	
+	public static float correctAzi(float azi) {
+		if (azi >= 2.0f * Math.PI) {
+			float d = (float)(azi / (2.0f * Math.PI));
+			azi = d - (float)Math.floor(d);
+		} else if (azi < 0.0f) {
+			float d = (float)(-azi / (2.0f * Math.PI));
+			azi = (float)(2.0f * Math.PI - (d - (float)Math.floor(d)));
+		}
+		
+		return azi;
+	}
 	
 	/**
 	 * Calculates the unit normal vector of the camera plane.

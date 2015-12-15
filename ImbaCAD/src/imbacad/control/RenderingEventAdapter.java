@@ -1,5 +1,6 @@
 package imbacad.control;
 
+import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -24,6 +25,8 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 	protected int mouseDy = 0;
 	protected int mouseX = 0;
 	protected int mouseY = 0;
+	protected int mouseW = 0;
+	protected int mouseH = 0;
 	protected int mouseWheel = 0;
 	protected boolean[] keys = new boolean[256]; 
 	protected boolean[] buttons = new boolean[32];
@@ -68,6 +71,18 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 	 */
 	public RenderingEventAdapter() {
 		keyDownThread.start();
+	}
+	
+	
+	
+	private void updateRenderer(ComponentEvent e) {
+		if (e.getSource() instanceof GLJPanel) {
+			GLJPanel p = (GLJPanel)e.getSource();
+			mouseW = p.getWidth();
+			mouseH = p.getHeight();
+			p.requestFocusInWindow();
+			p.display();
+		}
 	}
 	
 	
@@ -124,13 +139,7 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 		mouseX = e.getX();
 		mouseY = e.getY();
 		
-		if (e.getSource() instanceof GLJPanel) {
-			((GLJPanel)e.getSource()).requestFocusInWindow();
-		}
-		
-		if (e.getComponent() instanceof GLJPanel) {
-			((GLJPanel)e.getComponent()).display();
-		}
+		updateRenderer(e);
 	}
 
 
@@ -141,26 +150,14 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 		mouseX = e.getX();
 		mouseY = e.getY();
 		
-		if (e.getSource() instanceof GLJPanel) {
-			((GLJPanel)e.getSource()).requestFocusInWindow();
-		}
-		
-		if (e.getComponent() instanceof GLJPanel) {
-			((GLJPanel)e.getComponent()).display();
-		}
+		updateRenderer(e);
 	}
 	
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		mouseWheel = e.getWheelRotation();
 		
-		if (e.getSource() instanceof GLJPanel) {
-			((GLJPanel)e.getSource()).requestFocusInWindow();
-		}
-		
-		if (e.getComponent() instanceof GLJPanel) {
-			((GLJPanel)e.getComponent()).display();
-		}
+		updateRenderer(e);
 	}
 
 	@Override
@@ -207,6 +204,16 @@ public class RenderingEventAdapter implements KeyListener, MouseListener, MouseM
 
 	public int getMouseWheel() {
 		return mouseWheel;
+	}
+
+
+	public int getMouseW() {
+		return mouseW;
+	}
+
+
+	public int getMouseH() {
+		return mouseH;
 	}
 	
 }

@@ -17,6 +17,7 @@ import imbacad.model.camera.Camera;
 import imbacad.model.camera.LevitateUpdater;
 import imbacad.model.camera.OrbitUpdater;
 import imbacad.model.camera.PanUpdater;
+import imbacad.model.camera.XYPanUpdater;
 import imbacad.model.mesh.Mesh;
 
 import javax.swing.ButtonGroup;
@@ -62,6 +63,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	private JRadioButton buttonLevitate = new JRadioButton("Levitate");
 	private JRadioButton buttonOrbit = new JRadioButton("Orbit");
 	private JRadioButton buttonPan = new JRadioButton("Pan");
+	private JRadioButton buttonXYPan = new JRadioButton("XYPan");
 	
 	private JMenuBar menuBar = new JMenuBar();
 	
@@ -96,9 +98,11 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		bg.add(buttonLevitate);
 		bg.add(buttonOrbit);
 		bg.add(buttonPan);
+		bg.add(buttonXYPan);
 		buttonLevitate.addItemListener(this); 
 		buttonOrbit.addItemListener(this);
 		buttonPan.addItemListener(this);
+		buttonXYPan.addItemListener(this);
 		
 		buttonOrbit.setSelected(true);
 		
@@ -118,6 +122,7 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		panelControlWest.add(buttonLevitate);
 		panelControlWest.add(buttonOrbit);
 		panelControlWest.add(buttonPan);
+		panelControlWest.add(buttonXYPan);
 		panelControl.setLayout(new BorderLayout());
 		panelControl.add(panelControlWest, BorderLayout.WEST);
 
@@ -200,6 +205,9 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 				} else if (button == buttonPan) {
 					renderer.setCameraUpdater(new PanUpdater());
 					System.out.println("Pan");
+				} else if (button == buttonXYPan) {
+					renderer.setCameraUpdater(new XYPanUpdater());
+					System.out.println("XYPan");
 				}
 			}
 		}

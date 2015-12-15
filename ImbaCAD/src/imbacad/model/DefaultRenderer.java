@@ -233,7 +233,7 @@ public class DefaultRenderer implements GLEventListener {
 				selection.addAll(s);
 			}
 		}
-		select(gl, selection, new Vec4(0.0f, 1.0f, 0.0f, 0.25f));
+		select(gl, selection, new Vec4(0.0f, 1.0f, 0.0f, 0.0f));
 		
 		
 		frameBuffer.unbind(gl);

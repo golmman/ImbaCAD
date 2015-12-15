@@ -58,13 +58,8 @@ public class LevitateUpdater implements CameraUpdater {
 		}
 
 		
-		if (newAzi >= 2.0f * Math.PI) {
-			float d = (float)(newAzi / (2.0f * Math.PI));
-			newAzi = d - (float)Math.floor(d);
-		} else if (newAzi < 0.0f) {
-			float d = (float)(-newAzi / (2.0f * Math.PI));
-			newAzi = (float)(2.0f * Math.PI - (d - (float)Math.floor(d)));
-		}
+		newPol = Camera.correctPol(newPol);
+		newAzi = Camera.correctAzi(newAzi);
 		
 		
 		camera.setPosition(newPos);
