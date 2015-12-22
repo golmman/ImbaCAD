@@ -73,10 +73,14 @@ public class Dockable extends JPanel implements ComponentListener {
 		layeredPane.add(front, JLayeredPane.DRAG_LAYER);
 		
 		//this.add(layeredPane);
+		
+		
+		
 		this.addLayeredPane();
+		//super.add(back);
 		
 		
-
+		
 		
 		//dialog.setUndecorated(true);
 		//dialog.add(bottom);
@@ -105,7 +109,6 @@ public class Dockable extends JPanel implements ComponentListener {
 
 	@Override
 	public void componentResized(ComponentEvent e) {
-		
 		back.setBounds(0, 0, this.getWidth(), this.getHeight());
 		front.setBounds(0, 0, this.getWidth(), this.getHeight());
 		

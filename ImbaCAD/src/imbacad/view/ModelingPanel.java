@@ -9,17 +9,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.LinkedList;
 
-import imbacad.ImbaCAD;
-import imbacad.control.RenderingEventAdapter;
-import imbacad.model.DefaultRenderer;
-import imbacad.model.Vec3;
-import imbacad.model.camera.Camera;
-import imbacad.model.camera.LevitateUpdater;
-import imbacad.model.camera.OrbitUpdater;
-import imbacad.model.camera.PanUpdater;
-import imbacad.model.camera.XYPanUpdater;
-import imbacad.model.mesh.Mesh;
-
 import javax.swing.ButtonGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -31,6 +20,18 @@ import javax.swing.JToggleButton;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
+
+import imbacad.ImbaCAD;
+import imbacad.control.RenderingEventAdapter;
+import imbacad.model.DefaultRenderer;
+import imbacad.model.Vec3;
+import imbacad.model.camera.Camera;
+import imbacad.model.camera.CameraUpdater;
+import imbacad.model.camera.LevitateUpdater;
+import imbacad.model.camera.OrbitUpdater;
+import imbacad.model.camera.PanUpdater;
+import imbacad.model.camera.XYPanUpdater;
+import imbacad.model.mesh.Mesh;
 
 
 
@@ -69,6 +70,8 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 	
 	private JMenu menuShow = new JMenu("Show Mesh");
 	private LinkedList<MenuMesh> menuMeshes = new LinkedList<MenuMesh>();
+	
+	//private Camera camera;
 	
 	private Container parent = null;
 	
@@ -166,6 +169,8 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 		
 		panelControl.setBounds(0, 0, w, CONTROL_HEIGHT);
 		panelRendering.setBounds(0, CONTROL_HEIGHT, w, h - CONTROL_HEIGHT);
+		
+		this.revalidate();
 	}
 
 	@Override
@@ -209,8 +214,33 @@ public class ModelingPanel extends JPanel implements ComponentListener, ItemList
 					renderer.setCameraUpdater(new XYPanUpdater());
 					System.out.println("XYPan");
 				}
+				
+				if (panelRendering != null) {
+					panelRendering.display();
+				}
 			}
 		}
+	}
+
+
+
+	public void setCameraUpdater(CameraUpdater updater) {
+		
+		if (updater instanceof LevitateUpdater) {
+			buttonLevitate.setSelected(true);
+		} else if (updater instanceof OrbitUpdater) {
+			buttonOrbit.setSelected(true);
+		} else if (updater instanceof PanUpdater) {
+			buttonPan.setSelected(true);
+		} else if (updater instanceof XYPanUpdater) {
+			buttonXYPan.setSelected(true);
+		}
+	}
+
+
+
+	public DefaultRenderer getRenderer() {
+		return renderer;
 	}
 
 

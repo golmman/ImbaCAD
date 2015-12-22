@@ -77,4 +77,9 @@ public class ColorVertex extends Vertex<ColorVertex> {
 		return new ColorVertex(this);
 	}
 
+	
+	@Override
+	public String toString() {
+		return getPosition().toString() + " " + getColor().toString();
+	}
 }

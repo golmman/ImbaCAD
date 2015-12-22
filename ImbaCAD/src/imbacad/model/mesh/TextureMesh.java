@@ -71,7 +71,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	 * @param primitives
 	 * @param name
 	 */
-	public static TextureMesh createMesh(
+	public static final TextureMesh createMesh(
 			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
 		return new TextureMesh(textureFile, vertices, primitives, name);
 	}
@@ -85,7 +85,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createFlatShadedMesh(
+	public static final TextureMesh createFlatShadedMesh(
 			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
 		
 		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);
@@ -118,7 +118,7 @@ public class TextureMesh extends Mesh<TextureVertex, Triangle> {
 	 * @param name
 	 * @return
 	 */
-	public static TextureMesh createPhongShadedMesh(
+	public static final TextureMesh createPhongShadedMesh(
 			File textureFile, VertexArray<TextureVertex> vertices, PrimitiveArray<Triangle> primitives, String name) {
 		
 		TextureMesh result = new TextureMesh(textureFile, vertices, primitives, name);

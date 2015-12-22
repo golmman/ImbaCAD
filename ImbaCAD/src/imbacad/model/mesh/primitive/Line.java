@@ -23,5 +23,10 @@ public class Line extends Primitive<Line> {
 	public Line copy() {
 		return new Line(this);
 	}
-
+	
+	
+	@Override
+	public String toString() {
+		return "(" + data[0] + ", " + data[1] + "), " + id;
+	}
 }

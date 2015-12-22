@@ -133,7 +133,19 @@ public class DockingRoot implements ComponentListener, PropertyChangeListener {
 			}
 			
 		} else {
-			throw new IllegalStateException("Must only add to leafs!");
+			
+			System.err.print("Trying to add Dockable to non-leaf, delegated to ");
+			
+			if (leftOrRight == DockingRoot.LEFT) {
+				System.err.println("left child.");
+				left.add(dockable, orientation, leftOrRight);
+			} else {
+				System.err.println("right child.");
+				right.add(dockable, orientation, leftOrRight);
+			}
+			
+			
+			//throw new IllegalStateException("Must only add to leafs!");
 		}
 		
 		

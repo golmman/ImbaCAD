@@ -129,7 +129,7 @@ public class DefaultRenderer implements GLEventListener {
 		
 		// set up projection matrix
 		projection = Glm.diag(1.0f);
-		projection = Glm.perspective(camera.getFov(), (float)width / height, 0.1f, 100.0f);
+		projection = Glm.perspective(camera.getFov(), (float)width/height, 1.0f/1024.0f, 16.0f);
 		
 		// set up view matrix
 		view = Glm.diag(1.0f);
@@ -159,7 +159,7 @@ public class DefaultRenderer implements GLEventListener {
 			}
 			
 			if (mesh.getName().equals("testHouse")) {
-				//mesh.getRotation().setZ(mesh.getRotation().getZ() - 0.01f);
+				mesh.getRotation().setZ(mesh.getRotation().getZ() - 0.01f);
 			}
 			
 			model = Glm.diag(1.0f);
@@ -233,7 +233,7 @@ public class DefaultRenderer implements GLEventListener {
 				selection.addAll(s);
 			}
 		}
-		select(gl, selection, new Vec4(0.0f, 1.0f, 0.0f, 0.0f));
+		select(gl, selection, new Vec4(0.0f, 1.0f, 0.0f, 0.2f));
 		
 		
 		frameBuffer.unbind(gl);

@@ -1,5 +1,6 @@
 package imbacad.model.mesh;
 
+import java.io.File;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.Arrays;
@@ -9,6 +10,10 @@ import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 
+import imbacad.model.Vec3;
+import imbacad.model.Vec4;
+import imbacad.model.dwg.DWG;
+import imbacad.model.mesh.primitive.Line;
 import imbacad.model.mesh.primitive.Primitive;
 import imbacad.model.mesh.primitive.PrimitiveArray;
 import imbacad.model.mesh.vertex.ColorVertex;
@@ -49,7 +54,7 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 	 * @param name
 	 * @return
 	 */
-	public static <P extends Primitive<P>> ColorMesh<P> createGradientColorMesh(
+	public static final <P extends Primitive<P>> ColorMesh<P> createGradientColorMesh(
 			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
 		
 		return new ColorMesh<P>(drawMode, vertices, primitives, name);
@@ -65,7 +70,7 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 	 * @param name
 	 * @return
 	 */
-	public static <P extends Primitive<P>> ColorMesh<P> createFlatColorMesh(
+	public static final <P extends Primitive<P>> ColorMesh<P> createFlatColorMesh(
 			int drawMode, VertexArray<ColorVertex> vertices, PrimitiveArray<P> primitives, String name) {
 		
 		
@@ -77,43 +82,23 @@ public class ColorMesh<P extends Primitive<P>> extends Mesh<ColorVertex, P> impl
 	}
 	
 	
-//	public static <V extends Vertex<V>, P extends Primitive<P>> ColorMesh<P> 
-//		createSelectionMesh(Mesh<V, P> mesh) {
-//		
-//		// determine draw mode
-//		int drawMode = -1;
-//		if (mesh instanceof ColorMesh<?>) {
-//			drawMode = ((ColorMesh<?>)mesh).drawMode;
-//		} else if (mesh instanceof TextureMesh) {
-//			drawMode = GL.GL_TRIANGLES;
-//		}
-//		
-//		// copy primitive data
-//		PrimitiveArray<P> primitives = new PrimitiveArray<P>(mesh.originalPrimitives);
-//		
-//		// copy position data
-//		VertexArray<ColorVertex> vertices = new VertexArray<ColorVertex>();
-//		for (V vertex: mesh.originalVertices) {
-//			vertices.add(new ColorVertex(
-//					vertex.getPosition().getX(), 
-//					vertex.getPosition().getY(), 
-//					vertex.getPosition().getZ(), 
-//					0.0f, 0.0f, 0.0f, 0.0f));
-//		}
-//		
-//		// add colours
-//		int[] indices;
-//		for (P prim: primitives) {
-//			
-//			indices = prim.getData();
-//			for (int k = 0; k < indices.length; ++k) {
-//				
-//			}
-//			
-//		}
-//		
-//		return new ColorMesh<P>(drawMode, vertices, primitives, mesh.name + "_SELECTION");
-//	}
+	public static final ColorMesh<Line> createDWGMesh(File file, String name) {
+		Vec4 color = new Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		
+		double[] lines = DWG.readLines(file.getAbsolutePath());
+		
+		VertexArray<ColorVertex> vertices = new VertexArray<ColorVertex>();
+		PrimitiveArray<Line> primitives = new PrimitiveArray<Line>();
+		
+		for (int k = 0; k < lines.length; k += 4) {
+			vertices.add(new ColorVertex(new Vec3((float)lines[k+0], (float)lines[k+1], 0.0f), color));
+			vertices.add(new ColorVertex(new Vec3((float)lines[k+2], (float)lines[k+3], 0.0f), color));
+			
+			primitives.add(new Line(k/2, k/2+1, k/4));
+		}
+		
+		return createFlatColorMesh(GL.GL_LINES, vertices, primitives, name);
+	}
 	
 
 	@Override

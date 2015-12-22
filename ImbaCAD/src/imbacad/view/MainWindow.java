@@ -1,21 +1,34 @@
 package imbacad.view;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.jogamp.opengl.GL;
 
 import imbacad.ImbaCAD;
 import imbacad.model.Light;
 import imbacad.model.Vec3;
+import imbacad.model.camera.XYPanUpdater;
+import imbacad.model.dwg.DWG;
+import imbacad.model.mesh.ColorMesh;
+import imbacad.model.mesh.Mesh2D;
+import imbacad.model.mesh.Plaster;
+import imbacad.model.mesh.SelectionMesh;
 import imbacad.model.mesh.TextureMesh;
 import imbacad.model.mesh.primitive.Line;
 import imbacad.model.mesh.primitive.PrimitiveArray;
@@ -23,26 +36,28 @@ import imbacad.model.mesh.primitive.Triangle;
 import imbacad.model.mesh.vertex.ColorVertex;
 import imbacad.model.mesh.vertex.TextureVertex;
 import imbacad.model.mesh.vertex.VertexArray;
-import imbacad.model.mesh.ColorMesh;
-import imbacad.model.mesh.Mesh2D;
-import imbacad.model.mesh.Plaster;
-import imbacad.model.mesh.SelectionMesh;
 import imbacad.view.docking.Dockable;
+import imbacad.view.docking.DockableLayer;
 import imbacad.view.docking.DockingCanvas;
 import imbacad.view.docking.DockingRoot;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.util.Animator;
-
-public class MainWindow extends JFrame {
+public class MainWindow extends JFrame implements ActionListener {
 	
 	private static final long serialVersionUID = 280678482530286275L;
+	
+	
+	private JMenuBar menuBar = new JMenuBar();
+	
+	private JMenu menuFile = new JMenu("File");
+	private JMenuItem menuDebug = new JMenuItem("debug");
+	private JMenuItem menuImport = new JMenuItem("Import...");
+	private JMenuItem menuExit = new JMenuItem("Exit");
+	
+	
+	private DockingCanvas dockingCanvas;
+	private DockingRoot root;
+	
+	
 	
 	// vertices and indices for test meshes
 	public static TextureVertex[] testVertices = {
@@ -125,7 +140,9 @@ public class MainWindow extends JFrame {
 	public MainWindow(String title) {
 		super(title);
 		
-		// add test meshes
+		/*
+		 * Test meshes
+		 */
 		TextureMesh mesh1 = TextureMesh.createMesh(
 				new File("test2.jpg"), 
 				new VertexArray<TextureVertex>(testVertices), 
@@ -168,6 +185,9 @@ public class MainWindow extends JFrame {
 		
 		SelectionMesh<Line> mesh7 = SelectionMesh.createSelectionMesh(mesh5);
 		
+//		ColorMesh<Line> mesh8 = ColorMesh.createDWGMesh(new File(DWG.TEST_DIR + "ARC_GR_DA_3_009_2000.dwg"), "dwgtest");
+//		mesh8.setPosition(new Vec3(2.5f, -2.5f, 0.0f));
+		
 		ImbaCAD.meshes.add(mesh1);
 		ImbaCAD.meshes.add(mesh2);
 		ImbaCAD.meshes.add(mesh3);
@@ -175,6 +195,7 @@ public class MainWindow extends JFrame {
 		ImbaCAD.meshes.add(mesh5);
 		ImbaCAD.meshes.add(mesh6);
 		ImbaCAD.meshes.add(mesh7);
+//		ImbaCAD.meshes.add(mesh8);
 		
 		// add directional lights
 		Vec3 dirLightPos0 = new Vec3(1.0f, 1.0f, 1.0f).normalised();
@@ -207,47 +228,135 @@ public class MainWindow extends JFrame {
 		this.setBounds(0, 0, screenWidth, screenHeight);
 
 
-		
-		DockingCanvas dockingCanvas = new DockingCanvas(this, false);
-		
+		/*
+		 * Dockables
+		 */
+		dockingCanvas = new DockingCanvas(this, false);
 		
 		Dockable dockable1 = new Dockable(this, new JLabel("dockable1"), "dockable1");
-		Dockable dockable2 = new Dockable(this, new JLabel("dockable2"), "dockable2");
-		Dockable dockable3 = new Dockable(this, new JLabel("dockable3"), "dockable3");
-		Dockable dockable4 = new Dockable(this, new JLabel("dockable4"), "dockable4");
+//		Dockable dockable2 = new Dockable(this, new JLabel("dockable2"), "dockable2");
+//		Dockable dockable3 = new Dockable(this, new JLabel("dockable3"), "dockable3");
+//		Dockable dockable4 = new Dockable(this, new JLabel("dockable4"), "dockable4");
 		
 		dockable1.getContentPane().setLayout(new GridLayout(1, 1));
 		dockable1.getContentPane().add(new ModelingPanel(dockable1));
 		
-		dockable2.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable2.getContentPane().add(new ModelingPanel(dockable2));
+//		dockable2.getContentPane().setLayout(new GridLayout(1, 1));
+//		dockable2.getContentPane().add(new ModelingPanel(dockable2));
+//		
+//		dockable3.getContentPane().setLayout(new GridLayout(1, 1));
+//		dockable3.getContentPane().add(new ModelingPanel(dockable3));
+//		
+//		dockable4.getContentPane().setLayout(new GridLayout(1, 1));
+//		dockable4.getContentPane().add(new JButton("Miau"));
 		
-		dockable3.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable3.getContentPane().add(new ModelingPanel(dockable3));
-		
-		dockable4.getContentPane().setLayout(new GridLayout(1, 1));
-		dockable4.getContentPane().add(new JButton("Miau"));
-		
-		
-		DockingRoot root = new DockingRoot(dockable1);
+		root = new DockingRoot(dockable1);
 		
 		dockingCanvas.add(root);
 		
-		root.add(dockable2, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
-		root.getRight().add(dockable3, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
-		root.getRight().getLeft().add(dockable4, DockingRoot.VERTICAL, DockingRoot.RIGHT);
-		
+//		root.add(dockable2, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
+//		root.getRight().add(dockable3, DockingRoot.HORIZONTAL, DockingRoot.RIGHT);
+//		root.getRight().getLeft().add(dockable4, DockingRoot.VERTICAL, DockingRoot.RIGHT);
 		
 		this.add(dockingCanvas);
-		
 		
 		
 		dockable1.setCursor(CustomCursor.createEraser(5, 5));
 		
 		
 		
+		// Menu
+		this.setJMenuBar(menuBar);
+		
+		menuBar.add(menuFile);
+		menuFile.add(menuDebug);
+		menuFile.add(menuImport);
+		menuFile.addSeparator();
+		menuFile.add(menuExit);
+		
+		menuDebug.addActionListener(this);
+		menuImport.addActionListener(this);
+		menuExit.addActionListener(this);
+		
+		
+		
 		this.setVisible(true);
 		
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		
+		if (e.getSource().equals(menuExit)) {
+			this.dispose();
+			System.exit(0);
+		} else if (e.getSource().equals(menuDebug)) {
+			dockingCanvas.revalidate();
+			dockingCanvas.repaint();
+		} else if (e.getSource().equals(menuImport)) {
+			
+			// restore last directory
+	    	StringBuilder sb = new StringBuilder();
+	    	try {
+	    		FileReader fr = new FileReader("config.txt");
+	    		int c = 0;
+	    		while ((c = fr.read()) != -1) {
+	    			sb.append((char)c);
+	    		}
+				fr.close();
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
+	    	
+	    	// open file chooser
+		    JFileChooser chooser = new JFileChooser(sb.toString());
+		    FileNameExtensionFilter filter = new FileNameExtensionFilter("DWG files", "dwg");
+		    chooser.setFileFilter(filter);
+		    int returnVal = chooser.showOpenDialog(this);
+		    
+		    if(returnVal == JFileChooser.APPROVE_OPTION) {
+		    	
+		    	File file = chooser.getSelectedFile();	
+		    	
+		    	// creates meshes
+		    	ColorMesh<Line> mesh = ColorMesh.createDWGMesh(file, file.getName());
+				mesh.setPosition(new Vec3(-0.5f, -3.0f, 0.0f));
+				ImbaCAD.meshes.add(mesh);
+		    	
+		    	SelectionMesh<Line> selMesh = SelectionMesh.createSelectionMesh(mesh);
+		    	ImbaCAD.meshes.add(selMesh);
+				
+		    			
+		    	Dockable dockable = new Dockable(this, new JLabel(file.getName()), file.getName());
+		    	ModelingPanel modelingPanel = new ModelingPanel(dockable);
+		    	
+		    	modelingPanel.getRenderer().getCamera().setPosition(new Vec3(0.0f, -3.0f, 0.5f));
+		    	modelingPanel.getRenderer().getCamera().setPolarAngle(3.14f);
+		    	modelingPanel.getRenderer().getCamera().setAzimuthAngle(3.1415f / 2.0f);
+		    	
+		    	modelingPanel.setCameraUpdater(new XYPanUpdater());
+		    	
+		    	dockable.getContentPane().setLayout(new GridLayout(1, 1));
+				dockable.getContentPane().add(modelingPanel);
+				
+				root.add(dockable, DockableLayer.DIRECTION_EAST);
+				
+				
+				dockingCanvas.revalidate();
+				dockingCanvas.repaint();
+
+				
+				// save directory
+				try {
+					FileWriter fw = new FileWriter("config.txt");
+					fw.write(file.getAbsolutePath());
+					fw.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+		    }
+		}
 	}
 
 

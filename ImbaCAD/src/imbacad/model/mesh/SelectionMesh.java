@@ -32,7 +32,7 @@ public class SelectionMesh<P extends Primitive<P>> extends ColorMesh<P> {
 	 * @param mesh
 	 * @return
 	 */
-	public static <P extends Primitive<P>> SelectionMesh<P> createSelectionMesh(Mesh<?, P> mesh) {
+	public static final <P extends Primitive<P>> SelectionMesh<P> createSelectionMesh(Mesh<?, P> mesh) {
 		
 		if (!mesh.isFlat()) {
 			throw new UnsupportedOperationException("Input mesh has to be flat.");
